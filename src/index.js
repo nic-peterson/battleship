@@ -1,4 +1,5 @@
 import "./style.css";
-import { ship } from "./ship.js";
+import { createShip } from "./ship.js";
 
+const ship = createShip();
 ship.call();

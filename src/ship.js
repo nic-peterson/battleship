@@ -4,7 +4,7 @@ export default function ship() {
 }
 */
 
-export const ship = (() => {
+export const createShip = () => {
   const call = () => {
     console.log("I get called from ship.js!");
   };
@@ -12,4 +12,4 @@ export const ship = (() => {
   return {
     call,
   };
-})();
+};
