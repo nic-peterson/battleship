@@ -1,6 +1,7 @@
 import _ from "lodash";
 import "./style.css";
 import printMe from "./print.js";
+import { ship } from "./ship.js";
 
 function component() {
   const element = document.createElement("div");
@@ -14,6 +15,7 @@ function component() {
 
   element.appendChild(btn);
 
+  ship.call();
   return element;
 }
 
