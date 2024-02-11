@@ -14,7 +14,6 @@ export const createGameboard = () => {
   };
 
   const getShipAt = (x, y) => {
-    // return ships.find((s) => s.x === x && s.y === y);
     const found = ships.find((ship) => ship.x === x && ship.y === y);
     return found ? found.ship : null;
   };
@@ -25,18 +24,9 @@ export const createGameboard = () => {
     } else {
       missedAttacks.push({ x, y });
     }
-    /*
-    const ship = ships.find((s) => s.x === x && s.y === y);
-    if (ship) {
-      ship.ship.hit();
-    } else {
-      missedAttacks.push({ x, y });
-    }
-    */
   };
 
   const areAllShipsSunk = () => {
-    //ships.every((s) => s.ship.isSunk())
     return ships.every(({ ship }) => ship.isSunk());
   };
 
