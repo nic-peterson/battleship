@@ -1,5 +1,3 @@
-import { create } from "lodash";
-
 export const createGameboard = () => {
   const boardSize = 10;
   const board = Array(boardSize)
