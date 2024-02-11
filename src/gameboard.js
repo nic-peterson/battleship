@@ -17,8 +17,9 @@ export const createGameboard = () => {
   };
 
   const receiveAttack = (x, y) => {
-    if (board[y][x]) {
-      board[y][x].hit();
+    const ship = getShipAt(x, y);
+    if (ship) {
+      ship.hit();
     } else {
       missedAttacks.push({ x, y });
     }

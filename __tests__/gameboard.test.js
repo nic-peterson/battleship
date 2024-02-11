@@ -9,7 +9,6 @@ describe("Gameboard", () => {
     // Check if the ship exists on the board
     const shipOnBoard = gameboard.getShipAt(0, 0);
     expect(shipOnBoard).toBe(ship);
-    // TODO expect(gameboard.areAllShipsSunk()).toBe(false);
   });
 
   test("can receive attacks", () => {
