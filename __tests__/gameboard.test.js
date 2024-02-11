@@ -2,6 +2,20 @@ const { createGameboard } = require("../src/gameboard"); // replace with the pat
 const { createShip } = require("../src/ship"); // replace with the path to your createShip function
 
 describe("Gameboard", () => {
+  describe("checking isGameBoardNull", () => {
+    test("returns true if the board is empty", () => {
+      const gameboard = createGameboard();
+      expect(gameboard.isGameBoardNull()).toBe(true);
+    });
+
+    test("returns false if the board is not empty", () => {
+      const gameboard = createGameboard();
+      const ship = createShip(3);
+      gameboard.placeShip(ship, 0, 0);
+      expect(gameboard.isGameBoardNull()).toBe(false);
+    });
+  });
+
   test("can place ships", () => {
     const gameboard = createGameboard();
     const ship = createShip(3);

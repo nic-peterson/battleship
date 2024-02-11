@@ -31,9 +31,14 @@ export const createGameboard = () => {
 
   const getMissedAttacks = () => missedAttacks;
 
+  const isGameBoardNull = () => {
+    return board.every((row) => row.every((cell) => cell === null));
+  };
+
   return {
     placeShip,
     getShipAt,
+    isGameBoardNull,
     receiveAttack,
     areAllShipsSunk,
     getMissedAttacks,
