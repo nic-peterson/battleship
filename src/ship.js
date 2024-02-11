@@ -10,13 +10,19 @@ export const createShip = (length) => {
     console.log("I get called from ship.js!");
   };
 
+  const hit = () => {
+    hits += 1;
+  };
+
+  const getHits = () => hits;
+
+  const isSunk = () => hits === length;
+
   return {
     length,
     call,
-    hit: () => {
-      hits += 1;
-    },
-    getHits: () => hits,
-    isSunk: () => hits === length,
+    hit,
+    getHits,
+    isSunk,
   };
 };
