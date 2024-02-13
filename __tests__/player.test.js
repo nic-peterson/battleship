@@ -27,12 +27,12 @@ describe("Player", () => {
     expect(player.getGameboard()).toBe(playerGameboard);
   });
 
-  test.skip("can hit a ship on opponent gameboard", () => {
+  test("can hit a ship on opponent gameboard", () => {
     const playerGameboard = createGameboard();
     const opponentGameboard = createGameboard();
 
     const player = createPlayer("player", playerGameboard);
-    const ship = createShip(3);
+    const ship = createShip(3, "horizontal", "cruiser");
     opponentGameboard.placeShip(ship, 0, 0);
 
     player.attack(0, 0, opponentGameboard);
