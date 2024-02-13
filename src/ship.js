@@ -1,4 +1,4 @@
-export const createShip = (length, orientation) => {
+export const createShip = (length, orientation, type) => {
   let hits = 0;
 
   const call = () => {
@@ -15,6 +15,8 @@ export const createShip = (length, orientation) => {
 
   const getOrientation = () => orientation;
 
+  const getType = () => type;
+
   const isSunk = () => hits === length;
 
   return {
@@ -24,6 +26,7 @@ export const createShip = (length, orientation) => {
     getHits,
     getLength,
     getOrientation,
+    getType,
     isSunk,
   };
 };

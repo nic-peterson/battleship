@@ -18,6 +18,11 @@ describe("Ship", () => {
     expect(ship.getOrientation()).toBe("horizontal");
   });
 
+  test("returns the type of the ship", () => {
+    const ship = createShip(3, "horizontal", "battleship");
+    expect(ship.getType()).toBe("battleship");
+  });
+
   test("tracks the number of times it has been hit", () => {
     const ship = createShip(3);
     ship.hit();
