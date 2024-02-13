@@ -39,16 +39,21 @@ describe("Player", () => {
     expect(ship.getHits()).toBe(1);
   });
 
-  test.skip("can miss a ship on opponent gameboard", () => {
+  test("can miss a ship on opponent gameboard", () => {
     const playerGameboard = createGameboard();
     const opponentGameboard = createGameboard();
 
     const player = createPlayer("player", playerGameboard);
     player.attack(0, 0, opponentGameboard);
     expect(opponentGameboard.getMissedAttacks().length).toBe(1);
+
+    const missedAttacks = opponentGameboard.getMissedAttacks();
+
+    const lastMissedAttack = missedAttacks[missedAttacks.length - 1];
+    expect(lastMissedAttack).toEqual({ x: 0, y: 0 });
   });
 
-  test.skip("throws an error if the player tries to attack the same coordinates twice", () => {
+  test("throws an error if the player tries to attack the same coordinates twice", () => {
     const playerGameboard = createGameboard();
     const opponentGameboard = createGameboard();
 
