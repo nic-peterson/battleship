@@ -4,7 +4,7 @@ export const createGameboard = () => {
     .fill()
     .map(() => Array(boardSize).fill(null));
   const ships = [];
-  // const missedAttacks = [];
+  const missedAttacks = [];
   const allAttacks = [];
   const occupied = new Map();
 
@@ -34,7 +34,6 @@ export const createGameboard = () => {
         return x < 0 || x >= boardSize || y < 0 || y >= boardSize;
       })
     ) {
-      console.log("coordinates", coordinates);
       throw new Error(
         "Cannot place ship. Coordinates are outside the gameboard."
       );

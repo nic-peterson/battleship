@@ -1,27 +1,5 @@
 const { createGameboard } = require("../src/gameboard"); // replace with the path to your createGameboard function
 const { createShip } = require("../src/ship"); // replace with the path to your createShip function
-const ships = [
-  {
-    type: "carrier",
-    length: 5,
-  },
-  {
-    type: "battleship",
-    length: 4,
-  },
-  {
-    type: "cruiser",
-    length: 3,
-  },
-  {
-    type: "submarine",
-    length: 3,
-  },
-  {
-    type: "destroyer",
-    length: 2,
-  },
-];
 
 describe("Gameboard", () => {
   describe("checking isGameBoardNull", () => {
@@ -85,21 +63,21 @@ describe("Gameboard", () => {
     });
   });
 
-  test.skip("can receive attacks", () => {
+  test("can receive attacks", () => {
     const gameboard = createGameboard();
-    const ship = createShip(3);
+    const ship = createShip(3, "horizontal");
     gameboard.placeShip(ship, 0, 0);
     gameboard.receiveAttack(0, 0);
     expect(ship.getHits()).toBe(1);
   });
 
-  test.skip("tracks missed attacks", () => {
+  test("tracks missed attacks", () => {
     const gameboard = createGameboard();
     gameboard.receiveAttack(0, 0);
     expect(gameboard.getMissedAttacks()).toEqual([{ x: 0, y: 0 }]);
   });
 
-  test.skip("reports when all ships are sunk", () => {
+  test("reports when all ships are sunk", () => {
     const gameboard = createGameboard();
     const ship = createShip(3);
     gameboard.placeShip(ship, 0, 0);

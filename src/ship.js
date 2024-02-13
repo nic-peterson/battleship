@@ -15,8 +15,6 @@ export const createShip = (length, orientation) => {
 
   const getOrientation = () => orientation;
 
-  const getType = () => type;
-
   const isSunk = () => hits === length;
 
   return {
