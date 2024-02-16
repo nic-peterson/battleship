@@ -9,10 +9,6 @@ export const createGameboard = () => {
   const occupied = new Map();
 
   const placeShip = (ship, startX, startY) => {
-    /*
-    ships.push({ ship, x, y });
-    board[y][x] = ship;
-    */
     const orientation = ship.getOrientation();
     const length = ship.getLength();
     let coordinates = [];
@@ -25,6 +21,8 @@ export const createGameboard = () => {
       for (let i = 0; i < length; i++) {
         coordinates.push(`${startX},${startY + i}`);
       }
+    } else {
+      throw new Error("Invalid ship orientation");
     }
 
     // Check if any of the coordinates are outside the gameboard
@@ -58,13 +56,6 @@ export const createGameboard = () => {
   };
 
   const getShipAt = (x, y) => occupied.get(`${x},${y}`);
-  /*
-  const getShipAt = (x, y) => {
-    
-    const found = ships.find((ship) => ship.x === x && ship.y === y);
-    return found ? found.ship : null;
-  };
-  */
 
   const receiveAttack = (x, y) => {
     const coord = `${x},${y}`;
@@ -80,26 +71,8 @@ export const createGameboard = () => {
     const ship = getShipAt(x, y);
     if (ship) {
       ship.hit();
-      /*
-        if (ship.isSunk()) {
-          removeShip(ship);
-        }
-        */
     } else {
-      // Check if the spot has already been attacked
-      /*
-      const alreadyAttacked = allAttacks.some(
-        (attack) => attack.x === x && attack.y === y
-      );
-      */
       missedAttacks.add(coord);
-
-      /*
-      if (!alreadyAttacked) {
-        missedAttacks.add({ x, y });
-        allAttacks.add({ x, y });
-      }
-      */
     }
     allAttacks.add(coord);
   };

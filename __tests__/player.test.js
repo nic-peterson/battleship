@@ -45,19 +45,6 @@ describe("Player", () => {
 
     // Check that the attack was registered
     expect(opponentGameboard.getAllAttacks().has("1,0")).toBe(true);
-
-    /*
-    const playerGameboard = createGameboard();
-    const opponentGameboard = createGameboard();
-
-    const player = createPlayer("player", playerGameboard);
-    const ship = createShip(3, "horizontal", "cruiser");
-    opponentGameboard.placeShip(ship, 0, 0);
-
-    player.attack(0, 0, opponentGameboard);
-    expect(opponentGameboard.getAllAttacks().has("0,0")).toBe(true);
-    // expect(ship.getHits()).toBe(1);
-    */
   });
 
   test("can miss a ship on opponent gameboard", () => {
@@ -68,20 +55,6 @@ describe("Player", () => {
     player.attack(0, 0, opponentGameboard);
     expect(opponentGameboard.getMissedAttacks().size).toBe(1);
     expect(opponentGameboard.getMissedAttacks().has("0,0")).toBe(true);
-
-    /*
-    const playerGameboard = createGameboard();
-    const opponentGameboard = createGameboard();
-
-    const player = createPlayer("player", playerGameboard);
-    player.attack(0, 0, opponentGameboard);
-    expect(opponentGameboard.getMissedAttacks().length).toBe(1);
-
-    const missedAttacks = opponentGameboard.getMissedAttacks();
-
-    const lastMissedAttack = missedAttacks[missedAttacks.length - 1];
-    expect(lastMissedAttack).toEqual({ x: 0, y: 0 });
-    */
   });
 
   test("throws an error if the player tries to attack the same coordinates twice", () => {
@@ -115,19 +88,4 @@ describe("Player", () => {
       );
     });
   });
-
-  /*
-  test.skip("computer player does not attack the same coordinates twice", () => {
-    const playerGameboard = createGameboard();
-    const opponentGameboard = createGameboard();
-    const player = createPlayer("player", playerGameboard);
-    const opponent = createPlayer("computer", opponentGameboard);
-    for (let i = 0; i < 100; i++) {
-      opponent.attack(playerGameboard);
-    }
-    const missedAttacks = playerGameboard.getMissedAttacks();
-    const uniqueAttacks = new Set(missedAttacks.map(({ x, y }) => `${x},${y}`));
-    expect(missedAttacks.length).toBe(uniqueAttacks.size);
-  });
-  */
 });

@@ -10,24 +10,6 @@ export const createPlayer = (type, name, gameboard) => {
     opponentGameboard.receiveAttack(x, y);
   };
 
-  /*
-  const attack = (x, y, opponentGameboard) => {
-    const attacks = opponentGameboard.getAllAttacks();
-    ``;
-
-    console.log(attacks);
-
-    if (!attacks.has(`${x},${y}`)) {
-      attacks.add(`${x},${y}`);
-      opponentGameboard.receiveAttack(x, y);
-    } else {
-      throw new Error("You've already attacked this position!");
-    }
-    
-  };
-
-  */
-
   const getGameboard = () => gameboard;
 
   const getName = () => name;

@@ -42,6 +42,14 @@ describe("Gameboard", () => {
         expect(gameboard.getShipAt(0, 2)).toBe(ship);
         expect(ship.getOrientation()).toBe("vertical");
       });
+      test("throws an error if the ship has an invalid orientation", () => {
+        const gameboard = createGameboard();
+        const ship = createShip(3, "invalid"); // Assuming createShip takes orientation and length
+
+        expect(() => {
+          gameboard.placeShip(ship, 0, 0);
+        }).toThrow("Invalid ship orientation");
+      });
 
       test("throws an error if the attack is outside the gameboard", () => {
         const gameboard = createGameboard();
@@ -98,7 +106,6 @@ describe("Gameboard", () => {
           }
         );
         expect(missedAttacks).toEqual([{ x: 0, y: 0 }]);
-        // expect(gameboard.getMissedAttacks()).toEqual([{ x: 0, y: 0 }]);
       });
 
       test("throws an error if the attack is outside the gameboard", () => {
@@ -168,14 +175,4 @@ describe("Gameboard", () => {
       );
     });
   });
-
-  /*
-  test("can remove a ship", () => {
-    const gameboard = createGameboard();
-    const ship = createShip(3, "horizontal", "cruiser");
-    gameboard.placeShip(ship, 0, 0);
-    gameboard.removeShip(ship);
-    expect(gameboard.getOccupied()).toEqual([]);
-  });
-  */
 });
