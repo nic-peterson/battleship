@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1708092659686" clover="3.2.0">
-  <project timestamp="1708092659686" name="All files">
-    <metrics statements="87" coveredstatements="81" conditionals="28" coveredconditionals="27" methods="30" coveredmethods="27" elements="145" coveredelements="135" complexity="0" loc="87" ncloc="87" packages="1" files="3" classes="3"/>
+<coverage generated="1708092717924" clover="3.2.0">
+  <project timestamp="1708092717924" name="All files">
+    <metrics statements="85" coveredstatements="80" conditionals="28" coveredconditionals="27" methods="29" coveredmethods="27" elements="142" coveredelements="134" complexity="0" loc="85" ncloc="85" packages="1" files="3" classes="3"/>
     <file name="gameboard.js" path="/Users/nicpeterson/repos/js-battleship/src/gameboard.js">
       <metrics statements="59" coveredstatements="59" conditionals="26" coveredconditionals="25" methods="16" coveredmethods="15"/>
       <line num="1" count="2" type="stmt"/>
@@ -84,19 +84,17 @@
       <line num="30" count="7" type="stmt"/>
     </file>
     <file name="ship.js" path="/Users/nicpeterson/repos/js-battleship/src/ship.js">
-      <metrics statements="12" coveredstatements="11" conditionals="0" coveredconditionals="0" methods="8" coveredmethods="7"/>
+      <metrics statements="10" coveredstatements="10" conditionals="0" coveredconditionals="0" methods="7" coveredmethods="7"/>
       <line num="1" count="3" type="stmt"/>
       <line num="2" count="18" type="stmt"/>
       <line num="4" count="18" type="stmt"/>
-      <line num="5" count="0" type="stmt"/>
+      <line num="5" count="11" type="stmt"/>
       <line num="8" count="18" type="stmt"/>
-      <line num="9" count="11" type="stmt"/>
+      <line num="10" count="18" type="stmt"/>
       <line num="12" count="18" type="stmt"/>
       <line num="14" count="18" type="stmt"/>
       <line num="16" count="18" type="stmt"/>
       <line num="18" count="18" type="stmt"/>
-      <line num="20" count="18" type="stmt"/>
-      <line num="22" count="18" type="stmt"/>
     </file>
   </project>
 </coverage>

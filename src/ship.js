@@ -1,10 +1,6 @@
 export const createShip = (length, orientation, type) => {
   let hits = 0;
 
-  const call = () => {
-    console.log("I get called from ship.js!");
-  };
-
   const hit = () => {
     hits += 1;
   };
@@ -21,7 +17,6 @@ export const createShip = (length, orientation, type) => {
 
   return {
     length,
-    call,
     hit,
     getHits,
     getLength,
