@@ -94,27 +94,26 @@ describe("Player", () => {
   });
 
   describe("getValidCoordinates", () => {
-    test.skip("returns valid coordinates - no attacks", () => {
-      // const attacks = new Set(["0,0", "0,1", "0,2"]);
+    test("returns valid coordinates that have not been attacked", () => {
+      const playerGameboard = createGameboard();
       const opponentGameboard = createGameboard();
-      const player = createPlayer("computer", "computer", playerGameboard);
-      const playerAttacks = player.attack(0, 0, opponentGameboard);
-      const [x, y] = player.getValidCoordinates(
-        playerAttacks,
-        opponentGameboard
-      );
 
-      /*
-      const [x, y] = getValidCoordinates(attacks, opponentGameboard);
-      const size = opponentGameboard.getSize();
-      expect(x).toBeGreaterThanOrEqual(0);
-      expect(x).toBeLessThan(size);
-      expect(y).toBeGreaterThanOrEqual(0);
-      expect(y).toBeLessThan(size);
-      expect(attacks.has(`${x},${y}`)).toBe(false);
-      */
+      const player = createPlayer("human", "player", playerGameboard);
+
+      opponentGameboard.hasBeenAttacked = jest
+        .fn()
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(false);
+
+      const result = player.getValidCoordinates(opponentGameboard);
+
+      expect(result).toHaveLength(2);
+      expect(opponentGameboard.hasBeenAttacked).toHaveBeenCalledTimes(2);
+      expect(opponentGameboard.hasBeenAttacked).toHaveBeenCalledWith(
+        result[0],
+        result[1]
+      );
     });
-    test.skip("returns valid coordinates - some attacks", () => {});
   });
 
   /*
