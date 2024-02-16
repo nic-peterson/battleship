@@ -88,7 +88,26 @@ describe("Gameboard", () => {
       test("tracks missed attacks", () => {
         const gameboard = createGameboard();
         gameboard.receiveAttack(0, 0);
-        expect(gameboard.getMissedAttacks()).toEqual([{ x: 0, y: 0 }]);
+        const missedAttacks = Array.from(
+          gameboard.getMissedAttacks(),
+          (coord) => {
+            const [x, y] = coord.split(",").map(Number);
+            return { x, y };
+          }
+        );
+        expect(missedAttacks).toEqual([{ x: 0, y: 0 }]);
+        // expect(gameboard.getMissedAttacks()).toEqual([{ x: 0, y: 0 }]);
+      });
+
+      test("throws an error if the attack is outside the gameboard", () => {
+        const gameboard = createGameboard();
+        expect(() => gameboard.receiveAttack(10, 10)).toThrow();
+      });
+
+      test("throws an error if the attack is repeated", () => {
+        const gameboard = createGameboard();
+        gameboard.receiveAttack(0, 0);
+        expect(() => gameboard.receiveAttack(0, 0)).toThrow();
       });
     });
 

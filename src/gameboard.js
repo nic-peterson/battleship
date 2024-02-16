@@ -4,8 +4,8 @@ export const createGameboard = () => {
     .fill()
     .map(() => Array(boardSize).fill(null));
   const ships = [];
-  const missedAttacks = [];
-  const allAttacks = [];
+  const missedAttacks = new Set(); // changed array to set
+  const allAttacks = new Set(); // changed array to set
   const occupied = new Map();
 
   const placeShip = (ship, startX, startY) => {
@@ -64,11 +64,13 @@ export const createGameboard = () => {
   */
 
   const receiveAttack = (x, y) => {
+    const coord = `${x},${y}`;
+
     if (x < 0 || x >= boardSize || y < 0 || y >= boardSize) {
       throw new Error("Attack is outside the gameboard.");
     }
 
-    if ({ x, y } in allAttacks) {
+    if (allAttacks.has(coord)) {
       throw new Error("You've already attacked this position!");
     }
 
@@ -82,14 +84,21 @@ export const createGameboard = () => {
         */
     } else {
       // Check if the spot has already been attacked
+      /*
       const alreadyAttacked = allAttacks.some(
         (attack) => attack.x === x && attack.y === y
       );
+      */
+      missedAttacks.add(coord);
+
+      /*
       if (!alreadyAttacked) {
-        missedAttacks.push({ x, y });
-        allAttacks.push({ x, y });
+        missedAttacks.add({ x, y });
+        allAttacks.add({ x, y });
       }
+      */
     }
+    allAttacks.add(coord);
   };
 
   const areAllShipsSunk = () => {
