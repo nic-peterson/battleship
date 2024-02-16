@@ -71,9 +71,11 @@ export const createGameboard = () => {
     const ship = getShipAt(x, y);
     if (ship) {
       ship.hit();
+      /*
       if (ship.isSunk()) {
         removeShip(ship);
       }
+      */
     } else {
       missedAttacks.push({ x, y });
     }
@@ -102,6 +104,17 @@ export const createGameboard = () => {
     return true;
   };
 
+  const print = () => {
+    let output = "";
+    for (let y = 0; y < boardSize; y++) {
+      for (let x = 0; x < boardSize; x++) {
+        output += occupied.has(`${x},${y}`) ? "X " : "- ";
+      }
+      output = output.trim() + "\n"; // Remove trailing space and add newline
+    }
+    return output.trim(); // Remove trailing newline
+  };
+
   return {
     areAllShipsSunk,
     getMissedAttacks,
@@ -110,6 +123,7 @@ export const createGameboard = () => {
     getSize,
     isGameBoardNull,
     placeShip,
+    print,
     receiveAttack,
   };
 };
