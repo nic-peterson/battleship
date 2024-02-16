@@ -52,6 +52,9 @@ export const createGameboard = () => {
       const [x, y] = coord.split(",").map(Number);
       board[y][x] = ship;
     });
+
+    // ...and add the ship to the ships array
+    ships.push({ ship, coordinates });
   };
 
   const getShipAt = (x, y) => occupied.get(`${x},${y}`);

@@ -28,6 +28,7 @@ describe("Gameboard", () => {
         expect(gameboard.getShipAt(0, 0)).toBe(ship);
         expect(gameboard.getShipAt(1, 0)).toBe(ship);
         expect(gameboard.getShipAt(2, 0)).toBe(ship);
+        expect(ship.getOrientation()).toBe("horizontal");
       });
       test("can place ships -> vertical", () => {
         const gameboard = createGameboard();
@@ -39,6 +40,7 @@ describe("Gameboard", () => {
         expect(gameboard.getShipAt(0, 0)).toBe(ship);
         expect(gameboard.getShipAt(0, 1)).toBe(ship);
         expect(gameboard.getShipAt(0, 2)).toBe(ship);
+        expect(ship.getOrientation()).toBe("vertical");
       });
 
       test("throws an error if the attack is outside the gameboard", () => {
@@ -123,16 +125,15 @@ describe("Gameboard", () => {
       });
 
       // TODO figure out this test
-      test.skip("reports when not all ships are sunk", () => {
+      test("reports when not all ships are sunk", () => {
         const gameboard = createGameboard();
         const ship1 = createShip(3, "horizontal", "battleship");
         const ship2 = createShip(3, "vertical", "cruiser");
         gameboard.placeShip(ship1, 0, 0);
-        gameboard.placeShip(ship2, 2, 1);
-        gameboard.print();
+        gameboard.placeShip(ship2, 0, 1);
         gameboard.receiveAttack(0, 0);
-        // gameboard.receiveAttack(0, 0);
-        // gameboard.receiveAttack(0, 0);
+        gameboard.receiveAttack(1, 0);
+        gameboard.receiveAttack(2, 0);
         expect(gameboard.areAllShipsSunk()).toBe(false);
       });
     });
