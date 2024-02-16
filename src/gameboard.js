@@ -89,6 +89,8 @@ export const createGameboard = () => {
 
   const getOccupied = () => Array.from(occupied.keys());
 
+  const getSize = () => boardSize;
+
   const isGameBoardNull = () => {
     for (let row of board) {
       for (let cell of row) {
@@ -105,6 +107,7 @@ export const createGameboard = () => {
     getMissedAttacks,
     getOccupied,
     getShipAt,
+    getSize,
     isGameBoardNull,
     placeShip,
     receiveAttack,

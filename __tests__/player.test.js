@@ -63,9 +63,13 @@ describe("Player", () => {
   });
 
   describe("getValidCoordinates", () => {
-    test.skip("returns valid coordinates", () => {
-      const attacks = new Set(["0,0", "0,1", "0,2"]);
-      const opponentGameboard = createGameboard(3); // Assuming createGameboard takes the size as an argument
+    test.skip("returns valid coordinates - no attacks", () => {
+      // const attacks = new Set(["0,0", "0,1", "0,2"]);
+      const opponentGameboard = createGameboard();
+      const player = createPlayer("computer", "computer", playerGameboard);
+      const playerAttacks = player.attack(0, 0, opponentGameboard);
+
+      /*
       const [x, y] = getValidCoordinates(attacks, opponentGameboard);
       const size = opponentGameboard.getSize();
       expect(x).toBeGreaterThanOrEqual(0);
@@ -73,7 +77,9 @@ describe("Player", () => {
       expect(y).toBeGreaterThanOrEqual(0);
       expect(y).toBeLessThan(size);
       expect(attacks.has(`${x},${y}`)).toBe(false);
+      */
     });
+    test.skip("returns valid coordinates - some attacks", () => {});
   });
 
   /*
