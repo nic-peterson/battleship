@@ -19,6 +19,7 @@ export const createPlayer = (type, name, gameboard) => {
   function getValidCoordinates(attacks, opponentGameboard) {
     let x, y;
     const size = opponentGameboard.getSize(); // Assuming getSize is a method that returns the size of the gameboard
+
     do {
       x = Math.floor(Math.random() * size);
       y = Math.floor(Math.random() * size);
