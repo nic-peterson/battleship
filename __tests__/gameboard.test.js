@@ -111,6 +111,12 @@ describe("Gameboard", () => {
         gameboard.receiveAttack(0, 0);
         expect(() => gameboard.receiveAttack(0, 0)).toThrow();
       });
+
+      test("can check if a specific coordinate has been attacked", () => {
+        const gameboard = createGameboard();
+        gameboard.receiveAttack(0, 0);
+        expect(gameboard.hasBeenAttacked(0, 0)).toBe(true);
+      });
     });
 
     describe("sinking ships", () => {
@@ -124,7 +130,6 @@ describe("Gameboard", () => {
         expect(gameboard.areAllShipsSunk()).toBe(true);
       });
 
-      // TODO figure out this test
       test("reports when not all ships are sunk", () => {
         const gameboard = createGameboard();
         const ship1 = createShip(3, "horizontal", "battleship");

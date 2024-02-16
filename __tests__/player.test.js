@@ -31,19 +31,40 @@ describe("Player", () => {
     const playerGameboard = createGameboard();
     const opponentGameboard = createGameboard();
 
+    const player = createPlayer("human", "player", playerGameboard);
+    const ship = createShip(3, "horizontal", "cruiser");
+    opponentGameboard.placeShip(ship, 0, 0);
+    player.attack(0, 0, opponentGameboard); // Attack at coordinates (0,0)
+
+    // Check that the attack was registered
+    expect(opponentGameboard.getAllAttacks().has("0,0")).toBe(true);
+    // Check that the ship was hit
+    expect(ship.getHits()).toBe(1);
+
+    player.attack(1, 0, opponentGameboard); // Attack at different coordinates (1,0)
+
+    // Check that the attack was registered
+    expect(opponentGameboard.getAllAttacks().has("1,0")).toBe(true);
+
+    /*
+    const playerGameboard = createGameboard();
+    const opponentGameboard = createGameboard();
+
     const player = createPlayer("player", playerGameboard);
     const ship = createShip(3, "horizontal", "cruiser");
     opponentGameboard.placeShip(ship, 0, 0);
 
     player.attack(0, 0, opponentGameboard);
-    expect(ship.getHits()).toBe(1);
+    expect(opponentGameboard.getAllAttacks().has("0,0")).toBe(true);
+    // expect(ship.getHits()).toBe(1);
+    */
   });
 
   test("can miss a ship on opponent gameboard", () => {
     const playerGameboard = createGameboard();
     const opponentGameboard = createGameboard();
 
-    const player = createPlayer("player", playerGameboard);
+    const player = createPlayer("human", "player", playerGameboard);
     player.attack(0, 0, opponentGameboard);
     expect(opponentGameboard.getMissedAttacks().size).toBe(1);
     expect(opponentGameboard.getMissedAttacks().has("0,0")).toBe(true);
@@ -78,6 +99,10 @@ describe("Player", () => {
       const opponentGameboard = createGameboard();
       const player = createPlayer("computer", "computer", playerGameboard);
       const playerAttacks = player.attack(0, 0, opponentGameboard);
+      const [x, y] = player.getValidCoordinates(
+        playerAttacks,
+        opponentGameboard
+      );
 
       /*
       const [x, y] = getValidCoordinates(attacks, opponentGameboard);

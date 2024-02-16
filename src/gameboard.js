@@ -108,11 +108,17 @@ export const createGameboard = () => {
     return ships.every(({ ship }) => ship.isSunk());
   };
 
+  const getAllAttacks = () => allAttacks;
+
   const getMissedAttacks = () => missedAttacks;
 
   const getOccupied = () => Array.from(occupied.keys());
 
   const getSize = () => boardSize;
+
+  hasBeenAttacked = (x, y) => {
+    return allAttacks.has(`${x},${y}`);
+  };
 
   const isGameBoardNull = () => {
     for (let row of board) {
@@ -138,10 +144,12 @@ export const createGameboard = () => {
 
   return {
     areAllShipsSunk,
+    getAllAttacks,
     getMissedAttacks,
     getOccupied,
     getShipAt,
     getSize,
+    hasBeenAttacked,
     isGameBoardNull,
     placeShip,
     print,

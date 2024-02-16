@@ -1,14 +1,32 @@
 export const createPlayer = (type, name, gameboard) => {
-  const attacks = new Set();
-
   const attack = (x, y, opponentGameboard) => {
+    const attacks = opponentGameboard.getAllAttacks();
+    const coord = `${x},${y}`;
+
+    if (attacks.has(coord)) {
+      throw new Error("You've already attacked this position!");
+    }
+
+    opponentGameboard.receiveAttack(x, y);
+  };
+
+  /*
+  const attack = (x, y, opponentGameboard) => {
+    const attacks = opponentGameboard.getAllAttacks();
+    ``;
+
+    console.log(attacks);
+
     if (!attacks.has(`${x},${y}`)) {
       attacks.add(`${x},${y}`);
       opponentGameboard.receiveAttack(x, y);
     } else {
       throw new Error("You've already attacked this position!");
     }
+    
   };
+
+  */
 
   const getGameboard = () => gameboard;
 
@@ -16,7 +34,7 @@ export const createPlayer = (type, name, gameboard) => {
 
   const getType = () => type;
 
-  function getValidCoordinates(attacks, opponentGameboard) {
+  function getValidCoordinates(opponentGameboard) {
     let x, y;
     const size = opponentGameboard.getSize(); // Assuming getSize is a method that returns the size of the gameboard
 
