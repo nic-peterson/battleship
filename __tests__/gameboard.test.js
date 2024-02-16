@@ -40,6 +40,18 @@ describe("Gameboard", () => {
         expect(gameboard.getShipAt(0, 1)).toBe(ship);
         expect(gameboard.getShipAt(0, 2)).toBe(ship);
       });
+
+      test("throws an error if the attack is outside the gameboard", () => {
+        const gameboard = createGameboard();
+        expect(() => gameboard.receiveAttack(10, 10)).toThrow();
+      });
+
+      test("can get the occupied coordinates", () => {
+        const gameboard = createGameboard();
+        const ship = createShip(3, "horizontal", "cruiser");
+        gameboard.placeShip(ship, 0, 0);
+        expect(gameboard.getOccupied()).toEqual(["0,0", "1,0", "2,0"]);
+      });
     });
 
     describe("unsuccessfully placing ships", () => {
@@ -63,76 +75,73 @@ describe("Gameboard", () => {
     });
   });
 
-  test("can receive attacks", () => {
-    const gameboard = createGameboard();
-    const ship = createShip(3, "horizontal");
-    gameboard.placeShip(ship, 0, 0);
-    gameboard.receiveAttack(0, 0);
-    expect(ship.getHits()).toBe(1);
+  describe("attacking & sinking", () => {
+    describe("attacks", () => {
+      test("can receive attacks", () => {
+        const gameboard = createGameboard();
+        const ship = createShip(3, "horizontal");
+        gameboard.placeShip(ship, 0, 0);
+        gameboard.receiveAttack(0, 0);
+        expect(ship.getHits()).toBe(1);
+      });
+
+      test("tracks missed attacks", () => {
+        const gameboard = createGameboard();
+        gameboard.receiveAttack(0, 0);
+        expect(gameboard.getMissedAttacks()).toEqual([{ x: 0, y: 0 }]);
+      });
+    });
+
+    describe("sinking ships", () => {
+      test("reports when all ships are sunk", () => {
+        const gameboard = createGameboard();
+        const ship = createShip(3, "horizontal", "cruiser");
+        gameboard.placeShip(ship, 0, 0);
+        gameboard.receiveAttack(0, 0);
+        gameboard.receiveAttack(1, 0);
+        gameboard.receiveAttack(2, 0);
+        expect(gameboard.areAllShipsSunk()).toBe(true);
+      });
+
+      // TODO figure out this test
+      test.skip("reports when not all ships are sunk", () => {
+        const gameboard = createGameboard();
+        const ship1 = createShip(3, "horizontal", "battleship");
+        const ship2 = createShip(3, "vertical", "cruiser");
+        gameboard.placeShip(ship1, 0, 0);
+        gameboard.placeShip(ship2, 2, 1);
+        gameboard.print();
+        gameboard.receiveAttack(0, 0);
+        // gameboard.receiveAttack(0, 0);
+        // gameboard.receiveAttack(0, 0);
+        expect(gameboard.areAllShipsSunk()).toBe(false);
+      });
+    });
   });
 
-  test("tracks missed attacks", () => {
-    const gameboard = createGameboard();
-    gameboard.receiveAttack(0, 0);
-    expect(gameboard.getMissedAttacks()).toEqual([{ x: 0, y: 0 }]);
-  });
+  describe("gameboard properties", () => {
+    test("reports the size of the gameboard", () => {
+      const gameboard = createGameboard();
+      expect(gameboard.getSize()).toBe(10);
+    });
 
-  test("reports when all ships are sunk", () => {
-    const gameboard = createGameboard();
-    const ship = createShip(3, "horizontal", "cruiser");
-    gameboard.placeShip(ship, 0, 0);
-    gameboard.receiveAttack(0, 0);
-    gameboard.receiveAttack(1, 0);
-    gameboard.receiveAttack(2, 0);
-    expect(gameboard.areAllShipsSunk()).toBe(true);
-  });
-
-  // TODO figure out this test
-  test.skip("reports when not all ships are sunk", () => {
-    const gameboard = createGameboard();
-    const ship1 = createShip(3, "vertical", "battleship");
-    const ship2 = createShip(3, "vertical", "cruiser");
-    gameboard.placeShip(ship1, 0, 0);
-    gameboard.placeShip(ship2, 0, 1);
-    gameboard.receiveAttack(0, 0);
-    gameboard.receiveAttack(0, 0);
-    gameboard.receiveAttack(0, 0);
-    expect(gameboard.areAllShipsSunk()).toBe(false);
-  });
-
-  test("reports the size of the gameboard", () => {
-    const gameboard = createGameboard();
-    expect(gameboard.getSize()).toBe(10);
-  });
-
-  test("throws an error if the attack is outside the gameboard", () => {
-    const gameboard = createGameboard();
-    expect(() => gameboard.receiveAttack(10, 10)).toThrow();
-  });
-
-  test("can get the occupied coordinates", () => {
-    const gameboard = createGameboard();
-    const ship = createShip(3, "horizontal", "cruiser");
-    gameboard.placeShip(ship, 0, 0);
-    expect(gameboard.getOccupied()).toEqual(["0,0", "1,0", "2,0"]);
-  });
-
-  test("prints the gameboard", () => {
-    const gameboard = createGameboard();
-    const ship = createShip(3, "horizontal", "cruiser");
-    gameboard.placeShip(ship, 0, 0);
-    expect(gameboard.print()).toBe(
-      "X X X - - - - - - -\n" +
-        "- - - - - - - - - -\n" +
-        "- - - - - - - - - -\n" +
-        "- - - - - - - - - -\n" +
-        "- - - - - - - - - -\n" +
-        "- - - - - - - - - -\n" +
-        "- - - - - - - - - -\n" +
-        "- - - - - - - - - -\n" +
-        "- - - - - - - - - -\n" +
-        "- - - - - - - - - -"
-    );
+    test("prints the gameboard", () => {
+      const gameboard = createGameboard();
+      const ship = createShip(3, "horizontal", "cruiser");
+      gameboard.placeShip(ship, 0, 0);
+      expect(gameboard.print()).toBe(
+        "X X X - - - - - - -\n" +
+          "- - - - - - - - - -\n" +
+          "- - - - - - - - - -\n" +
+          "- - - - - - - - - -\n" +
+          "- - - - - - - - - -\n" +
+          "- - - - - - - - - -\n" +
+          "- - - - - - - - - -\n" +
+          "- - - - - - - - - -\n" +
+          "- - - - - - - - - -\n" +
+          "- - - - - - - - - -"
+      );
+    });
   });
 
   /*

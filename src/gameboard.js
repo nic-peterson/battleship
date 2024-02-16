@@ -68,19 +68,28 @@ export const createGameboard = () => {
       throw new Error("Attack is outside the gameboard.");
     }
 
+    if ({ x, y } in allAttacks) {
+      throw new Error("You've already attacked this position!");
+    }
+
     const ship = getShipAt(x, y);
     if (ship) {
       ship.hit();
       /*
-      if (ship.isSunk()) {
-        removeShip(ship);
-      }
-      */
+        if (ship.isSunk()) {
+          removeShip(ship);
+        }
+        */
     } else {
-      missedAttacks.push({ x, y });
+      // Check if the spot has already been attacked
+      const alreadyAttacked = allAttacks.some(
+        (attack) => attack.x === x && attack.y === y
+      );
+      if (!alreadyAttacked) {
+        missedAttacks.push({ x, y });
+        allAttacks.push({ x, y });
+      }
     }
-
-    allAttacks.push({ x, y });
   };
 
   const areAllShipsSunk = () => {
