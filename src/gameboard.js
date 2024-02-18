@@ -24,8 +24,10 @@ export const createGameboard = () => {
         }
       }
     }
+
     return { allPlaced: actualTotal === expectedTotal, placed: actualTotal };
   };
+
   const placeShip = (ship, startX, startY) => {
     const orientation = ship.getOrientation();
     const length = ship.getLength();

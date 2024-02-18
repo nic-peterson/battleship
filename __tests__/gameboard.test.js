@@ -1,6 +1,6 @@
 const { createGameboard } = require("../src/gameboard"); // replace with the path to your createGameboard function
 const { createShip } = require("../src/ship"); // replace with the path to your createShip function
-// import
+const { placeShips } = require("../src/helper"); // replace with the path to your placeShip function
 
 describe("Gameboard", () => {
   describe("checking isGameBoardNull", () => {
@@ -65,13 +65,28 @@ describe("Gameboard", () => {
       });
 
       describe("all ships placed", () => {
+        let gameboard;
+
+        beforeEach(() => {
+          gameboard = createGameboard();
+        });
+
         test("returns false when no ships have been placed", () => {
-          const gameboard = createGameboard();
           const result = gameboard.allShipsPlaced();
           expect(result).toEqual({ allPlaced: false, placed: 0 });
         });
-        test.skip("returns false when not all ships have been placed", () => {});
-        test.skip("returns true when all ships have been placed", () => {});
+
+        test("returns false when not all ships have been placed", () => {
+          const ship = createShip(3, "horizontal", "Cruiser");
+          gameboard.placeShip(ship, 0, 0);
+          const result = gameboard.allShipsPlaced();
+          expect(result).toEqual({ allPlaced: false, placed: 3 });
+        });
+        test("returns true when all ships have been placed", () => {
+          placeShips(gameboard);
+          const result = gameboard.allShipsPlaced();
+          expect(result).toEqual({ allPlaced: true, placed: 17 });
+        });
       });
 
       describe("getShips", () => {
