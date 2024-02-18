@@ -3,7 +3,8 @@ const { createShip } = require("../src/ship");
 describe("Ship", () => {
   test("has a length", () => {
     const ship = createShip(4);
-    expect(ship.length).toBe(4);
+    const length = ship.getLength();
+    expect(length).toBe(4);
   });
 
   test("returns the orientation of the ship", () => {

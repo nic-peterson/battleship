@@ -1,41 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1708096352883" clover="3.2.0">
-  <project timestamp="1708096352883" name="All files">
-    <metrics statements="91" coveredstatements="91" conditionals="28" coveredconditionals="28" methods="31" coveredmethods="31" elements="150" coveredelements="150" complexity="0" loc="91" ncloc="91" packages="1" files="3" classes="3"/>
+<coverage generated="1708215764244" clover="3.2.0">
+  <project timestamp="1708215764244" name="All files">
+    <metrics statements="116" coveredstatements="116" conditionals="28" coveredconditionals="28" methods="34" coveredmethods="34" elements="178" coveredelements="178" complexity="0" loc="116" ncloc="116" packages="1" files="5" classes="5"/>
+    <file name="battleships.js" path="/Users/nicpeterson/repos/js-battleship/src/battleships.js">
+      <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <line num="1" count="1" type="stmt"/>
+      <line num="24" count="1" type="stmt"/>
+    </file>
+    <file name="game.js" path="/Users/nicpeterson/repos/js-battleship/src/game.js">
+      <metrics statements="23" coveredstatements="23" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
+      <line num="8" count="1" type="stmt"/>
+      <line num="12" count="1" type="stmt"/>
+      <line num="15" count="1" type="stmt"/>
+      <line num="16" count="1" type="stmt"/>
+      <line num="17" count="1" type="stmt"/>
+      <line num="19" count="1" type="stmt"/>
+      <line num="20" count="1" type="stmt"/>
+      <line num="21" count="1" type="stmt"/>
+      <line num="23" count="1" type="stmt"/>
+      <line num="25" count="1" type="stmt"/>
+      <line num="26" count="2" type="stmt"/>
+      <line num="27" count="2" type="stmt"/>
+      <line num="29" count="2" type="stmt"/>
+      <line num="30" count="10" type="stmt"/>
+      <line num="32" count="10" type="stmt"/>
+      <line num="34" count="18" type="stmt"/>
+      <line num="35" count="18" type="stmt"/>
+      <line num="37" count="18" type="stmt"/>
+      <line num="39" count="18" type="stmt"/>
+      <line num="46" count="18" type="stmt"/>
+      <line num="47" count="18" type="stmt"/>
+      <line num="48" count="10" type="stmt"/>
+      <line num="58" count="1" type="stmt"/>
+    </file>
     <file name="gameboard.js" path="/Users/nicpeterson/repos/js-battleship/src/gameboard.js">
       <metrics statements="64" coveredstatements="64" conditionals="26" coveredconditionals="26" methods="18" coveredmethods="18"/>
-      <line num="1" count="2" type="stmt"/>
-      <line num="2" count="31" type="stmt"/>
-      <line num="3" count="31" type="stmt"/>
-      <line num="5" count="310" type="stmt"/>
-      <line num="6" count="31" type="stmt"/>
-      <line num="7" count="31" type="stmt"/>
-      <line num="8" count="31" type="stmt"/>
-      <line num="9" count="31" type="stmt"/>
-      <line num="11" count="31" type="stmt"/>
-      <line num="12" count="15" type="stmt"/>
-      <line num="13" count="15" type="stmt"/>
-      <line num="14" count="15" type="stmt"/>
-      <line num="16" count="15" type="cond" truecount="2" falsecount="0"/>
-      <line num="17" count="11" type="stmt"/>
-      <line num="18" count="33" type="stmt"/>
-      <line num="20" count="4" type="cond" truecount="2" falsecount="0"/>
-      <line num="21" count="3" type="stmt"/>
-      <line num="22" count="9" type="stmt"/>
+      <line num="1" count="3" type="stmt"/>
+      <line num="2" count="33" type="stmt"/>
+      <line num="3" count="33" type="stmt"/>
+      <line num="5" count="330" type="stmt"/>
+      <line num="6" count="33" type="stmt"/>
+      <line num="7" count="33" type="stmt"/>
+      <line num="8" count="33" type="stmt"/>
+      <line num="9" count="33" type="stmt"/>
+      <line num="11" count="33" type="stmt"/>
+      <line num="12" count="33" type="stmt"/>
+      <line num="13" count="33" type="stmt"/>
+      <line num="14" count="33" type="stmt"/>
+      <line num="16" count="33" type="cond" truecount="2" falsecount="0"/>
+      <line num="17" count="23" type="stmt"/>
+      <line num="18" count="74" type="stmt"/>
+      <line num="20" count="10" type="cond" truecount="2" falsecount="0"/>
+      <line num="21" count="9" type="stmt"/>
+      <line num="22" count="30" type="stmt"/>
       <line num="25" count="1" type="stmt"/>
-      <line num="29" count="14" type="cond" truecount="2" falsecount="0"/>
-      <line num="31" count="42" type="stmt"/>
-      <line num="32" count="42" type="cond" truecount="4" falsecount="0"/>
-      <line num="35" count="2" type="stmt"/>
-      <line num="41" count="34" type="cond" truecount="2" falsecount="0"/>
-      <line num="42" count="1" type="stmt"/>
-      <line num="46" count="33" type="stmt"/>
-      <line num="49" count="11" type="stmt"/>
-      <line num="50" count="33" type="stmt"/>
-      <line num="51" count="33" type="stmt"/>
-      <line num="55" count="11" type="stmt"/>
-      <line num="58" count="31" type="stmt"/>
-      <line num="60" count="31" type="stmt"/>
+      <line num="29" count="32" type="cond" truecount="2" falsecount="0"/>
+      <line num="31" count="100" type="stmt"/>
+      <line num="32" count="100" type="cond" truecount="4" falsecount="0"/>
+      <line num="35" count="7" type="stmt"/>
+      <line num="41" count="72" type="cond" truecount="2" falsecount="0"/>
+      <line num="42" count="4" type="stmt"/>
+      <line num="46" count="67" type="stmt"/>
+      <line num="49" count="21" type="stmt"/>
+      <line num="50" count="67" type="stmt"/>
+      <line num="51" count="67" type="stmt"/>
+      <line num="55" count="21" type="stmt"/>
+      <line num="58" count="33" type="stmt"/>
+      <line num="60" count="33" type="stmt"/>
       <line num="61" count="17" type="stmt"/>
       <line num="63" count="17" type="cond" truecount="6" falsecount="0"/>
       <line num="64" count="2" type="stmt"/>
@@ -46,61 +77,61 @@
       <line num="73" count="9" type="stmt"/>
       <line num="75" count="5" type="stmt"/>
       <line num="77" count="14" type="stmt"/>
-      <line num="80" count="31" type="stmt"/>
+      <line num="80" count="33" type="stmt"/>
       <line num="81" count="3" type="stmt"/>
-      <line num="84" count="31" type="stmt"/>
-      <line num="86" count="31" type="stmt"/>
-      <line num="88" count="31" type="stmt"/>
-      <line num="90" count="31" type="stmt"/>
-      <line num="92" count="31" type="stmt"/>
+      <line num="84" count="33" type="stmt"/>
+      <line num="86" count="33" type="stmt"/>
+      <line num="88" count="33" type="stmt"/>
+      <line num="90" count="33" type="stmt"/>
+      <line num="92" count="33" type="stmt"/>
       <line num="93" count="1" type="stmt"/>
-      <line num="96" count="31" type="stmt"/>
+      <line num="96" count="33" type="stmt"/>
       <line num="97" count="2" type="stmt"/>
       <line num="98" count="11" type="stmt"/>
       <line num="99" count="101" type="cond" truecount="2" falsecount="0"/>
       <line num="100" count="1" type="stmt"/>
       <line num="104" count="1" type="stmt"/>
-      <line num="107" count="31" type="stmt"/>
+      <line num="107" count="33" type="stmt"/>
       <line num="108" count="1" type="stmt"/>
       <line num="109" count="1" type="stmt"/>
       <line num="110" count="10" type="stmt"/>
       <line num="111" count="100" type="cond" truecount="2" falsecount="0"/>
       <line num="113" count="10" type="stmt"/>
       <line num="115" count="1" type="stmt"/>
-      <line num="118" count="31" type="stmt"/>
+      <line num="118" count="33" type="stmt"/>
     </file>
     <file name="player.js" path="/Users/nicpeterson/repos/js-battleship/src/player.js">
       <metrics statements="17" coveredstatements="17" conditionals="2" coveredconditionals="2" methods="6" coveredmethods="6"/>
-      <line num="1" count="1" type="stmt"/>
-      <line num="2" count="8" type="stmt"/>
+      <line num="1" count="2" type="stmt"/>
+      <line num="2" count="10" type="stmt"/>
       <line num="3" count="5" type="stmt"/>
       <line num="4" count="5" type="stmt"/>
       <line num="6" count="5" type="cond" truecount="2" falsecount="0"/>
       <line num="7" count="1" type="stmt"/>
       <line num="10" count="4" type="stmt"/>
-      <line num="13" count="8" type="stmt"/>
-      <line num="15" count="8" type="stmt"/>
-      <line num="17" count="8" type="stmt"/>
-      <line num="19" count="8" type="stmt"/>
+      <line num="13" count="10" type="stmt"/>
+      <line num="15" count="10" type="stmt"/>
+      <line num="17" count="10" type="stmt"/>
+      <line num="19" count="10" type="stmt"/>
       <line num="21" count="1" type="stmt"/>
       <line num="23" count="1" type="stmt"/>
       <line num="24" count="2" type="stmt"/>
       <line num="25" count="2" type="stmt"/>
       <line num="27" count="1" type="stmt"/>
-      <line num="30" count="8" type="stmt"/>
+      <line num="30" count="10" type="stmt"/>
     </file>
     <file name="ship.js" path="/Users/nicpeterson/repos/js-battleship/src/ship.js">
       <metrics statements="10" coveredstatements="10" conditionals="0" coveredconditionals="0" methods="7" coveredmethods="7"/>
-      <line num="1" count="3" type="stmt"/>
-      <line num="2" count="21" type="stmt"/>
-      <line num="4" count="21" type="stmt"/>
+      <line num="1" count="4" type="stmt"/>
+      <line num="2" count="39" type="stmt"/>
+      <line num="4" count="39" type="stmt"/>
       <line num="5" count="15" type="stmt"/>
-      <line num="8" count="21" type="stmt"/>
-      <line num="10" count="21" type="stmt"/>
-      <line num="12" count="21" type="stmt"/>
-      <line num="14" count="21" type="stmt"/>
-      <line num="16" count="21" type="stmt"/>
-      <line num="18" count="21" type="stmt"/>
+      <line num="8" count="39" type="stmt"/>
+      <line num="10" count="39" type="stmt"/>
+      <line num="12" count="39" type="stmt"/>
+      <line num="14" count="39" type="stmt"/>
+      <line num="16" count="39" type="stmt"/>
+      <line num="18" count="39" type="stmt"/>
     </file>
   </project>
 </coverage>
