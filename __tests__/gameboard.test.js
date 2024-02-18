@@ -4,14 +4,17 @@ const { placeShips } = require("../src/helper"); // replace with the path to you
 
 describe("Gameboard", () => {
   describe("checking isGameBoardNull", () => {
+    let gameboard;
+    beforeEach(() => {
+      gameboard = createGameboard();
+    });
     test("returns true if the board is empty", () => {
-      const gameboard = createGameboard();
       expect(gameboard.isGameBoardNull()).toBe(true);
     });
 
     test("returns false if the board is not empty", () => {
-      const gameboard = createGameboard();
       const ship = createShip(3, "horizontal");
+      gameboard = createGameboard();
       gameboard.placeShip(ship, 0, 0);
       expect(gameboard.isGameBoardNull()).toBe(false);
     });
