@@ -62,6 +62,32 @@ describe("Gameboard", () => {
         gameboard.placeShip(ship, 0, 0);
         expect(gameboard.getOccupied()).toEqual(["0,0", "1,0", "2,0"]);
       });
+
+      describe("all ships placed", () => {
+        test("returns false when no ships have been placed", () => {
+          const gameboard = createGameboard();
+          const result = gameboard.allShipsPlaced();
+          expect(result).toEqual({ allPlaced: false, placed: 0 });
+        });
+        test.skip("returns false when not all ships have been placed", () => {});
+        test.skip("returns true when all ships have been placed", () => {});
+      });
+
+      describe("getShips", () => {
+        test("returns an empty array when no ships have been placed", () => {
+          const gameboard = createGameboard();
+          expect(gameboard.getShips()).toEqual([]);
+        });
+        test("returns a array (of accurate length) of ships when ships have been placed", () => {
+          const gameboard = createGameboard();
+          const ship1 = createShip(3, "horizontal");
+          const ship2 = createShip(3, "vertical");
+          gameboard.placeShip(ship1, 0, 0);
+          gameboard.placeShip(ship2, 2, 2);
+          const ships = gameboard.getShips();
+          expect(ships.length).toBe(2);
+        });
+      });
     });
 
     describe("unsuccessfully placing ships", () => {

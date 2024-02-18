@@ -1,13 +1,31 @@
+import battleships from "./battleships.js";
+
 export const createGameboard = () => {
-  const boardSize = 10;
-  const board = Array(boardSize)
+  const size = 10;
+  const board = Array(size)
     .fill()
-    .map(() => Array(boardSize).fill(null));
+    .map(() => Array(size).fill(null));
   const ships = [];
   const missedAttacks = new Set(); // changed array to set
   const allAttacks = new Set(); // changed array to set
   const occupied = new Map();
 
+  const allShipsPlaced = () => {
+    const expectedTotal = battleships.reduce(
+      (total, ship) => total + ship.length,
+      0
+    );
+
+    let actualTotal = 0;
+    for (let row of board) {
+      for (let cell of row) {
+        if (cell !== null) {
+          actualTotal++;
+        }
+      }
+    }
+    return { allPlaced: actualTotal === expectedTotal, placed: actualTotal };
+  };
   const placeShip = (ship, startX, startY) => {
     const orientation = ship.getOrientation();
     const length = ship.getLength();
@@ -29,7 +47,7 @@ export const createGameboard = () => {
     if (
       coordinates.some((coord) => {
         const [x, y] = coord.split(",").map(Number);
-        return x < 0 || x >= boardSize || y < 0 || y >= boardSize;
+        return x < 0 || x >= size || y < 0 || y >= size;
       })
     ) {
       throw new Error(
@@ -55,12 +73,24 @@ export const createGameboard = () => {
     ships.push({ ship, coordinates });
   };
 
+  const getShips = () => {
+    let ships = [];
+    for (let row of board) {
+      for (let cell of row) {
+        if (cell !== null && !ships.includes(cell)) {
+          ships.push(cell);
+        }
+      }
+    }
+    return ships;
+  };
+
   const getShipAt = (x, y) => occupied.get(`${x},${y}`);
 
   const receiveAttack = (x, y) => {
     const coord = `${x},${y}`;
 
-    if (x < 0 || x >= boardSize || y < 0 || y >= boardSize) {
+    if (x < 0 || x >= size || y < 0 || y >= size) {
       throw new Error("Attack is outside the gameboard.");
     }
 
@@ -87,9 +117,9 @@ export const createGameboard = () => {
 
   const getOccupied = () => Array.from(occupied.keys());
 
-  const getSize = () => boardSize;
+  const getSize = () => size;
 
-  hasBeenAttacked = (x, y) => {
+  const hasBeenAttacked = (x, y) => {
     return allAttacks.has(`${x},${y}`);
   };
 
@@ -106,8 +136,8 @@ export const createGameboard = () => {
 
   const print = () => {
     let output = "";
-    for (let y = 0; y < boardSize; y++) {
-      for (let x = 0; x < boardSize; x++) {
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
         output += occupied.has(`${x},${y}`) ? "X " : "- ";
       }
       output = output.trim() + "\n"; // Remove trailing space and add newline
@@ -116,10 +146,12 @@ export const createGameboard = () => {
   };
 
   return {
+    allShipsPlaced,
     areAllShipsSunk,
     getAllAttacks,
     getMissedAttacks,
     getOccupied,
+    getShips,
     getShipAt,
     getSize,
     hasBeenAttacked,

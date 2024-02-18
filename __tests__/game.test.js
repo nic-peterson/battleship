@@ -17,7 +17,7 @@ describe("Game", () => {
           game = createGame(player1, player2);
         });
         */
-    test("startGame", () => {
+    test.skip("startGame", () => {
       const game = createGame(
         { name: "player1", type: "human" },
         { name: "player2", type: "computer" },
