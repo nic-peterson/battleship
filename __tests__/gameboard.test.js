@@ -1,5 +1,6 @@
 const { createGameboard } = require("../src/gameboard"); // replace with the path to your createGameboard function
 const { createShip } = require("../src/ship"); // replace with the path to your createShip function
+// import
 
 describe("Gameboard", () => {
   describe("checking isGameBoardNull", () => {

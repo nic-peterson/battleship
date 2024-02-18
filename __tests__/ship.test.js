@@ -1,4 +1,5 @@
 const { createShip } = require("../src/ship");
+const { createGameboard } = require("../src/gameboard");
 
 describe("Ship", () => {
   test("has a length", () => {

@@ -74,14 +74,6 @@ export const createGameboard = () => {
   };
 
   const getShips = () => {
-    let ships = [];
-    for (let row of board) {
-      for (let cell of row) {
-        if (cell !== null && !ships.includes(cell)) {
-          ships.push(cell);
-        }
-      }
-    }
     return ships;
   };
 

@@ -23,5 +23,6 @@ export const createShip = (length, orientation, type) => {
     getOrientation,
     getType,
     isSunk,
+    type,
   };
 };
