@@ -1,32 +1,58 @@
-const { createPlayer } = require("../src/player");
-const { createGameboard } = require("../src/gameboard");
-const { createShip } = require("../src/ship");
-const { before } = require("lodash");
 const { createGame } = require("../src/game");
-import battleships from "../src/battleships";
 
-describe("Game", () => {
+describe("createGame", () => {
+  let game;
+  beforeEach(() => {
+    game = createGame(
+      { name: "player1", type: "human" },
+      { name: "player2", type: "computer" }
+    );
+  });
   describe("start game", () => {
-    /*
-        let game;
-        beforeEach(() => {
-          const player1Gameboard = createGameboard();
-          const player1 = createPlayer("human", "player1", player1Gameboard);
-          const player2Gameboard = createGameboard();
-          const player2 = createPlayer("computer", "player2", player2Gameboard);
-          game = createGame(player1, player2);
-        });
-        */
-    test.skip("startGame", () => {
-      const game = createGame(
-        { name: "player1", type: "human" },
-        { name: "player2", type: "computer" },
-        battleships
-      );
-      expect(game.startGame()).toBe(true);
+    beforeEach(() => {
+      game.startGame();
     });
-    test.skip("isGameOver", () => {
+
+    test("ships are placed", () => {
+      const [player1, player2] = game.getPlayers();
+      const player1Gameboard = player1.getGameboard();
+      const player2Gameboard = player2.getGameboard();
+
+      const player1AllShipPlaced = player1Gameboard.allShipsPlaced().allPlaced;
+      const player2AllShipPlaced = player2Gameboard.allShipsPlaced().allPlaced;
+
+      expect(player1AllShipPlaced).toBe(true);
+      expect(player2AllShipPlaced).toBe(true);
+    });
+
+    test("isGameOver === false", () => {
       expect(game.isGameOver()).toBe(false);
+    });
+    test("getCurrentPlayer === player 1", () => {
+      expect(game.getCurrentPlayer().getName()).toBe("player1");
+    });
+    test("getScore === {player1: 0, player2: 0}", () => {
+      expect(game.getScore().player1).toEqual(0);
+      expect(game.getScore().player2).toEqual(0);
+    });
+  });
+
+  describe("end game", () => {
+    beforeEach(() => {
+      game.startGame();
+    });
+
+    test("isGameOver === true", () => {
+      const ships = game.getCurrentPlayer().getGameboard().getShips();
+
+      for (let ship of ships) {
+        for (let i = 0; i < ship.ship.getLength(); i++) {
+          ship.ship.hit();
+        }
+      }
+
+      const isGameOver = game.isGameOver();
+      expect(isGameOver).toBe(true);
     });
   });
 });
