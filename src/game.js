@@ -15,25 +15,6 @@ export const createGame = (
   let player2;
   let winner;
 
-  const startGame = () => {
-    // Define game variables
-
-    // Create players
-    // * Player 1
-    const player1Gameboard = createGameboard();
-    placeShips(player1Gameboard);
-    player1 = createPlayer(player1Type, player1Name, player1Gameboard);
-    // * Player 2
-    const player2Gameboard = createGameboard();
-    placeShips(player2Gameboard);
-    player2 = createPlayer(player2Type, player2Name, player2Gameboard);
-
-    // Start game
-    currentPlayer = player1;
-    gameOver = false;
-    score = { [player1Name]: 0, [player2Name]: 0 };
-  };
-
   const isGameOver = () => {
     gameOver =
       player1.getGameboard().areAllShipsSunk() ||
@@ -58,16 +39,42 @@ export const createGame = (
     gameOver = true;
   };
 
+  const initGame = () => {
+    // Create players
+    // * Player 1
+    const player1Gameboard = createGameboard();
+    placeShips(player1Gameboard);
+    player1 = createPlayer(player1Type, player1Name, player1Gameboard);
+    console.log("player1Gameboard is: ");
+    console.log(player1Gameboard.print());
+    // * Player 2
+    const player2Gameboard = createGameboard();
+    placeShips(player2Gameboard);
+    player2 = createPlayer(player2Type, player2Name, player2Gameboard);
+    console.log("player2Gameboard is: ");
+    console.log(player2Gameboard.print());
+  };
+
   const setWinner = (player) => {
     winner = player;
+  };
+
+  const startGame = () => {
+    initGame();
+    // Start game
+    currentPlayer = player1;
+    gameOver = false;
+    score = { [player1Name]: 0, [player2Name]: 0 };
+
+    console.log("Game started");
   };
 
   const switchPlayer = () => {
     currentPlayer = currentPlayer === player1 ? player2 : player1;
   };
 
-  const updateScore = (player, points) => {
-    score[player.getName()] += points;
+  const updateScore = (player) => {
+    score[player.getName()] += 1;
   };
 
   return { getCurrentPlayer, getPlayers, getScore, isGameOver, startGame };

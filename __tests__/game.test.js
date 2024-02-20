@@ -1,4 +1,5 @@
 const { createGame } = require("../src/game");
+const { placeShips } = require("../src/helper");
 
 describe("createGame", () => {
   let game;
@@ -34,6 +35,20 @@ describe("createGame", () => {
     test("getScore === {player1: 0, player2: 0}", () => {
       expect(game.getScore().player1).toEqual(0);
       expect(game.getScore().player2).toEqual(0);
+    });
+  });
+
+  describe("during game", () => {
+    beforeEach(() => {
+      game.startGame();
+    });
+
+    test.skip("playerMove", () => {
+      const [player1, player2] = game.getPlayers();
+      const player1Gameboard = player1.getGameboard();
+      const player2Gameboard = player2.getGameboard();
+
+      // placeShips(player1Gameboard);
     });
   });
 
