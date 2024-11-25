@@ -1,8 +1,18 @@
-export const createShip = (length, orientation, type) => {
+export const createShip = (length, orientation = "horizontal", type) => {
+  if (!Number.isInteger(length) || length <= 0) {
+    throw new Error("Length must be a positive integer.");
+  }
+  if (!["horizontal", "vertical"].includes(orientation)) {
+    throw new Error("Orientation must be 'horizontal' or 'vertical'.");
+  }
+  if (typeof type !== "string") {
+    throw new Error("Type must be a string.");
+  }
+
   let hits = 0;
 
   const hit = () => {
-    hits += 1;
+    if (hits < length) hits += 1;
   };
 
   const getHits = () => hits;
@@ -13,16 +23,23 @@ export const createShip = (length, orientation, type) => {
 
   const getType = () => type;
 
-  const isSunk = () => hits === length;
+  const isSunk = () => hits >= length;
+
+  const getState = () => ({
+    length,
+    hits,
+    isSunk: isSunk(),
+    orientation,
+    type,
+  });
 
   return {
-    length,
     hit,
     getHits,
     getLength,
     getOrientation,
     getType,
     isSunk,
-    type,
+    getState,
   };
 };
