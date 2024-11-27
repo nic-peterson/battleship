@@ -34,6 +34,14 @@ export const createGame = (
     return score;
   };
 
+  const playerMove = () => {
+    if (isGameOver() === false) {
+      return;
+    }
+
+    // Get the current player's move
+  };
+
   // * Private Methods
   const endGame = () => {
     gameOver = true;
