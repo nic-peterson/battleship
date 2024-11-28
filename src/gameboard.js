@@ -24,7 +24,13 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
 
   const placedShips = []; // Array to keep track of all ships placed
 
+  const hits = []; // Array to keep track of all hits
+
+  const misses = []; // Array to keep track of all misses
+
   const getBoard = () => board;
+
+  const getSize = () => boardSize;
 
   /**
    * Places a ship on the gameboard at the specified coordinates and orientation.
@@ -175,6 +181,7 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
     if (cell.ship !== null) {
       cell.ship.hit();
       cell.status = CellStatus.HIT;
+      hits.push({ x, y });
       return {
         result: CellStatus.HIT,
         shipSunk: cell.ship.isSunk(),
@@ -182,6 +189,7 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
       };
     } else {
       cell.status = CellStatus.MISS;
+      misses.push({ x, y });
       return { result: CellStatus.MISS, coordinates: { x, y } };
     }
   };
@@ -192,14 +200,6 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
    * @returns {Array<{x: number, y: number}>} An array of objects representing the coordinates of missed attacks.
    */
   const getMissedAttacks = () => {
-    const misses = [];
-    board.forEach((row, y) => {
-      row.forEach((cell, x) => {
-        if (cell.status === CellStatus.MISS) {
-          misses.push({ x, y });
-        }
-      });
-    });
     return misses;
   };
 
@@ -209,14 +209,6 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
    * @returns {Array<{x: number, y: number}>} An array of objects representing the coordinates of hit cells.
    */
   const getHits = () => {
-    const hits = [];
-    board.forEach((row, y) => {
-      row.forEach((cell, x) => {
-        if (cell.status === CellStatus.HIT) {
-          hits.push({ x, y });
-        }
-      });
-    });
     return hits;
   };
 
@@ -256,6 +248,27 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
     return { allPlaced: actualTotal === expectedTotal, placed: actualTotal };
   };
 
+  const hasBeenAttacked = (x, y) => {
+    return (
+      board[y][x].status === CellStatus.HIT ||
+      board[y][x].status === CellStatus.MISS
+    );
+  };
+
+  const getAllAttacks = () => {
+    const attacks = new Set();
+
+    hits.forEach(({ x, y }) => {
+      attacks.add(`${x},${y}`);
+    });
+
+    misses.forEach(({ x, y }) => {
+      attacks.add(`${x},${y}`);
+    });
+
+    return attacks;
+  };
+
   return {
     getBoard,
     placeShip,
@@ -264,5 +277,8 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
     getHits,
     areAllShipsSunk,
     allShipsPlaced,
+    hasBeenAttacked,
+    getSize,
+    getAllAttacks,
   };
 };

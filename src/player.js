@@ -8,18 +8,17 @@ export const createPlayer = (type, name, gameboard) => {
       typeof y !== "number" ||
       x < 0 ||
       y < 0 ||
-      x >= BOARD_SIZE ||
-      y >= BOARD_SIZE
+      x >= opponentGameboard.getSize() ||
+      y >= opponentGameboard.getSize()
     ) {
       throw new Error(ERROR_MESSAGES.INVALID_COORDINATES);
     }
 
-    const cellToAttack = opponentGameboard.getBoard()[y][x];
+    const attacks = opponentGameboard.getAllAttacks(); // Returns a Set of "x,y"
 
-    if (
-      cellToAttack.status === CellStatus.HIT ||
-      cellToAttack.status === CellStatus.MISS
-    ) {
+    const coord = `${x},${y}`;
+
+    if (attacks.has(coord)) {
       throw new Error(ERROR_MESSAGES.ALREADY_ATTACKED);
     }
 
@@ -40,10 +39,7 @@ export const createPlayer = (type, name, gameboard) => {
     do {
       x = Math.floor(Math.random() * BOARD_SIZE);
       y = Math.floor(Math.random() * BOARD_SIZE);
-    } while (
-      opponentGameboard.getBoard()[y][x].status === CellStatus.HIT ||
-      opponentGameboard.getBoard()[y][x].status === CellStatus.MISS
-    );
+    } while (opponentGameboard.hasBeenAttacked(x, y));
 
     return [x, y];
   };

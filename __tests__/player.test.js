@@ -41,7 +41,11 @@ describe("Player Methods", () => {
       const attackResult = player.attack(3, 3, computerGameboard);
 
       // Assert
-      expect(attackResult).toEqual({ result: CellStatus.HIT, shipSunk: false });
+      expect(attackResult).toEqual({
+        result: CellStatus.HIT,
+        shipSunk: false,
+        coordinates: { x: 3, y: 3 },
+      });
       expect(ship.getHits()).toBe(1);
       expect(computerGameboard.getBoard()[3][3].status).toBe(CellStatus.HIT);
     });
@@ -71,7 +75,7 @@ describe("Player Methods", () => {
   });
 
   describe("Valid Coordinate Generation", () => {
-    test.skip("should generate valid coordinates that have not been attacked", () => {
+    test("should generate valid coordinates that have not been attacked", () => {
       // Arrange
       // Simulate some attacks
       player.attack(2, 2, computerGameboard);
@@ -82,13 +86,13 @@ describe("Player Methods", () => {
 
       // Assert
       expect(x).toBeGreaterThanOrEqual(0);
-      expect(x).toBeLessThan(BOARD_SIZE);
+      expect(x).toBeLessThan(computerGameboard.getSize());
       expect(y).toBeGreaterThanOrEqual(0);
-      expect(y).toBeLessThan(BOARD_SIZE);
+      expect(y).toBeLessThan(computerGameboard.getSize());
       expect(computerGameboard.hasBeenAttacked(x, y)).toBe(false);
     });
 
-    test.skip("should return coordinates without considering orientation", () => {
+    test("should return coordinates without considering orientation", () => {
       // For player, orientation isn't directly relevant; ensure coordinates are valid
       const [x, y] = player.getValidCoordinates(computerGameboard);
 

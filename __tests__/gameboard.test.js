@@ -45,6 +45,7 @@ describe("Gameboard Methods", () => {
     test.each([8, 10, 12])("should create a %dx%d gameboard", (boardSize) => {
       const gameboard = createGameboard(boardSize, battleships);
       const board = gameboard.getBoard();
+      expect(board.length).toBe(gameboard.getSize());
       expect(board.length).toBe(boardSize);
       board.forEach((row) => {
         expect(row.length).toBe(boardSize);
@@ -466,6 +467,29 @@ describe("Gameboard Methods", () => {
         allPlaced: false,
         placed: ship1.getLength(),
       });
+    });
+
+    test("should return if a cell has been attacked", () => {
+      gameboard.receiveAttack(0, 0);
+      expect(gameboard.hasBeenAttacked(0, 0)).toBe(true);
+      expect(gameboard.hasBeenAttacked(1, 1)).toBe(false);
+    });
+
+    test("should return all attacks (hits and misses)", () => {
+      const ship = createShip(2);
+      gameboard.placeShip(ship, 1, 1, ORIENTATIONS.HORIZONTAL);
+
+      gameboard.receiveAttack(1, 1); // Hit
+      gameboard.receiveAttack(2, 1); // Hit
+      gameboard.receiveAttack(0, 0); // Miss
+      gameboard.receiveAttack(3, 3); // Miss
+
+      const allAttacks = gameboard.getAllAttacks();
+      expect(allAttacks).toContain("1,1");
+      expect(allAttacks).toContain("2,1");
+      expect(allAttacks).toContain("0,0");
+      expect(allAttacks).toContain("3,3");
+      expect(allAttacks.size).toBe(4);
     });
   });
 });
