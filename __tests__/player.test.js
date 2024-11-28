@@ -1,12 +1,12 @@
-const { createPlayer } = require("../src/player");
-const { createGameboard } = require("../src/gameboard");
-const { createShip } = require("../src/ship");
+const { createPlayer } = require("../src/components/player");
+const { createGameboard } = require("../src/components/gameboard");
+const { createShip } = require("../src/components/ship");
 const {
   ORIENTATIONS,
   ERROR_MESSAGES,
   CellStatus,
   BOARD_SIZE,
-} = require("../src/constants"); // Assuming that the constants are exported from a separate file
+} = require("../src/helpers/constants"); // Assuming that the constants are exported from a separate file
 // const { before } = require("lodash");
 
 describe("Player Methods", () => {

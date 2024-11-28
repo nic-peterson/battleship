@@ -1,4 +1,4 @@
-const { createShip } = require("../src/ship");
+const { createShip } = require("../src/components/ship");
 
 describe("Ship", () => {
   test("throws an error if length is not a positive integer", () => {

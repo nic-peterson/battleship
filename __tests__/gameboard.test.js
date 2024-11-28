@@ -1,8 +1,12 @@
-import { createGameboard } from "../src/gameboard";
-const { createShip } = require("../src/ship");
-import { BOARD_SIZE } from "../src/constants";
-import { CellStatus, ORIENTATIONS, ERROR_MESSAGES } from "../src/constants";
-import { battleships } from "../src/battleships";
+import { createGameboard } from "../src/components/gameboard";
+const { createShip } = require("../src/components/ship");
+import { BOARD_SIZE } from "../src/helpers/constants";
+import {
+  CellStatus,
+  ORIENTATIONS,
+  ERROR_MESSAGES,
+} from "../src/helpers/constants";
+import { battleships } from "../src/helpers/battleships";
 
 const verifyShipPlacement = (board, ship, coordinates) => {
   coordinates.forEach(([x, y]) => {
