@@ -1,4 +1,4 @@
-const battleships = [
+export const battleships = [
   { type: "Carrier", length: 5 },
   { type: "Battleship", length: 4 },
   { type: "Cruiser", length: 3 },
@@ -6,6 +6,6 @@ const battleships = [
   { type: "Destroyer", length: 2 },
 ];
 
-module.exports = battleships;
+//module.exports = battleships;
 
 // Path: src/gameboard.js

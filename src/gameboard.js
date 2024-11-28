@@ -1,4 +1,4 @@
-import battleships from "./battleships.js";
+import { battleships } from "./battleships.js";
 import { createCell } from "./cell.js";
 import { CellStatus } from "./constants.js";
 
@@ -20,12 +20,21 @@ export const createGameboard = () => {
 
   const placeShip = (ship, x, y, orientation) => {
     const length = ship.getLength();
+    const allowedOrientations = [HORIZONTAL, VERTICAL];
+
+    if (!allowedOrientations.includes(orientation)) {
+      throw new Error("Invalid orientation. Use 'horizontal' or 'vertical'.");
+    }
+
+    if (x < 0 || x >= size || y < 0 || y >= size) {
+      throw new Error("Ship placement coorindates are out of bounds [0-9].");
+    }
 
     // Check for out-of-bounds placement
-    if (orientation === HORIZONTAL && x + length > size) {
+    if (orientation === HORIZONTAL && Math.abs(x) + length > size) {
       throw new Error("Ship placement is out of bounds horizontally.");
     }
-    if (orientation === VERTICAL && y + length > size) {
+    if (orientation === VERTICAL && Math.abs(y) + length > size) {
       throw new Error("Ship placement is out of bounds vertically.");
     }
 
@@ -70,7 +79,7 @@ export const createGameboard = () => {
     }
   };
 
-  const getMissedShots = () => {
+  const getMissedAttacks = () => {
     const misses = [];
     board.forEach((row, y) => {
       row.forEach((cell, x) => {
@@ -121,7 +130,7 @@ export const createGameboard = () => {
     getBoard,
     placeShip,
     receiveAttack,
-    getMissedShots,
+    getMissedAttacks,
     getHits,
     areAllShipsSunk,
     allShipsPlaced,
