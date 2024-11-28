@@ -1,31 +1,64 @@
-import { battleships } from "./battleships.js";
 import { createCell } from "./cell.js";
 import { CellStatus } from "./constants.js";
 import { ORIENTATIONS, ERROR_MESSAGES, BOARD_SIZE } from "./constants.js";
 
 /**
- * Creates a gameboard with the specified size.
- * @param {number} boardSize - The size of the gameboard (default is BOARD_SIZE).
- * @param {Array} expectedShips - The list of expected ships to be placed on the board.
- * returns {Object} - The gameboard object.
+ * Creates a gameboard for the Battleship game.
+ *
+ * @param {number} [boardSize=BOARD_SIZE] - The size of the game board (default is BOARD_SIZE).
+ * @param {Array<Object>} [expectedShips=[]] - An array of expected ship objects to be placed on the board.
+ * @returns {Object} The gameboard object with the following methods:
+ *   - `getBoard()`: Retrieves the current state of the game board.
+ *   - `placeShip(ship, x, y, orientation)`: Places a ship on the game board at the specified coordinates and orientation.
+ *   - `receiveAttack(x, y)`: Handles an attack on the game board at the specified coordinates.
+ *   - `getMissedAttacks()`: Retrieves the coordinates of missed attacks on the game board.
+ *   - `getHits()`: Retrieves the coordinates of all cells that have been hit.
+ *   - `areAllShipsSunk()`: Checks if all placed ships are sunk.
+ *   - `allShipsPlaced()`: Checks if all ships have been placed on the game board.
  */
 
 export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
-  const size = boardSize;
-  const board = Array.from({ length: size }, () =>
-    Array.from({ length: size }, () => createCell())
+  const board = Array.from({ length: boardSize }, () =>
+    Array.from({ length: boardSize }, () => createCell())
   );
 
   const placedShips = []; // Array to keep track of all ships placed
 
   const getBoard = () => board;
 
+  /**
+   * Places a ship on the gameboard at the specified coordinates and orientation.
+   *
+   * @param {Object} ship - The ship object to be placed.
+   * @param {number} x - The x-coordinate where the ship's placement starts.
+   * @param {number} y - The y-coordinate where the ship's placement starts.
+   * @param {string} orientation - The orientation of the ship ('horizontal' or 'vertical').
+   * @throws {Error} If the ship placement is invalid, out of bounds, or overlaps with another ship.
+   */
+
   const placeShip = (ship, x, y, orientation) => {
+    validateShipPlacement(ship, x, y, orientation);
+    checkOutOfBounds(ship, x, y, orientation);
+    checkOverlap(ship, x, y, orientation);
+    placeShipOnBoard(ship, x, y, orientation);
+  };
+
+  /**
+   * Validates the placement of a ship on the game board.
+   *
+   * @param {Object} ship - The ship object to be placed.
+   * @param {number} x - The x-coordinate for the ship's placement.
+   * @param {number} y - The y-coordinate for the ship's placement.
+   * @param {string} orientation - The orientation of the ship (either 'HORIZONTAL' or 'VERTICAL').
+   * @throws {Error} Throws an error if the ship is null.
+   * @throws {Error} Throws an error if the orientation is invalid.
+   * @throws {Error} Throws an error if the coordinates are invalid.
+   */
+  const validateShipPlacement = (ship, x, y, orientation) => {
     if (ship === null) {
       throw new Error(ERROR_MESSAGES.INVALID_SHIP);
     }
 
-    const length = ship.getLength();
     const allowedOrientations = [
       ORIENTATIONS.HORIZONTAL,
       ORIENTATIONS.VERTICAL,
@@ -39,23 +72,48 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
       !Number.isInteger(x) ||
       !Number.isInteger(y) ||
       x < 0 ||
-      x >= size ||
+      x >= boardSize ||
       y < 0 ||
-      y >= size
+      y >= boardSize
     ) {
       throw new Error(ERROR_MESSAGES.INVALID_COORDINATES);
     }
+  };
 
-    // Check for out-of-bounds placement
-    if (orientation === ORIENTATIONS.HORIZONTAL && x + length > size) {
+  /**
+   * Checks if the ship placement is out of bounds on the game board.
+   *
+   * @param {Object} ship - The ship object to be placed.
+   * @param {number} x - The x-coordinate of the ship's starting position.
+   * @param {number} y - The y-coordinate of the ship's starting position.
+   * @param {string} orientation - The orientation of the ship ('HORIZONTAL' or 'VERTICAL').
+   * @throws {Error} Throws an error if the ship placement is out of bounds horizontally or vertically.
+   */
+  const checkOutOfBounds = (ship, x, y, orientation) => {
+    const shipLength = ship.getLength();
+
+    if (orientation === ORIENTATIONS.HORIZONTAL && x + shipLength > boardSize) {
       throw new Error(ERROR_MESSAGES.OUT_OF_BOUNDS_HORIZONTAL);
     }
-    if (orientation === ORIENTATIONS.VERTICAL && y + length > size) {
+    if (orientation === ORIENTATIONS.VERTICAL && y + shipLength > boardSize) {
       throw new Error(ERROR_MESSAGES.OUT_OF_BOUNDS_VERTICAL);
     }
+  };
 
-    // Check for overlap with existing ships
-    for (let i = 0; i < length; i++) {
+  /**
+   * Checks if placing a ship at the given coordinates and orientation would overlap with an existing ship.
+   *
+   * @param {Object} ship - The ship object to be placed.
+   * @param {number} x - The x-coordinate where the ship is to be placed.
+   * @param {number} y - The y-coordinate where the ship is to be placed.
+   * @param {string} orientation - The orientation of the ship, either 'HORIZONTAL' or 'VERTICAL'.
+   * @throws {Error} Throws an error if the ship overlaps with an existing ship.
+   */
+
+  const checkOverlap = (ship, x, y, orientation) => {
+    const shipLength = ship.getLength();
+
+    for (let i = 0; i < shipLength; i++) {
       const posX = orientation === ORIENTATIONS.HORIZONTAL ? x + i : x;
       const posY = orientation === ORIENTATIONS.VERTICAL ? y + i : y;
 
@@ -63,9 +121,20 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
         throw new Error(ERROR_MESSAGES.OVERLAPPING_SHIP);
       }
     }
+  };
 
-    // Place the ship
-    for (let i = 0; i < length; i++) {
+  /**
+   * Places a ship on the game board at the specified coordinates and orientation.
+   *
+   * @param {Object} ship - The ship object to be placed on the board.
+   * @param {number} x - The x-coordinate where the ship's placement starts.
+   * @param {number} y - The y-coordinate where the ship's placement starts.
+   * @param {string} orientation - The orientation of the ship, either 'HORIZONTAL' or 'VERTICAL'.
+   */
+  const placeShipOnBoard = (ship, x, y, orientation) => {
+    const shipLength = ship.getLength();
+
+    for (let i = 0; i < shipLength; i++) {
       const posX = orientation === ORIENTATIONS.HORIZONTAL ? x + i : x;
       const posY = orientation === ORIENTATIONS.VERTICAL ? y + i : y;
 
@@ -76,13 +145,27 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
     if (!placedShips.includes(ship)) {
       placedShips.push(ship);
     }
-
-    // ships.push(ship); // Add ship to the ships array
   };
 
+  /**
+   * Handles an attack on the game board at the specified coordinates.
+   *
+   * @param {number} x - The x-coordinate of the attack.
+   * @param {number} y - The y-coordinate of the attack.
+   * @throws {Error} If the coordinates are out of bounds.
+   * @throws {Error} If the cell has already been attacked.
+   * @returns {Object} The result of the attack.
+   * @returns {string} result.result - The status of the cell after the attack (HIT or MISS).
+   * @returns {boolean} [result.shipSunk] - Whether the ship at the attacked cell is sunk (only present if a ship was hit).
+   * @returns {Object} result.coordinates - The coordinates of the attack.
+   * @returns {number} result.coordinates.x - The x-coordinate of the attack.
+   * @returns {number} result.coordinates.y - The y-coordinate of the attack.
+   */
   const receiveAttack = (x, y) => {
+    if (x < 0 || x >= boardSize || y < 0 || y >= boardSize) {
+      throw new Error(ERROR_MESSAGES.INVALID_COORDINATES);
+    }
     const cell = board[y][x];
-
     if (cell.isHit) {
       throw new Error(ERROR_MESSAGES.ALREADY_ATTACKED);
     }
@@ -103,6 +186,11 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
     }
   };
 
+  /**
+   * Retrieves the coordinates of missed attacks on the game board.
+   *
+   * @returns {Array<{x: number, y: number}>} An array of objects representing the coordinates of missed attacks.
+   */
   const getMissedAttacks = () => {
     const misses = [];
     board.forEach((row, y) => {
@@ -115,6 +203,11 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
     return misses;
   };
 
+  /**
+   * Retrieves the coordinates of all cells that have been hit.
+   *
+   * @returns {Array<{x: number, y: number}>} An array of objects representing the coordinates of hit cells.
+   */
   const getHits = () => {
     const hits = [];
     board.forEach((row, y) => {
@@ -127,11 +220,23 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
     return hits;
   };
 
+  /**
+   * Checks if all placed ships are sunk.
+   *
+   * @returns {boolean} True if all placed ships are sunk, false otherwise.
+   */
   const areAllShipsSunk = () => {
     if (placedShips.length === 0) return false;
     return placedShips.every((ship) => ship.isSunk());
   };
 
+  /**
+   * Checks if all ships have been placed on the game board.
+   *
+   * @returns {Object} An object containing:
+   * - `allPlaced` {boolean}: True if all ships are placed, false otherwise.
+   * - `placed` {number}: The total number of ship cells placed on the board.
+   */
   const allShipsPlaced = () => {
     // Assuming you have a predefined list of ships in 'battleships.js'
     const expectedTotal = expectedShips.reduce(
