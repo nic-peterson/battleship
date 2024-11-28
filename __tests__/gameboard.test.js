@@ -2,13 +2,17 @@ const { createGameboard } = require("../src/gameboard"); // replace with the pat
 const { createShip } = require("../src/ship"); // replace with the path to your createShip function
 const { placeShips } = require("../src/helper"); // replace with the path to your placeShip function
 const { before } = require("lodash");
-const { ORIENTATIONS, ERROR_MESSAGES } = require("../src/constants");
+const {
+  CellStatus,
+  ORIENTATIONS,
+  ERROR_MESSAGES,
+} = require("../src/constants");
 const { battleships } = require("../src/battleships");
 
 const verifyShipPlacement = (board, ship, coordinates) => {
   coordinates.forEach(([x, y]) => {
     expect(board[y][x].ship).toBe(ship);
-    expect(board[y][x].status).toBe("ship");
+    expect(board[y][x].status).toBe(CellStatus.SHIP);
   });
 };
 
@@ -39,7 +43,7 @@ describe("Gameboard Methods", () => {
         row.forEach((cell) => {
           expect(cell).toHaveProperty("ship", null);
           expect(cell).toHaveProperty("isHit", false);
-          expect(cell).toHaveProperty("status", "empty");
+          expect(cell).toHaveProperty("status", CellStatus.EMPTY);
         });
       });
     });
@@ -419,9 +423,12 @@ describe("Gameboard Methods", () => {
 
         const attackResult = gameboard.receiveAttack(1, 1);
 
-        expect(attackResult).toEqual({ result: "hit", shipSunk: false });
+        expect(attackResult).toEqual({
+          result: CellStatus.HIT,
+          shipSunk: false,
+        });
         expect(ship.getHits()).toBe(1);
-        expect(gameboard.getBoard()[1][1].status).toBe("hit");
+        expect(gameboard.getBoard()[1][1].status).toBe(CellStatus.HIT);
       });
 
       test("should register a sink when all parts of the ship are hit", () => {
@@ -431,17 +438,20 @@ describe("Gameboard Methods", () => {
         gameboard.receiveAttack(1, 1);
         const attackResult = gameboard.receiveAttack(2, 1);
 
-        expect(attackResult).toEqual({ result: "hit", shipSunk: true });
+        expect(attackResult).toEqual({
+          result: CellStatus.HIT,
+          shipSunk: true,
+        });
         expect(ship.isSunk()).toBe(true);
-        expect(gameboard.getBoard()[1][1].status).toBe("hit");
-        expect(gameboard.getBoard()[1][2].status).toBe("hit");
+        expect(gameboard.getBoard()[1][1].status).toBe(CellStatus.HIT);
+        expect(gameboard.getBoard()[1][2].status).toBe(CellStatus.HIT);
       });
 
       test("should register a miss when attacking an empty cell", () => {
         const attackResult = gameboard.receiveAttack(0, 0);
 
-        expect(attackResult).toEqual({ result: "miss" });
-        expect(gameboard.getBoard()[0][0].status).toBe("miss");
+        expect(attackResult).toEqual({ result: CellStatus.MISS });
+        expect(gameboard.getBoard()[0][0].status).toBe(CellStatus.MISS);
         expect(gameboard.getMissedAttacks()).toContainEqual({ x: 0, y: 0 });
       });
 
@@ -459,16 +469,19 @@ describe("Gameboard Methods", () => {
         const attackResult = gameboard.receiveAttack(9, 9);
         const board = gameboard.getBoard();
 
-        expect(attackResult).toEqual({ result: "hit", shipSunk: true });
-        expect(board[9][9].status).toBe("hit");
+        expect(attackResult).toEqual({
+          result: CellStatus.HIT,
+          shipSunk: true,
+        });
+        expect(board[9][9].status).toBe(CellStatus.HIT);
       });
 
       test("should register a miss on a cell with no ship at extreme corner", () => {
         const attackResult = gameboard.receiveAttack(0, 9);
         const board = gameboard.getBoard();
 
-        expect(attackResult).toEqual({ result: "miss" });
-        expect(board[9][0].status).toBe("miss");
+        expect(attackResult).toEqual({ result: CellStatus.MISS });
+        expect(board[9][0].status).toBe(CellStatus.MISS);
         expect(gameboard.getMissedAttacks()).toContainEqual({ x: 0, y: 9 });
       });
     });
@@ -482,24 +495,24 @@ describe("Gameboard Methods", () => {
 
         // Attack ship1
         let result = gameboard.receiveAttack(0, 0);
-        expect(result).toEqual({ result: "hit", shipSunk: false });
+        expect(result).toEqual({ result: CellStatus.HIT, shipSunk: false });
         expect(ship1.getHits()).toBe(1);
 
         result = gameboard.receiveAttack(1, 0);
-        expect(result).toEqual({ result: "hit", shipSunk: true });
+        expect(result).toEqual({ result: CellStatus.HIT, shipSunk: true });
         expect(ship1.isSunk()).toBe(true);
 
         // Attack ship2
         result = gameboard.receiveAttack(2, 2);
-        expect(result).toEqual({ result: "hit", shipSunk: false });
+        expect(result).toEqual({ result: CellStatus.HIT, shipSunk: false });
         expect(ship2.getHits()).toBe(1);
 
         result = gameboard.receiveAttack(2, 3);
-        expect(result).toEqual({ result: "hit", shipSunk: false });
+        expect(result).toEqual({ result: CellStatus.HIT, shipSunk: false });
         expect(ship2.getHits()).toBe(2);
 
         result = gameboard.receiveAttack(2, 4);
-        expect(result).toEqual({ result: "hit", shipSunk: true });
+        expect(result).toEqual({ result: CellStatus.HIT, shipSunk: true });
         expect(ship2.isSunk()).toBe(true);
       });
     });

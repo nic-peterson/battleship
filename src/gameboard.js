@@ -54,7 +54,7 @@ export const createGameboard = () => {
       const posY = orientation === VERTICAL ? y + i : y;
 
       board[posY][posX].ship = ship;
-      board[posY][posX].status = "ship";
+      board[posY][posX].status = CellStatus.SHIP;
     }
 
     ships.push(ship); // Add ship to the ships array
@@ -71,10 +71,10 @@ export const createGameboard = () => {
 
     if (cell.ship) {
       cell.ship.hit();
-      cell.status = "hit";
+      cell.status = CellStatus.HIT;
       return { result: "hit", shipSunk: cell.ship.isSunk() };
     } else {
-      cell.status = "miss";
+      cell.status = CellStatus.MISS;
       return { result: "miss" };
     }
   };
@@ -83,7 +83,7 @@ export const createGameboard = () => {
     const misses = [];
     board.forEach((row, y) => {
       row.forEach((cell, x) => {
-        if (cell.status === "miss") {
+        if (cell.status === CellStatus.MISS) {
           misses.push({ x, y });
         }
       });
@@ -95,7 +95,7 @@ export const createGameboard = () => {
     const hits = [];
     board.forEach((row, y) => {
       row.forEach((cell, x) => {
-        if (cell.status === "hit") {
+        if (cell.status === CellStatus.HIT) {
           hits.push({ x, y });
         }
       });
