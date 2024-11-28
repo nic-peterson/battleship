@@ -5,7 +5,3 @@ export const battleships = [
   { type: "Submarine", length: 3 },
   { type: "Destroyer", length: 2 },
 ];
-
-//module.exports = battleships;
-
-// Path: src/gameboard.js
