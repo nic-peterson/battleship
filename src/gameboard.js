@@ -1,15 +1,12 @@
 import { battleships } from "./battleships.js";
 import { createCell } from "./cell.js";
 import { CellStatus } from "./constants.js";
-import { ORIENTATIONS, BOARD_SIZE } from "./constants.js";
-
-const HORIZONTAL = ORIENTATIONS.HORIZONTAL;
-const VERTICAL = ORIENTATIONS.VERTICAL;
+import { ORIENTATIONS, ERROR_MESSAGES, BOARD_SIZE } from "./constants.js";
 
 export const createGameboard = () => {
-  const size = BOARD_SIZE;
-  const board = Array.from({ length: size }, () =>
-    Array.from({ length: size }, () => createCell())
+  // const size = BOARD_SIZE;
+  const board = Array.from({ length: BOARD_SIZE }, () =>
+    Array.from({ length: BOARD_SIZE }, () => createCell())
   );
 
   const ships = []; // Array to keep track of all ships placed
@@ -18,38 +15,41 @@ export const createGameboard = () => {
 
   const placeShip = (ship, x, y, orientation) => {
     const length = ship.getLength();
-    const allowedOrientations = [HORIZONTAL, VERTICAL];
+    const allowedOrientations = [
+      ORIENTATIONS.HORIZONTAL,
+      ORIENTATIONS.VERTICAL,
+    ];
 
     if (!allowedOrientations.includes(orientation)) {
-      throw new Error("Invalid orientation. Use 'horizontal' or 'vertical'.");
+      throw new Error(ERROR_MESSAGES.INVALID_ORIENTATION);
     }
 
-    if (x < 0 || x >= size || y < 0 || y >= size) {
-      throw new Error("Ship placement coorindates are out of bounds [0-9].");
+    if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
+      throw new Error(ERROR_MESSAGES.INVALID_COORDINATES);
     }
 
     // Check for out-of-bounds placement
-    if (orientation === HORIZONTAL && Math.abs(x) + length > size) {
-      throw new Error("Ship placement is out of bounds horizontally.");
+    if (orientation === ORIENTATIONS.HORIZONTAL && x + length > BOARD_SIZE) {
+      throw new Error(ERROR_MESSAGES.OUT_OF_BOUNDS_HORIZONTAL);
     }
-    if (orientation === VERTICAL && Math.abs(y) + length > size) {
-      throw new Error("Ship placement is out of bounds vertically.");
+    if (orientation === ORIENTATIONS.VERTICAL && y + length > BOARD_SIZE) {
+      throw new Error(ERROR_MESSAGES.OUT_OF_BOUNDS_VERTICAL);
     }
 
     // Check for overlap with existing ships
     for (let i = 0; i < length; i++) {
-      const posX = orientation === HORIZONTAL ? x + i : x;
-      const posY = orientation === VERTICAL ? y + i : y;
+      const posX = orientation === ORIENTATIONS.HORIZONTAL ? x + i : x;
+      const posY = orientation === ORIENTATIONS.VERTICAL ? y + i : y;
 
       if (board[posY][posX].ship !== null) {
-        throw new Error("Cannot place ship; position is already occupied.");
+        throw new Error(ERROR_MESSAGES.OVERLAPPING_SHIP);
       }
     }
 
     // Place the ship
     for (let i = 0; i < length; i++) {
-      const posX = orientation === HORIZONTAL ? x + i : x;
-      const posY = orientation === VERTICAL ? y + i : y;
+      const posX = orientation === ORIENTATIONS.HORIZONTAL ? x + i : x;
+      const posY = orientation === ORIENTATIONS.VERTICAL ? y + i : y;
 
       board[posY][posX].ship = ship;
       board[posY][posX].status = CellStatus.SHIP;
@@ -62,7 +62,7 @@ export const createGameboard = () => {
     const cell = board[y][x];
 
     if (cell.isHit) {
-      throw new Error("Position has already been attacked.");
+      throw new Error(ERROR_MESSAGES.ALREADY_ATTACKED);
     }
 
     cell.isHit = true;
@@ -70,10 +70,10 @@ export const createGameboard = () => {
     if (cell.ship) {
       cell.ship.hit();
       cell.status = CellStatus.HIT;
-      return { result: "hit", shipSunk: cell.ship.isSunk() };
+      return { result: CellStatus.HIT, shipSunk: cell.ship.isSunk() };
     } else {
       cell.status = CellStatus.MISS;
-      return { result: "miss" };
+      return { result: CellStatus.MISS };
     }
   };
 
