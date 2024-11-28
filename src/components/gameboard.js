@@ -1,6 +1,10 @@
-import { createCell } from "./cell.js";
-import { CellStatus } from "./constants.js";
-import { ORIENTATIONS, ERROR_MESSAGES, BOARD_SIZE } from "./constants.js";
+import { createCell } from "../helpers/cell.js";
+import { CellStatus } from "../helpers/constants.js";
+import {
+  ORIENTATIONS,
+  ERROR_MESSAGES,
+  BOARD_SIZE,
+} from "../helpers/constants.js";
 
 /**
  * Creates a gameboard for the Battleship game.

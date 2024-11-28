@@ -1,8 +1,7 @@
 import battleships from "./battleships";
-import { createShip } from "./ship";
+import { createShip } from "../components/ship";
 
-/*
-export const placeShips = (gameboard) => {
+export const placeShipsRandomly = (gameboard) => {
   const orientations = ["horizontal", "vertical"];
   const size = gameboard.getSize();
 
@@ -29,4 +28,3 @@ export const placeShips = (gameboard) => {
     }
   }
 };
-*/

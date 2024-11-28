@@ -1,4 +1,4 @@
-import { BOARD_SIZE, CellStatus, ERROR_MESSAGES } from "./constants";
+import { BOARD_SIZE, ERROR_MESSAGES } from "../helpers/constants";
 
 export const createPlayer = (type, name, gameboard) => {
   const attack = (x, y, opponentGameboard) => {
@@ -46,37 +46,3 @@ export const createPlayer = (type, name, gameboard) => {
 
   return { attack, getName, getType, getGameboard, getValidCoordinates };
 };
-
-/*
-export const createPlayer = (type, name, gameboard) => {
-  const attack = (x, y, opponentGameboard) => {
-    const attacks = opponentGameboard.getAllAttacks();
-    const coord = `${x},${y}`;
-
-    if (attacks.has(coord)) {
-      throw new Error("You've already attacked this position!");
-    }
-
-    opponentGameboard.receiveAttack(x, y);
-  };
-
-  const getGameboard = () => gameboard;
-
-  const getName = () => name;
-
-  const getType = () => type;
-
-  const getValidCoordinates = (opponentGameboard) => {
-    let x, y;
-    const size = opponentGameboard.getSize(); // Assuming getSize is a method that returns the size of the gameboard
-
-    do {
-      x = Math.floor(Math.random() * size);
-      y = Math.floor(Math.random() * size);
-    } while (opponentGameboard.hasBeenAttacked(x, y));
-    return [x, y];
-  };
-
-  return { attack, getValidCoordinates, getGameboard, getName, getType };
-};
-*/
