@@ -267,7 +267,7 @@ describe("Gameboard Methods", () => {
 
         expect(() => {
           gameboard.receiveAttack(0, 0);
-        }).toThrow("Position has already been attacked.");
+        }).toThrow(ERROR_MESSAGES.ALREADY_ATTACKED);
       });
 
       test("should register a hit on a ship placed at the extreme corner", () => {
