@@ -7,4 +7,5 @@ const battleships = [
 ];
 
 module.exports = battleships;
+
 // Path: src/gameboard.js

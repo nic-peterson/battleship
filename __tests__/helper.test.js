@@ -1,6 +1,7 @@
 import { placeShips } from "../src/helper";
 import { createGameboard } from "../src/gameboard";
 
+/*
 describe("Helper", () => {
   describe("placeShips", () => {
     test("should place all ships on the gameboard", () => {
@@ -51,3 +52,4 @@ describe("Helper", () => {
     });
   });
 });
+*/

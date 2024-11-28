@@ -1,6 +1,7 @@
 import battleships from "./battleships";
 import { createShip } from "./ship";
 
+/*
 export const placeShips = (gameboard) => {
   const orientations = ["horizontal", "vertical"];
   const size = gameboard.getSize();
@@ -28,3 +29,4 @@ export const placeShips = (gameboard) => {
     }
   }
 };
+*/

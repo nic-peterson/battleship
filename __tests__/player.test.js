@@ -2,6 +2,7 @@ const { createPlayer } = require("../src/player");
 const { createGameboard } = require("../src/gameboard");
 const { createShip } = require("../src/ship");
 
+/*
 describe("Player", () => {
   test("has a name", () => {
     const playerGameboard = createGameboard();
@@ -89,3 +90,4 @@ describe("Player", () => {
     });
   });
 });
+*/

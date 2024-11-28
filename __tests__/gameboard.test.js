@@ -1,6 +1,7 @@
 const { createGameboard } = require("../src/gameboard"); // replace with the path to your createGameboard function
 const { createShip } = require("../src/ship"); // replace with the path to your createShip function
 const { placeShips } = require("../src/helper"); // replace with the path to your placeShip function
+const { before } = require("lodash");
 
 describe("Gameboard Methods", () => {
   let gameboard;
@@ -9,296 +10,214 @@ describe("Gameboard Methods", () => {
     gameboard = createGameboard();
   });
 
-  describe("allShipsPlaced", () => {
-    test("returns false when no ships have been placed", () => {
-      const result = gameboard.allShipsPlaced();
-      expect(result).toEqual({ allPlaced: false, placed: 0 });
-    });
+  describe("Gameboard Initialization", () => {
+    test("should create a 10x10 gameboard array initialized with empty objects", () => {
+      const gameboard = createGameboard();
+      const board = gameboard.getBoard();
 
-    test("returns false when not all ships have been placed", () => {
-      const ship = createShip(3, "horizontal", "Cruiser");
-      gameboard.placeShip(ship, 0, 0);
-      const result = gameboard.allShipsPlaced();
-      expect(result).toEqual({ allPlaced: false, placed: 3 });
-    });
+      // Check that the board has 10 rows
+      expect(board.length).toBe(10);
 
-    test("returns true when all ships have been placed", () => {
-      placeShips(gameboard); // Assuming placeShips places all required ships
-      const result = gameboard.allShipsPlaced();
-      expect(result).toEqual({ allPlaced: true, placed: 17 }); // Adjust the placed value based on your battleships configuration
+      // Check that each row has 10 columns
+      board.forEach((row) => {
+        expect(row.length).toBe(10);
+      });
+
+      // Check that all cells are initialized to null
+      board.forEach((row) => {
+        row.forEach((cell) => {
+          expect(cell).toHaveProperty("ship", null);
+          expect(cell).toHaveProperty("isHit", false);
+          expect(cell).toHaveProperty("status", "empty");
+        });
+      });
     });
   });
 
-  describe("areAllShipsSunk", () => {
-    test("returns true when all ships are sunk", () => {
-      const ship = createShip(3, "horizontal", "Cruiser");
-      gameboard.placeShip(ship, 0, 0);
+  describe("Ship Placement", () => {
+    test("should place a ship at specified coordinates horizontally", () => {
+      const ship = createShip(3); // Assuming you have a createShip(length) function
+
+      gameboard.placeShip(ship, 0, 0, "horizontal"); // Place ship at (0,0) horizontally
+
+      const board = gameboard.getBoard();
+
+      // Check that the ship occupies the correct cells
+      expect(board[0][0].ship).toBe(ship);
+      expect(board[0][1].ship).toBe(ship);
+      expect(board[0][2].ship).toBe(ship);
+
+      // Check the status of the cells
+      expect(board[0][0].status).toBe("ship");
+      expect(board[0][1].status).toBe("ship");
+      expect(board[0][2].status).toBe("ship");
+    });
+
+    test("should place a ship at specified coordinates vertically", () => {
+      const ship = createShip(3);
+
+      gameboard.placeShip(ship, 2, 2, "vertical"); // Place ship at (0,0) vertically
+
+      const board = gameboard.getBoard();
+
+      // Check that the ship occupies the correct cells
+      expect(board[2][2].ship).toBe(ship);
+      expect(board[3][2].ship).toBe(ship);
+      expect(board[4][2].ship).toBe(ship);
+
+      // Check the status of the cells
+      expect(board[2][2].status).toBe("ship");
+      expect(board[3][2].status).toBe("ship");
+      expect(board[4][2].status).toBe("ship");
+    });
+
+    test("should not allow ship placement out of bounds horizontally", () => {
+      const ship = createShip(4);
+
+      expect(() => {
+        gameboard.placeShip(ship, 7, 0, "horizontal");
+      }).toThrow("Ship placement is out of bounds horizontally.");
+    });
+
+    test("should not allow ship placement out of bounds vertically", () => {
+      const ship = createShip(4);
+
+      expect(() => {
+        gameboard.placeShip(ship, 0, 7, "vertical");
+      }).toThrow("Ship placement is out of bounds vertically.");
+    });
+
+    test("should not allow overlapping ships", () => {
+      const ship1 = createShip(3);
+      const ship2 = createShip(3);
+
+      gameboard.placeShip(ship1, 0, 0, "horizontal");
+
+      expect(() => {
+        gameboard.placeShip(ship2, 0, 0, "vertical");
+      }).toThrow("Cannot place ship; position is already occupied.");
+    });
+  });
+
+  describe("Receiving Attacks", () => {
+    test("should register a hit on a ship", () => {
+      const ship = createShip(2);
+      gameboard.placeShip(ship, 1, 1, "horizontal");
+
+      const attackResult = gameboard.receiveAttack(1, 1);
+
+      expect(attackResult).toEqual({ result: "hit", shipSunk: false });
+      expect(ship.getHits()).toBe(1);
+      expect(gameboard.getBoard()[1][1].status).toBe("hit");
+    });
+
+    test("should register a sink when all parts of the ship are hit", () => {
+      const ship = createShip(2);
+      gameboard.placeShip(ship, 1, 1, "horizontal");
+
+      gameboard.receiveAttack(1, 1);
+      const attackResult = gameboard.receiveAttack(2, 1);
+
+      expect(attackResult).toEqual({ result: "hit", shipSunk: true });
+      expect(ship.isSunk()).toBe(true);
+      expect(gameboard.getBoard()[1][1].status).toBe("hit");
+      expect(gameboard.getBoard()[1][2].status).toBe("hit");
+    });
+
+    test("should register a miss when attacking an empty cell", () => {
+      const attackResult = gameboard.receiveAttack(0, 0);
+
+      expect(attackResult).toEqual({ result: "miss" });
+      expect(gameboard.getBoard()[0][0].status).toBe("miss");
+      expect(gameboard.getMissedAttacks()).toContainEqual({ x: 0, y: 0 });
+    });
+
+    test("should throw an error when attacking the same position twice", () => {
       gameboard.receiveAttack(0, 0);
-      gameboard.receiveAttack(1, 0);
-      gameboard.receiveAttack(2, 0);
+
+      expect(() => {
+        gameboard.receiveAttack(0, 0);
+      }).toThrow("Position has already been attacked.");
+    });
+  });
+
+  describe("Gameboard Status", () => {
+    test("should return all missed shots", () => {
+      gameboard.receiveAttack(0, 0);
+      gameboard.receiveAttack(1, 1);
+
+      const missedAttacks = gameboard.getMissedAttacks();
+      expect(missedAttacks).toContainEqual({ x: 0, y: 0 });
+      expect(missedAttacks).toContainEqual({ x: 1, y: 1 });
+    });
+
+    test("should return all hits", () => {
+      const ship = createShip(2);
+      gameboard.placeShip(ship, 1, 1, "horizontal");
+
+      gameboard.receiveAttack(1, 1);
+      gameboard.receiveAttack(2, 1);
+
+      const hits = gameboard.getHits();
+      expect(hits).toContainEqual({ x: 1, y: 1 });
+      expect(hits).toContainEqual({ x: 2, y: 1 });
+    });
+
+    test("should return true if all ships are sunk", () => {
+      const ship1 = createShip(2);
+      const ship2 = createShip(3);
+
+      gameboard.placeShip(ship1, 1, 1, "horizontal");
+      gameboard.placeShip(ship2, 3, 3, "vertical");
+
+      gameboard.receiveAttack(1, 1);
+      gameboard.receiveAttack(2, 1);
+      gameboard.receiveAttack(3, 3);
+      gameboard.receiveAttack(3, 4);
+      gameboard.receiveAttack(3, 5);
+
       expect(gameboard.areAllShipsSunk()).toBe(true);
     });
 
-    test("returns false when not all ships are sunk", () => {
-      const ship1 = createShip(3, "horizontal", "Cruiser");
-      const ship2 = createShip(3, "vertical", "Destroyer");
-      gameboard.placeShip(ship1, 0, 0);
-      gameboard.placeShip(ship2, 0, 1);
-      gameboard.receiveAttack(0, 0);
-      gameboard.receiveAttack(1, 0);
-      gameboard.receiveAttack(2, 0);
+    test("should return false if not all ships are sunk", () => {
+      const ship1 = createShip(2);
+      const ship2 = createShip(3);
+
+      gameboard.placeShip(ship1, 1, 1, "horizontal");
+      gameboard.placeShip(ship2, 3, 3, "vertical");
+
+      gameboard.receiveAttack(1, 1);
+      gameboard.receiveAttack(2, 1);
+      gameboard.receiveAttack(3, 3);
+      gameboard.receiveAttack(3, 4);
+
       expect(gameboard.areAllShipsSunk()).toBe(false);
     });
-  });
 
-  describe("display", () => {
-    test("displays an empty gameboard", () => {
-      expect(gameboard.display()).toBe(
-        "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -"
-      );
+    test("should return true if all ships are placed", () => {
+      const ship1 = createShip(2);
+      const ship2 = createShip(3);
+      const ship3 = createShip(3);
+      const ship4 = createShip(4);
+      const ship5 = createShip(5);
+
+      gameboard.placeShip(ship1, 8, 8, "horizontal");
+      gameboard.placeShip(ship2, 3, 3, "vertical");
+      gameboard.placeShip(ship3, 5, 5, "horizontal");
+      gameboard.placeShip(ship4, 6, 6, "vertical");
+      gameboard.placeShip(ship5, 1, 1, "horizontal");
+
+      const { allPlaced } = gameboard.allShipsPlaced();
+      expect(allPlaced).toBe(true);
     });
 
-    test("displays the gameboard with a horizontal ship", () => {
-      const ship = createShip(3, "horizontal", "Cruiser");
-      gameboard.placeShip(ship, 0, 0);
-      expect(gameboard.display()).toBe(
-        "X X X - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -"
-      );
-    });
+    test("should return false if not all ships are placed", () => {
+      const ship1 = createShip(2);
 
-    test("displays the gameboard with a vertical ship", () => {
-      const ship = createShip(3, "vertical", "Cruiser");
-      gameboard.placeShip(ship, 0, 0);
-      expect(gameboard.display()).toBe(
-        "X - - - - - - - - -\n" +
-          "X - - - - - - - - -\n" +
-          "X - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -"
-      );
-    });
+      gameboard.placeShip(ship1, 1, 1, "horizontal");
 
-    test("displays the gameboard with multiple ships", () => {
-      const ship1 = createShip(3, "horizontal", "Cruiser");
-      const ship2 = createShip(2, "vertical", "Destroyer");
-      gameboard.placeShip(ship1, 0, 0);
-      gameboard.placeShip(ship2, 5, 5);
-      expect(gameboard.display()).toBe(
-        "X X X - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - X - - - -\n" +
-          "- - - - - X - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -"
-      );
-    });
-
-    /*
-    test("displays the gameboard with hits and misses", () => {
-      const ship = createShip(3, "horizontal", "Cruiser");
-      gameboard.placeShip(ship, 0, 0);
-      gameboard.receiveAttack(0, 0); // Hit
-      gameboard.receiveAttack(1, 1); // Miss
-      expect(gameboard.display()).toBe(
-        "H X X - - - - - - -\n" +
-          "- M - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -\n" +
-          "- - - - - - - - - -"
-      );
-    });
-    */
-  });
-
-  describe("getAllAttacks", () => {
-    test("returns all attacks made on the gameboard", () => {
-      gameboard.receiveAttack(0, 0);
-      gameboard.receiveAttack(1, 1);
-      expect(Array.from(gameboard.getAllAttacks())).toEqual(["0,0", "1,1"]);
-    });
-  });
-
-  describe("getBoard", () => {
-    test("returns the gameboard", () => {
-      expect(gameboard.getBoard()).toEqual(
-        Array(10).fill(Array(10).fill(null))
-      );
-    });
-  });
-
-  describe("getMissedAttacks", () => {
-    test("returns all missed attacks", () => {
-      gameboard.receiveAttack(0, 0);
-      expect(Array.from(gameboard.getMissedAttacks())).toEqual(["0,0"]);
-    });
-  });
-
-  describe("getOccupied", () => {
-    test("returns all occupied coordinates", () => {
-      const ship = createShip(3, "horizontal", "cruiser");
-      gameboard.placeShip(ship, 0, 0);
-      expect(gameboard.getOccupied()).toEqual(["0,0", "1,0", "2,0"]);
-    });
-  });
-
-  describe("getShipAt", () => {
-    test("returns the ship at a given coordinate", () => {
-      const ship = createShip(3, "horizontal", "cruiser");
-      gameboard.placeShip(ship, 0, 0);
-      expect(gameboard.getShipAt(0, 0)).toBe(ship);
-    });
-
-    test("returns undefined if no ship is at the given coordinate", () => {
-      expect(gameboard.getShipAt(0, 0)).toBeUndefined();
-    });
-  });
-
-  describe("getShips", () => {
-    test("returns all ships placed on the gameboard", () => {
-      const ship1 = createShip(3, "horizontal", "cruiser");
-      const ship2 = createShip(2, "vertical", "destroyer");
-      gameboard.placeShip(ship1, 0, 0);
-      gameboard.placeShip(ship2, 5, 5);
-      expect(gameboard.getShips()).toEqual([
-        { ship: ship1, coordinates: ["0,0", "1,0", "2,0"] },
-        { ship: ship2, coordinates: ["5,5", "5,6"] },
-      ]);
-    });
-  });
-
-  describe("getSize", () => {
-    test("returns the size of the gameboard", () => {
-      expect(gameboard.getSize()).toBe(10);
-    });
-  });
-
-  describe("hasBeenAttacked", () => {
-    test("returns true if the coordinate has been attacked", () => {
-      gameboard.receiveAttack(0, 0);
-      expect(gameboard.hasBeenAttacked(0, 0)).toBe(true);
-    });
-
-    test("returns false if the coordinate has not been attacked", () => {
-      expect(gameboard.hasBeenAttacked(0, 0)).toBe(false);
-    });
-  });
-
-  describe("isGameBoardNull", () => {
-    test("returns true if the gameboard is empty", () => {
-      expect(gameboard.isGameBoardNull()).toBe(true);
-    });
-
-    test("returns false if the gameboard is not empty", () => {
-      const ship = createShip(3, "horizontal", "cruiser");
-      gameboard.placeShip(ship, 0, 0);
-      expect(gameboard.isGameBoardNull()).toBe(false);
-    });
-  });
-
-  describe("placeShip", () => {
-    describe("SUCCESS", () => {
-      test("places a ship horizontally within bounds", () => {
-        const ship = createShip(3, "horizontal", "destroyer");
-        gameboard.placeShip(ship, 0, 0);
-        expect(gameboard.getOccupied()).toEqual(["0,0", "1,0", "2,0"]);
-      });
-
-      test("places a ship vertically within bounds", () => {
-        const ship = createShip(3, "vertical", "submarine");
-        gameboard.placeShip(ship, 0, 0);
-        expect(gameboard.getOccupied()).toEqual(["0,0", "0,1", "0,2"]);
-      });
-
-      test("places a ship at the edge of the gameboard successfully", () => {
-        const ship = createShip(3, "horizontal", "cruiser");
-        gameboard.placeShip(ship, 7, 0);
-        expect(gameboard.getShips()).toEqual([
-          { ship, coordinates: ["7,0", "8,0", "9,0"] },
-        ]);
-      });
-    });
-    describe("ERROR", () => {
-      test("throws an error if the ship is placed outside the gameboard horizontally", () => {
-        const ship = createShip(3, "horizontal", "destroyer");
-        expect(() => gameboard.placeShip(ship, 8, 0)).toThrow(
-          "Cannot place ship. Coordinates (8, 0) are outside the gameboard."
-        );
-      });
-
-      test("throws an error if the ship is placed outside the gameboard vertically", () => {
-        const ship = createShip(3, "vertical", "submarine");
-        expect(() => gameboard.placeShip(ship, 0, 8)).toThrow(
-          "Cannot place ship. Coordinates (0, 8) are outside the gameboard."
-        );
-      });
-
-      test("throws an error if the ship overlaps with another ship", () => {
-        const ship1 = createShip(3, "horizontal", "destroyer");
-        const ship2 = createShip(3, "horizontal", "submarine");
-        gameboard.placeShip(ship1, 0, 0);
-        expect(() => gameboard.placeShip(ship2, 1, 0)).toThrow(
-          "Cannot place ship. Overlaps with another ship."
-        );
-      });
-    });
-  });
-
-  describe("receiveAttack", () => {
-    test("registers a hit on a ship", () => {
-      const ship = createShip(3, "horizontal", "cruiser");
-      gameboard.placeShip(ship, 0, 0);
-      gameboard.receiveAttack(0, 0);
-      expect(ship.getHits()).toBe(1);
-    });
-
-    test("registers a missed attack", () => {
-      gameboard.receiveAttack(0, 0);
-      expect(Array.from(gameboard.getMissedAttacks())).toEqual(["0,0"]);
-    });
-
-    test("throws an error if the attack is outside the gameboard", () => {
-      expect(() => gameboard.receiveAttack(10, 10)).toThrow(
-        "Attack is outside the gameboard."
-      );
-    });
-
-    test("throws an error if the attack is repeated", () => {
-      gameboard.receiveAttack(0, 0);
-      expect(() => gameboard.receiveAttack(0, 0)).toThrow(
-        "You've already attacked this position!"
-      );
+      const { allPlaced } = gameboard.allShipsPlaced();
+      expect(allPlaced).toBe(false);
     });
   });
 });
