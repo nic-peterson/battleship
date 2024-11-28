@@ -1,12 +1,8 @@
-const { createGameboard } = require("../src/gameboard"); // replace with the path to your createGameboard function
-const { createShip } = require("../src/ship"); // replace with the path to your createShip function
-const { BOARD_SIZE } = require("../src/constants");
-const {
-  CellStatus,
-  ORIENTATIONS,
-  ERROR_MESSAGES,
-} = require("../src/constants");
-const { battleships } = require("../src/battleships");
+import { createGameboard } from "../src/gameboard";
+const { createShip } = require("../src/ship");
+import { BOARD_SIZE } from "../src/constants";
+import { CellStatus, ORIENTATIONS, ERROR_MESSAGES } from "../src/constants";
+import { battleships } from "../src/battleships";
 
 const verifyShipPlacement = (board, ship, coordinates) => {
   coordinates.forEach(([x, y]) => {
@@ -26,7 +22,7 @@ describe("Gameboard Methods", () => {
 
   describe("Gameboard Initialization", () => {
     test("should create a 10x10 gameboard array initialized with empty objects", () => {
-      gameboard = createGameboard(BOARD_SIZE);
+      gameboard = createGameboard(BOARD_SIZE, battleships);
       const board = gameboard.getBoard();
 
       // Check that the board has 10 rows
@@ -47,7 +43,7 @@ describe("Gameboard Methods", () => {
       });
     });
     test.each([8, 10, 12])("should create a %dx%d gameboard", (boardSize) => {
-      const gameboard = createGameboard(boardSize);
+      const gameboard = createGameboard(boardSize, battleships);
       const board = gameboard.getBoard();
       expect(board.length).toBe(boardSize);
       board.forEach((row) => {
