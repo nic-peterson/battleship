@@ -3,17 +3,28 @@ import { createCell } from "./cell.js";
 import { CellStatus } from "./constants.js";
 import { ORIENTATIONS, ERROR_MESSAGES, BOARD_SIZE } from "./constants.js";
 
-export const createGameboard = () => {
-  // const size = BOARD_SIZE;
-  const board = Array.from({ length: BOARD_SIZE }, () =>
-    Array.from({ length: BOARD_SIZE }, () => createCell())
+/**
+ * Creates a gameboard with the specified size.
+ * @param {number} boardSize - The size of the gameboard (default is BOARD_SIZE).
+ * @param {Array} expectedShips - The list of expected ships to be placed on the board.
+ * returns {Object} - The gameboard object.
+ */
+
+export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
+  const size = boardSize;
+  const board = Array.from({ length: size }, () =>
+    Array.from({ length: size }, () => createCell())
   );
 
-  const ships = []; // Array to keep track of all ships placed
+  const placedShips = []; // Array to keep track of all ships placed
 
   const getBoard = () => board;
 
   const placeShip = (ship, x, y, orientation) => {
+    if (ship === null) {
+      throw new Error(ERROR_MESSAGES.INVALID_SHIP);
+    }
+
     const length = ship.getLength();
     const allowedOrientations = [
       ORIENTATIONS.HORIZONTAL,
@@ -24,15 +35,22 @@ export const createGameboard = () => {
       throw new Error(ERROR_MESSAGES.INVALID_ORIENTATION);
     }
 
-    if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
+    if (
+      !Number.isInteger(x) ||
+      !Number.isInteger(y) ||
+      x < 0 ||
+      x >= size ||
+      y < 0 ||
+      y >= size
+    ) {
       throw new Error(ERROR_MESSAGES.INVALID_COORDINATES);
     }
 
     // Check for out-of-bounds placement
-    if (orientation === ORIENTATIONS.HORIZONTAL && x + length > BOARD_SIZE) {
+    if (orientation === ORIENTATIONS.HORIZONTAL && x + length > size) {
       throw new Error(ERROR_MESSAGES.OUT_OF_BOUNDS_HORIZONTAL);
     }
-    if (orientation === ORIENTATIONS.VERTICAL && y + length > BOARD_SIZE) {
+    if (orientation === ORIENTATIONS.VERTICAL && y + length > size) {
       throw new Error(ERROR_MESSAGES.OUT_OF_BOUNDS_VERTICAL);
     }
 
@@ -55,7 +73,11 @@ export const createGameboard = () => {
       board[posY][posX].status = CellStatus.SHIP;
     }
 
-    ships.push(ship); // Add ship to the ships array
+    if (!placedShips.includes(ship)) {
+      placedShips.push(ship);
+    }
+
+    // ships.push(ship); // Add ship to the ships array
   };
 
   const receiveAttack = (x, y) => {
@@ -67,13 +89,17 @@ export const createGameboard = () => {
 
     cell.isHit = true;
 
-    if (cell.ship) {
+    if (cell.ship !== null) {
       cell.ship.hit();
       cell.status = CellStatus.HIT;
-      return { result: CellStatus.HIT, shipSunk: cell.ship.isSunk() };
+      return {
+        result: CellStatus.HIT,
+        shipSunk: cell.ship.isSunk(),
+        coordinates: { x, y },
+      };
     } else {
       cell.status = CellStatus.MISS;
-      return { result: CellStatus.MISS };
+      return { result: CellStatus.MISS, coordinates: { x, y } };
     }
   };
 
@@ -102,12 +128,13 @@ export const createGameboard = () => {
   };
 
   const areAllShipsSunk = () => {
-    return ships.every((ship) => ship.isSunk());
+    if (placedShips.length === 0) return false;
+    return placedShips.every((ship) => ship.isSunk());
   };
 
   const allShipsPlaced = () => {
     // Assuming you have a predefined list of ships in 'battleships.js'
-    const expectedTotal = battleships.reduce(
+    const expectedTotal = expectedShips.reduce(
       (total, ship) => total + ship.length,
       0
     );

@@ -1,6 +1,6 @@
 const { createGameboard } = require("../src/gameboard"); // replace with the path to your createGameboard function
 const { createShip } = require("../src/ship"); // replace with the path to your createShip function
-
+const { BOARD_SIZE } = require("../src/constants");
 const {
   CellStatus,
   ORIENTATIONS,
@@ -21,20 +21,20 @@ describe("Gameboard Methods", () => {
   let gameboard;
 
   beforeEach(() => {
-    gameboard = createGameboard();
+    gameboard = createGameboard(BOARD_SIZE, battleships);
   });
 
   describe("Gameboard Initialization", () => {
     test("should create a 10x10 gameboard array initialized with empty objects", () => {
-      const gameboard = createGameboard();
+      gameboard = createGameboard(BOARD_SIZE);
       const board = gameboard.getBoard();
 
       // Check that the board has 10 rows
-      expect(board.length).toBe(10);
+      expect(board.length).toBe(BOARD_SIZE);
 
       // Check that each row has 10 columns
       board.forEach((row) => {
-        expect(row.length).toBe(10);
+        expect(row.length).toBe(BOARD_SIZE);
       });
 
       // Check that all cells are initialized to null
@@ -44,6 +44,14 @@ describe("Gameboard Methods", () => {
           expect(cell).toHaveProperty("isHit", false);
           expect(cell).toHaveProperty("status", CellStatus.EMPTY);
         });
+      });
+    });
+    test.each([8, 10, 12])("should create a %dx%d gameboard", (boardSize) => {
+      const gameboard = createGameboard(boardSize);
+      const board = gameboard.getBoard();
+      expect(board.length).toBe(boardSize);
+      board.forEach((row) => {
+        expect(row.length).toBe(boardSize);
       });
     });
   });
@@ -133,7 +141,35 @@ describe("Gameboard Methods", () => {
     });
 
     describe("Invalid Placements", () => {
+      test("should throw an error when ship is not provided", () => {
+        expect(() => {
+          gameboard.placeShip(null, 0, 0, ORIENTATIONS.HORIZONTAL);
+        }).toThrow(ERROR_MESSAGES.INVALID_SHIP);
+      });
+
       test.each([
+        {
+          description: "non-integer x and y coordinates",
+          x: -1.5,
+          y: "-1",
+          orientation: ORIENTATIONS.HORIZONTAL,
+          error: ERROR_MESSAGES.INVALID_COORDINATES,
+        },
+        {
+          description: "non-integer x coordinate",
+          x: -2.5,
+          y: 5,
+          orientation: ORIENTATIONS.HORIZONTAL,
+          error: ERROR_MESSAGES.INVALID_COORDINATES,
+        },
+
+        {
+          description: "non-integer y coordinate",
+          x: 5,
+          y: -3.873,
+          orientation: ORIENTATIONS.VERTICAL,
+          error: ERROR_MESSAGES.INVALID_COORDINATES,
+        },
         {
           description: "negative x and y coordinates",
           x: -1,
@@ -233,6 +269,7 @@ describe("Gameboard Methods", () => {
         expect(attackResult).toEqual({
           result: CellStatus.HIT,
           shipSunk: false,
+          coordinates: { x: 1, y: 1 },
         });
         expect(ship.getHits()).toBe(1);
         expect(gameboard.getBoard()[1][1].status).toBe(CellStatus.HIT);
@@ -248,7 +285,9 @@ describe("Gameboard Methods", () => {
         expect(attackResult).toEqual({
           result: CellStatus.HIT,
           shipSunk: true,
+          coordinates: { x: 2, y: 1 },
         });
+
         expect(ship.isSunk()).toBe(true);
         expect(gameboard.getBoard()[1][1].status).toBe(CellStatus.HIT);
         expect(gameboard.getBoard()[1][2].status).toBe(CellStatus.HIT);
@@ -257,7 +296,10 @@ describe("Gameboard Methods", () => {
       test("should register a miss when attacking an empty cell", () => {
         const attackResult = gameboard.receiveAttack(0, 0);
 
-        expect(attackResult).toEqual({ result: CellStatus.MISS });
+        expect(attackResult).toEqual({
+          result: CellStatus.MISS,
+          coordinates: { x: 0, y: 0 },
+        });
         expect(gameboard.getBoard()[0][0].status).toBe(CellStatus.MISS);
         expect(gameboard.getMissedAttacks()).toContainEqual({ x: 0, y: 0 });
       });
@@ -279,6 +321,7 @@ describe("Gameboard Methods", () => {
         expect(attackResult).toEqual({
           result: CellStatus.HIT,
           shipSunk: true,
+          coordinates: { x: 9, y: 9 },
         });
         expect(board[9][9].status).toBe(CellStatus.HIT);
       });
@@ -287,7 +330,10 @@ describe("Gameboard Methods", () => {
         const attackResult = gameboard.receiveAttack(0, 9);
         const board = gameboard.getBoard();
 
-        expect(attackResult).toEqual({ result: CellStatus.MISS });
+        expect(attackResult).toEqual({
+          result: CellStatus.MISS,
+          coordinates: { x: 0, y: 9 },
+        });
         expect(board[9][0].status).toBe(CellStatus.MISS);
         expect(gameboard.getMissedAttacks()).toContainEqual({ x: 0, y: 9 });
       });
@@ -302,24 +348,44 @@ describe("Gameboard Methods", () => {
 
         // Attack ship1
         let result = gameboard.receiveAttack(0, 0);
-        expect(result).toEqual({ result: CellStatus.HIT, shipSunk: false });
+        expect(result).toEqual({
+          result: CellStatus.HIT,
+          shipSunk: false,
+          coordinates: { x: 0, y: 0 },
+        });
         expect(ship1.getHits()).toBe(1);
 
         result = gameboard.receiveAttack(1, 0);
-        expect(result).toEqual({ result: CellStatus.HIT, shipSunk: true });
+        expect(result).toEqual({
+          result: CellStatus.HIT,
+          shipSunk: true,
+          coordinates: { x: 1, y: 0 },
+        });
         expect(ship1.isSunk()).toBe(true);
 
         // Attack ship2
         result = gameboard.receiveAttack(2, 2);
-        expect(result).toEqual({ result: CellStatus.HIT, shipSunk: false });
+        expect(result).toEqual({
+          result: CellStatus.HIT,
+          shipSunk: false,
+          coordinates: { x: 2, y: 2 },
+        });
         expect(ship2.getHits()).toBe(1);
 
         result = gameboard.receiveAttack(2, 3);
-        expect(result).toEqual({ result: CellStatus.HIT, shipSunk: false });
+        expect(result).toEqual({
+          result: CellStatus.HIT,
+          shipSunk: false,
+          coordinates: { x: 2, y: 3 },
+        });
         expect(ship2.getHits()).toBe(2);
 
         result = gameboard.receiveAttack(2, 4);
-        expect(result).toEqual({ result: CellStatus.HIT, shipSunk: true });
+        expect(result).toEqual({
+          result: CellStatus.HIT,
+          shipSunk: true,
+          coordinates: { x: 2, y: 4 },
+        });
         expect(ship2.isSunk()).toBe(true);
       });
     });
@@ -402,7 +468,7 @@ describe("Gameboard Methods", () => {
 
       expect(gameboard.allShipsPlaced()).toEqual({
         allPlaced: false,
-        placed: 3,
+        placed: ship1.getLength(),
       });
     });
   });
