@@ -1,3 +1,42 @@
-.hello {
-  color: red;
+.board {
+  display: grid;
+  grid-template-rows: repeat(10, 30px);
+  grid-template-columns: repeat(10, 30px);
+  gap: 2px;
+  margin-bottom: 20px;
+}
+
+.board-row {
+  display: contents;
+}
+
+.board-cell {
+  width: 30px;
+  height: 30px;
+  background-color: lightblue;
+  border: 1px solid #333;
+  cursor: pointer;
+}
+
+.board-cell.ship {
+  background-color: gray;
+}
+
+.board-cell.hit {
+  background-color: red;
+}
+
+.board-cell.miss {
+  background-color: white;
+}
+
+.player-section {
+  display: inline-block;
+  margin: 0 20px;
+}
+
+#message {
+  margin-top: 20px;
+  font-size: 1.2em;
+  color: green;
 }
