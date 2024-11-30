@@ -1,9 +1,36 @@
 import { createPlayer } from "./player";
 import { createGameboard } from "./gameboard";
-import { placeShips } from "./helper";
+import { UI } from "./ui";
+import { placeShipsRandomly } from "../helpers/placeShipsRandomly";
+import { BOARD_SIZE } from "../helpers/constants";
+import { battleships } from "../helpers/battleships";
+
+export const createGame = () => {
+  const initGame = () => {
+    // Initialize Gameboards
+    const playerGameboard = createGameboard(BOARD_SIZE, battleships);
+    const computerGameboard = createGameboard(BOARD_SIZE, battleships);
+
+    // Place ships randomly
+    placeShipsRandomly(playerGameboard);
+    placeShipsRandomly(computerGameboard);
+
+    // Initialize Players
+    const player = createPlayer("human", "Alice", playerGameboard);
+    const computer = createPlayer("computer", "Computer", computerGameboard);
+
+    // Render Boards
+    UI.renderBoard(playerGameboard.getBoard(), "player1-board");
+    UI.renderBoard(computerGameboard.getBoard(), "player2-board");
+
+    UI.displayMessage("Game started");
+  };
+
+  return { initGame };
+};
 
 // player1, player2, battleships
-
+/*
 export const createGame = (
   { name: player1Name, type: player1Type },
   { name: player2Name, type: player2Type }
@@ -87,3 +114,4 @@ export const createGame = (
 
   return { getCurrentPlayer, getPlayers, getScore, isGameOver, startGame };
 };
+*/

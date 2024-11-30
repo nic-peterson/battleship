@@ -1,79 +1,57 @@
 const { JSDOM } = require("jsdom");
-const { createUI } = require("../src/ui");
+const { UI } = require("../src/components/ui");
 
-/*
-function createScore() {
-  const score = document.createElement("p");
-  score.id = "score";
-  document.body.appendChild(score);
-}
-
-function updateScore(newScore) {
-  const score = document.getElementById("score");
-  score.textContent = `Score: ${newScore}`;
-}
-*/
 describe("UI", () => {
   let dom;
   let container;
 
   beforeEach(() => {
-    dom = new JSDOM('<!DOCTYPE html><p id="score"></p>');
+    dom = new JSDOM(
+      '<!DOCTYPE html><div id="board"></div><div id="message"></div>'
+    );
     container = dom.window.document;
-    // Set the global document object to the jsdom document
     global.document = container;
   });
 
   afterEach(() => {
-    // Clean up the global document object after each test
     global.document = undefined;
   });
 
-  /*
-  test("displays score", () => {
-    createScore();
-    const score = container.getElementById("score");
-    expect(score).toBeDefined();
-  });
-  */
-  /*
-  test("updates score ", () => {
-    createScore();
+  test("renders the game board", () => {
+    const board = [
+      [
+        { ship: true, status: "" },
+        { ship: false, status: "miss" },
+      ],
+      [
+        { ship: false, status: "" },
+        { ship: true, status: "hit" },
+      ],
+    ];
 
-    updateScore(5);
+    UI.renderBoard(board, "board");
 
-    let score = container.getElementById("score");
-    expect(score.textContent).toBe("Score: 5");
-    /*
-    const ui = createUI();
-    const score = ui.getScore();
-    expect(score).toBeDefined();
-    */
-  // });
+    const boardContainer = container.getElementById("board");
+    expect(boardContainer).toBeDefined();
+    expect(boardContainer.children.length).toBe(2); // Two rows
 
-  /*  
-  test("creates a gameboard", () => {
-    const ui = createUI();
-    const gameboard = ui.getGameboard();
-    expect(gameboard).toBeDefined();
-  });
+    const firstRow = boardContainer.children[0];
+    expect(firstRow.children.length).toBe(2); // Two cells in the first row
+    expect(firstRow.children[0].classList.contains("ship")).toBe(true);
+    expect(firstRow.children[1].classList.contains("miss")).toBe(true);
 
-  test("creates a player", () => {
-    const ui = createUI();
-    const player = ui.getPlayer();
-    expect(player).toBeDefined();
+    const secondRow = boardContainer.children[1];
+    expect(secondRow.children.length).toBe(2); // Two cells in the second row
+    expect(secondRow.children[1].classList.contains("ship")).toBe(true);
+    expect(secondRow.children[1].classList.contains("hit")).toBe(true);
   });
 
-  test("creates an opponent", () => {
-    const ui = createUI();
-    const opponent = ui.getOpponent();
-    expect(opponent).toBeDefined();
-  });
+  test("displays a message", () => {
+    const message = "Player 1's turn";
+    UI.displayMessage(message);
 
-  test("creates a display", () => {
-    const ui = createUI();
-    const display = ui.getDisplay();
-    expect(display).toBeDefined();
+    const messageContainer = container.getElementById("message");
+    expect(messageContainer).toBeDefined();
+    expect(messageContainer.textContent).toBe(message);
   });
-  */
 });
