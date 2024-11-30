@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for components/ship.js</title>
+    <title>Code coverage report for components/ui.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">components</a> ship.js</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">components</a> ui.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">7.14% </span>
+                <span class="strong">16.66% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>1/14</span>
+                <span class='fraction'>4/24</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">20% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>1/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">9.09% </span>
+                <span class="strong">16.66% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>1/11</span>
+                <span class='fraction'>4/24</span>
             </div>
         
             
@@ -101,15 +101,36 @@
 <a name='L36'></a><a href='#L36'>36</a>
 <a name='L37'></a><a href='#L37'>37</a>
 <a name='L38'></a><a href='#L38'>38</a>
-<a name='L39'></a><a href='#L39'>39</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -118,65 +139,47 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
- * Creates a ship object with the specified length.
- *
- * @param {number} length - The length of the ship. Must be a positive integer.
- * @returns {Object} The ship object.
- * @returns {Function} hit - Registers a hit on the ship.
- * @returns {Function} getHits - Returns the number of hits the ship has taken.
- * @returns {Function} getLength - Returns the length of the ship.
- * @returns {Function} isSunk - Returns true if the ship is sunk (i.e., number of hits equals the length of the ship), otherwise false.
- * @throws {Error} If the length is not a positive integer.
- */
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">export const UI = (() =&gt; {
+  const renderBoard = <span class="fstat-no" title="function not covered" >(b</span>oard, containerId) =&gt; {
+    const container = <span class="cstat-no" title="statement not covered" >document.getElementById(containerId);</span>
+<span class="cstat-no" title="statement not covered" >    container.innerHTML = ""; </span>// Clear previous content
 &nbsp;
-export const createShip = <span class="fstat-no" title="function not covered" >(l</span>ength) =&gt; {
-<span class="cstat-no" title="statement not covered" >  if (!Number.isInteger(length) || length &lt; 1) {</span>
-<span class="cstat-no" title="statement not covered" >    throw new Error("Length must be a positive integer.");</span>
-  }
+<span class="cstat-no" title="statement not covered" >    board.forEach(<span class="fstat-no" title="function not covered" >(r</span>ow, y) =&gt; {</span>
+      const rowElement = <span class="cstat-no" title="statement not covered" >document.createElement("div");</span>
+<span class="cstat-no" title="statement not covered" >      rowElement.classList.add("board-row");</span>
 &nbsp;
-  let hits = <span class="cstat-no" title="statement not covered" >0;</span>
+<span class="cstat-no" title="statement not covered" >      row.forEach(<span class="fstat-no" title="function not covered" >(c</span>ell, x) =&gt; {</span>
+        const cellElement = <span class="cstat-no" title="statement not covered" >document.createElement("div");</span>
+<span class="cstat-no" title="statement not covered" >        cellElement.classList.add("board-cell");</span>
+<span class="cstat-no" title="statement not covered" >        cellElement.dataset.x = x;</span>
+<span class="cstat-no" title="statement not covered" >        cellElement.dataset.y = y;</span>
 &nbsp;
-  const hit = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    if (hits &lt; length) {</span>
-<span class="cstat-no" title="statement not covered" >      hits += 1;</span>
-    }
+        // Display ship and status
+<span class="cstat-no" title="statement not covered" >        if (cell.ship) {</span>
+<span class="cstat-no" title="statement not covered" >          cellElement.classList.add("ship");</span>
+        }
+<span class="cstat-no" title="statement not covered" >        if (cell.status === "hit") {</span>
+<span class="cstat-no" title="statement not covered" >          cellElement.classList.add("hit");</span>
+        } else <span class="cstat-no" title="statement not covered" >if (cell.status === "miss") {</span>
+<span class="cstat-no" title="statement not covered" >          cellElement.classList.add("miss");</span>
+        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        rowElement.appendChild(cellElement);</span>
+      });
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      container.appendChild(rowElement);</span>
+    });
   };
 &nbsp;
-  const getHits = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >hits;</span></span>
-&nbsp;
-  const getLength = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >length;</span></span>
-&nbsp;
-  const isSunk = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >hits === length;</span></span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >  return {</span>
-    hit,
-    getHits,
-    getLength,
-    isSunk,
+  const displayMessage = <span class="fstat-no" title="function not covered" >(m</span>essage) =&gt; {
+    const messageContainer = <span class="cstat-no" title="statement not covered" >document.getElementById("message");</span>
+<span class="cstat-no" title="statement not covered" >    messageContainer.textContent = message;</span>
   };
-};
+&nbsp;
+  return { renderBoard, displayMessage };
+})();
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->

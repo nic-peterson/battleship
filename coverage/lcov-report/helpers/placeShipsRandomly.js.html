@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for components/ship.js</title>
+    <title>Code coverage report for helpers/placeShipsRandomly.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">components</a> ship.js</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">helpers</a> placeShipsRandomly.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -30,23 +30,23 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>0/0</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>0/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">9.09% </span>
+                <span class="strong">7.14% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>1/11</span>
+                <span class='fraction'>1/14</span>
             </div>
         
             
@@ -95,87 +95,69 @@
 <a name='L30'></a><a href='#L30'>30</a>
 <a name='L31'></a><a href='#L31'>31</a>
 <a name='L32'></a><a href='#L32'>32</a>
-<a name='L33'></a><a href='#L33'>33</a>
-<a name='L34'></a><a href='#L34'>34</a>
-<a name='L35'></a><a href='#L35'>35</a>
-<a name='L36'></a><a href='#L36'>36</a>
-<a name='L37'></a><a href='#L37'>37</a>
-<a name='L38'></a><a href='#L38'>38</a>
-<a name='L39'></a><a href='#L39'>39</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L33'></a><a href='#L33'>33</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
- * Creates a ship object with the specified length.
- *
- * @param {number} length - The length of the ship. Must be a positive integer.
- * @returns {Object} The ship object.
- * @returns {Function} hit - Registers a hit on the ship.
- * @returns {Function} getHits - Returns the number of hits the ship has taken.
- * @returns {Function} getLength - Returns the length of the ship.
- * @returns {Function} isSunk - Returns true if the ship is sunk (i.e., number of hits equals the length of the ship), otherwise false.
- * @throws {Error} If the length is not a positive integer.
- */
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { createShip } from "../components/ship";
 &nbsp;
-export const createShip = <span class="fstat-no" title="function not covered" >(l</span>ength) =&gt; {
-<span class="cstat-no" title="statement not covered" >  if (!Number.isInteger(length) || length &lt; 1) {</span>
-<span class="cstat-no" title="statement not covered" >    throw new Error("Length must be a positive integer.");</span>
-  }
+export const placeShipsRandomly = <span class="fstat-no" title="function not covered" >(g</span>ameboard) =&gt; {
+  const orientations = <span class="cstat-no" title="statement not covered" >["horizontal", "vertical"];</span>
+  const size = <span class="cstat-no" title="statement not covered" >gameboard.getSize();</span>
 &nbsp;
-  let hits = <span class="cstat-no" title="statement not covered" >0;</span>
+  const battleships = <span class="cstat-no" title="statement not covered" >gameboard.getShips();</span>
 &nbsp;
-  const hit = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    if (hits &lt; length) {</span>
-<span class="cstat-no" title="statement not covered" >      hits += 1;</span>
+<span class="cstat-no" title="statement not covered" >  for (let battleship of battleships) {</span>
+    let placed = <span class="cstat-no" title="statement not covered" >false;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    while (!placed) {</span>
+      // Generate random starting coordinates and orientation
+      const x = <span class="cstat-no" title="statement not covered" >Math.floor(Math.random() * size);</span>
+      const y = <span class="cstat-no" title="statement not covered" >Math.floor(Math.random() * size);</span>
+      const shipOrientation =
+<span class="cstat-no" title="statement not covered" >        orientations[Math.floor(Math.random() * orientations.length)];</span>
+&nbsp;
+      const ship = <span class="cstat-no" title="statement not covered" >createShip(battleship.length);</span>
+&nbsp;
+      // Try to place the ship
+<span class="cstat-no" title="statement not covered" >      try {</span>
+<span class="cstat-no" title="statement not covered" >        gameboard.placeShip(ship, x, y, shipOrientation);</span>
+<span class="cstat-no" title="statement not covered" >        placed = true;</span>
+      } catch (error) {
+        // If the ship can't be placed, ignore the error and try again
+        // This is because the randomly chosen coordinates or orientation might be invalid or overlap with another ship.
+        // By catching the error and continuing the loop, we ensure that the ship placement is retried until successful.
+      }
     }
-  };
-&nbsp;
-  const getHits = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >hits;</span></span>
-&nbsp;
-  const getLength = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >length;</span></span>
-&nbsp;
-  const isSunk = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >hits === length;</span></span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >  return {</span>
-    hit,
-    getHits,
-    getLength,
-    isSunk,
-  };
+  }
 };
 &nbsp;</pre></td></tr></table></pre>
 

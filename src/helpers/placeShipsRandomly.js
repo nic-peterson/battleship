@@ -1,4 +1,3 @@
-// import { battleships } from "./battleships";
 import { createShip } from "../components/ship";
 
 export const placeShipsRandomly = (gameboard) => {

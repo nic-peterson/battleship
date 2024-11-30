@@ -8,20 +8,20 @@ import { battleships } from "../helpers/battleships";
 export const createGame = () => {
   const initGame = () => {
     // Initialize Gameboards
-    const playerGameboard = createGameboard(BOARD_SIZE, battleships);
-    const computerGameboard = createGameboard(BOARD_SIZE, battleships);
+    const player1Gameboard = createGameboard(BOARD_SIZE, [...battleships]);
+    const player2Gameboard = createGameboard(BOARD_SIZE, [...battleships]);
 
     // Place ships randomly
-    placeShipsRandomly(playerGameboard);
-    placeShipsRandomly(computerGameboard);
+    placeShipsRandomly(player1Gameboard);
+    placeShipsRandomly(player2Gameboard);
 
     // Initialize Players
-    const player = createPlayer("human", "Alice", playerGameboard);
-    const computer = createPlayer("computer", "Computer", computerGameboard);
+    const player1 = createPlayer("human", "Alice", player1Gameboard);
+    const player2 = createPlayer("computer", "Computer", player2Gameboard);
 
     // Render Boards
-    UI.renderBoard(playerGameboard.getBoard(), "player1-board");
-    UI.renderBoard(computerGameboard.getBoard(), "player2-board");
+    UI.renderBoard(player1Gameboard.getBoard(), "player1-board");
+    UI.renderBoard(player2Gameboard.getBoard(), "player2-board");
 
     UI.displayMessage("Game started");
   };

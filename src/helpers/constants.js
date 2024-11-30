@@ -21,4 +21,6 @@ export const ERROR_MESSAGES = {
   OUT_OF_BOUNDS_VERTICAL: "Ship placement is out of bounds vertically.",
   OVERLAPPING_SHIP: "Cannot place ship; position is already occupied.",
   ALREADY_ATTACKED: "Position has already been attacked.",
+  PLAYER1_BOARD_FAILED: "Player 1 Gameboard creation failed.",
+  PLAYER2_BOARD_FAILED: "Player 2 Gameboard creation failed.",
 };
