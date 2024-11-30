@@ -1,9 +1,11 @@
-import { battleships } from "./battleships";
+// import { battleships } from "./battleships";
 import { createShip } from "../components/ship";
 
 export const placeShipsRandomly = (gameboard) => {
   const orientations = ["horizontal", "vertical"];
   const size = gameboard.getSize();
+
+  const battleships = gameboard.getShips();
 
   for (let battleship of battleships) {
     let placed = false;

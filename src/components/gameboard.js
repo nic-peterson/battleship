@@ -1,3 +1,4 @@
+import { get } from "lodash";
 import { createCell } from "../helpers/cell.js";
 import { CellStatus } from "../helpers/constants.js";
 import {
@@ -10,7 +11,7 @@ import {
  * Creates a gameboard for the Battleship game.
  *
  * @param {number} [boardSize=BOARD_SIZE] - The size of the game board (default is BOARD_SIZE).
- * @param {Array<Object>} [expectedShips=[]] - An array of expected ship objects to be placed on the board.
+ * @param {Array<Object>} [ships=[]] - An array of expected ship objects to be placed on the board.
  * @returns {Object} The gameboard object with the following methods:
  *   - `getBoard()`: Retrieves the current state of the game board.
  *   - `placeShip(ship, x, y, orientation)`: Places a ship on the game board at the specified coordinates and orientation.
@@ -21,7 +22,7 @@ import {
  *   - `allShipsPlaced()`: Checks if all ships have been placed on the game board.
  */
 
-export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
+export const createGameboard = (boardSize = BOARD_SIZE, ships = []) => {
   const board = Array.from({ length: boardSize }, () =>
     Array.from({ length: boardSize }, () => createCell())
   );
@@ -35,6 +36,8 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
   const getBoard = () => board;
 
   const getSize = () => boardSize;
+
+  const getShips = () => ships;
 
   /**
    * Places a ship on the gameboard at the specified coordinates and orientation.
@@ -235,10 +238,7 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
    */
   const allShipsPlaced = () => {
     // Assuming you have a predefined list of ships in 'battleships.js'
-    const expectedTotal = expectedShips.reduce(
-      (total, ship) => total + ship.length,
-      0
-    );
+    const expectedTotal = ships.reduce((total, ship) => total + ship.length, 0);
 
     let actualTotal = 0;
     board.forEach((row) => {
@@ -279,6 +279,7 @@ export const createGameboard = (boardSize = BOARD_SIZE, expectedShips = []) => {
     receiveAttack,
     getMissedAttacks,
     getHits,
+    getShips,
     areAllShipsSunk,
     allShipsPlaced,
     hasBeenAttacked,

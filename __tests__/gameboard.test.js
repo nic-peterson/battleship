@@ -55,6 +55,11 @@ describe("Gameboard Methods", () => {
         expect(row.length).toBe(boardSize);
       });
     });
+    test("should create a gameboard with the specified ships", () => {
+      const gameboard = createGameboard(BOARD_SIZE, battleships);
+      const ships = gameboard.getShips();
+      expect(ships).toEqual(battleships);
+    });
   });
 
   describe("Ship Placement", () => {
