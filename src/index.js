@@ -2,7 +2,7 @@ import "./styles.css";
 import { createBoilerPlate } from "./helpers/boilerPlate";
 import { createGame } from "./components/game";
 
-createBoilerPlate();
+// createBoilerPlate();
 
 const game = createGame();
 game.initGame();
