@@ -54,4 +54,32 @@ describe("UI", () => {
     expect(messageContainer).toBeDefined();
     expect(messageContainer.textContent).toBe(message);
   });
+
+  test("initializes the UI", () => {
+    const player1 = { getName: () => "Player 1" };
+    const player2 = { getName: () => "Player 2" };
+
+    UI.initUI(player1, player2);
+
+    const h1 = container.querySelector("h1");
+    expect(h1).toBeDefined();
+    expect(h1.textContent).toBe("Battleship");
+
+    const gameDiv = container.getElementById("game");
+    expect(gameDiv).toBeDefined();
+
+    const playerSections = gameDiv.getElementsByClassName("player-section");
+    expect(playerSections.length).toBe(2);
+
+    const player1Section = playerSections[0];
+    const player1Title = player1Section.querySelector("h2");
+    expect(player1Title.textContent).toBe("Player 1");
+
+    const player2Section = playerSections[1];
+    const player2Title = player2Section.querySelector("h2");
+    expect(player2Title.textContent).toBe("Player 2");
+
+    const messageDiv = container.getElementById("message");
+    expect(messageDiv).toBeDefined();
+  });
 });
