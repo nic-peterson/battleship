@@ -86,9 +86,40 @@ jest.mock("../src/helpers/placeShipsRandomly");
 
 describe("createGame", () => {
   let game;
+  let mockGameboard;
 
   beforeEach(() => {
+    mockGameboard = {
+      getBoard: jest.fn().mockReturnValue([]),
+      placeShip: jest.fn(),
+      getShips: jest.fn(),
+    };
+
+    // Setup mocks
+    createGameboard.mockReturnValue(mockGameboard);
+    placeShipsRandomly.mockReturnValue(true);
+
+    createPlayer.mockImplementation((type, name, gameboard) => ({
+      getName: jest.fn().mockReturnValue(name),
+      getGameboard: jest.fn().mockReturnValue(gameboard),
+    }));
+
+    // Create the game object
     game = createGame();
+
+    // Create mock players
+    const mockPlayer1 = {
+      getName: jest.fn().mockReturnValue("Alice"),
+      getGameboard: jest.fn().mockReturnValue(mockGameboard),
+    };
+
+    const mockPlayer2 = {
+      getName: jest.fn().mockReturnValue("Computer"),
+      getGameboard: jest.fn().mockReturnValue(mockGameboard),
+    };
+
+    // Mock game.getPlayers() to return the mock players
+    game.getPlayers = jest.fn().mockReturnValue([mockPlayer1, mockPlayer2]);
   });
 
   describe("initGame", () => {
@@ -107,11 +138,12 @@ describe("createGame", () => {
       expect(createGameboard).toHaveBeenCalledWith(BOARD_SIZE, battleships);
     });
 
-    test.skip("places ships randomly", () => {
+    test("places ships randomly", () => {
       expect(placeShipsRandomly).toHaveBeenCalledTimes(2);
+      expect(placeShipsRandomly).toHaveBeenCalledWith(mockGameboard);
     });
 
-    test.skip("initializes players", () => {
+    test("initializes players", () => {
       expect(createPlayer).toHaveBeenCalledTimes(2);
       expect(createPlayer).toHaveBeenCalledWith(
         "human",
@@ -125,7 +157,7 @@ describe("createGame", () => {
       );
     });
 
-    test.skip("renders boards", () => {
+    test("renders boards", () => {
       expect(UI.renderBoard).toHaveBeenCalledTimes(2);
       expect(UI.renderBoard).toHaveBeenCalledWith(
         expect.any(Array),
@@ -137,8 +169,40 @@ describe("createGame", () => {
       );
     });
 
-    test.skip("displays game started message", () => {
+    test("displays game started message", () => {
       expect(UI.displayMessage).toHaveBeenCalledWith("Game started");
+    });
+
+    test("returns game objects", () => {
+      const gameObjects = game.initGame();
+      expect(gameObjects).toEqual({
+        player1Gameboard: expect.any(Object),
+        player2Gameboard: expect.any(Object),
+        player1: expect.any(Object),
+        player2: expect.any(Object),
+        currentPlayer: expect.any(Object),
+      });
+    });
+
+    test("assigns gameboards to players", () => {
+      const gameObjects = game.initGame();
+      const [player1, player2] = game.getPlayers();
+      expect(player1.getGameboard()).toBe(mockGameboard);
+      expect(player2.getGameboard()).toBe(mockGameboard);
+    });
+
+    test("sets current player to Alice", () => {
+      const currentPlayer = game.getCurrentPlayer();
+      expect(currentPlayer.getName()).toBe("Alice");
+    });
+
+    test("initial game state is not over", () => {
+      expect(game.isGameOver()).toBe(false);
+    });
+
+    test("initial scores are zero", () => {
+      const score = game.getScore();
+      expect(score).toEqual({ player1: 0, player2: 0 });
     });
   });
 });

@@ -1,23 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1732975907748" clover="3.2.0">
-  <project timestamp="1732975907748" name="All files">
-    <metrics statements="170" coveredstatements="24" conditionals="72" coveredconditionals="0" methods="44" coveredmethods="3" elements="286" coveredelements="27" complexity="0" loc="170" ncloc="170" packages="2" files="9" classes="9"/>
+<coverage generated="1733023871753" clover="3.2.0">
+  <project timestamp="1733023871753" name="All files">
+    <metrics statements="179" coveredstatements="30" conditionals="80" coveredconditionals="6" methods="44" coveredmethods="3" elements="303" coveredelements="39" complexity="0" loc="179" ncloc="179" packages="2" files="9" classes="9"/>
     <package name="components">
-      <metrics statements="150" coveredstatements="17" conditionals="72" coveredconditionals="0" methods="42" coveredmethods="3"/>
+      <metrics statements="159" coveredstatements="23" conditionals="80" coveredconditionals="6" methods="42" coveredmethods="3"/>
       <file name="game.js" path="/Users/nicpeterson/repos/js-battleship/src/components/game.js">
-        <metrics statements="12" coveredstatements="10" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <metrics statements="21" coveredstatements="16" conditionals="8" coveredconditionals="6" methods="2" coveredmethods="2"/>
         <line num="8" count="1" type="stmt"/>
-        <line num="9" count="1" type="stmt"/>
-        <line num="11" count="1" type="stmt"/>
-        <line num="12" count="1" type="stmt"/>
-        <line num="15" count="1" type="stmt"/>
-        <line num="16" count="1" type="stmt"/>
-        <line num="19" count="1" type="stmt"/>
-        <line num="20" count="1" type="stmt"/>
-        <line num="23" count="1" type="stmt"/>
-        <line num="24" count="0" type="stmt"/>
-        <line num="26" count="0" type="stmt"/>
-        <line num="29" count="1" type="stmt"/>
+        <line num="9" count="6" type="stmt"/>
+        <line num="10" count="7" type="stmt"/>
+        <line num="12" count="7" type="stmt"/>
+        <line num="13" count="7" type="stmt"/>
+        <line num="16" count="7" type="cond" truecount="3" falsecount="1"/>
+        <line num="17" count="0" type="stmt"/>
+        <line num="20" count="7" type="cond" truecount="3" falsecount="1"/>
+        <line num="21" count="0" type="stmt"/>
+        <line num="25" count="7" type="stmt"/>
+        <line num="26" count="7" type="stmt"/>
+        <line num="29" count="7" type="stmt"/>
+        <line num="30" count="7" type="stmt"/>
+        <line num="33" count="7" type="stmt"/>
+        <line num="34" count="7" type="stmt"/>
+        <line num="36" count="7" type="stmt"/>
+        <line num="38" count="7" type="stmt"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="41" count="0" type="stmt"/>
+        <line num="42" count="0" type="stmt"/>
+        <line num="46" count="6" type="stmt"/>
       </file>
       <file name="gameboard.js" path="/Users/nicpeterson/repos/js-battleship/src/components/gameboard.js">
         <metrics statements="84" coveredstatements="1" conditionals="50" coveredconditionals="0" methods="24" coveredmethods="0"/>
