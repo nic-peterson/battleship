@@ -16,7 +16,7 @@ export const placeShipsRandomly = (gameboard) => {
       const shipOrientation =
         orientations[Math.floor(Math.random() * orientations.length)];
 
-      const ship = createShip(battleship.length);
+      const ship = Ship(battleship.length);
 
       // Try to place the ship
       try {

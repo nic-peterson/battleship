@@ -84,7 +84,9 @@ jest.mock("../src/components/player");
 jest.mock("../src/components/ui");
 jest.mock("../src/helpers/placeShipsRandomly");
 
-describe("createGame Methods", () => {});
+describe("createGame Methods", () => {
+  describe("initGame", () => {});
+});
 
 describe("createGame", () => {
   let game;

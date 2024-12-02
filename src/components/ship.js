@@ -10,7 +10,7 @@
  * @throws {Error} If the length is not a positive integer.
  */
 
-export const createShip = (length) => {
+export const Ship = (length) => {
   if (!Number.isInteger(length) || length < 1) {
     throw new Error("Length must be a positive integer.");
   }
