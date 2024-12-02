@@ -1,5 +1,5 @@
 import { Player } from "./player";
-import { createGameboard } from "./gameboard";
+import { Gameboard } from "./gameboard";
 import { UI } from "./ui";
 import { placeShipsRandomly } from "../helpers/placeShipsRandomly";
 import { BOARD_SIZE, ERROR_MESSAGES } from "../helpers/constants";
@@ -15,8 +15,8 @@ export const createGame = () => {
   // Private Methods
   const initailizeGameBoards = () => {
     // Initialize Gameboards
-    const player1Gameboard = createGameboard(BOARD_SIZE, [...battleships]);
-    const player2Gameboard = createGameboard(BOARD_SIZE, [...battleships]);
+    const player1Gameboard = Gameboard(BOARD_SIZE, [...battleships]);
+    const player2Gameboard = Gameboard(BOARD_SIZE, [...battleships]);
 
     // Ensure gameboards are created correctly
     if (!player1Gameboard || !player1Gameboard.getBoard) {

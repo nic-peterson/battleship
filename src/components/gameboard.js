@@ -22,7 +22,7 @@ import {
  *   - `allShipsPlaced()`: Checks if all ships have been placed on the game board.
  */
 
-export const createGameboard = (boardSize = BOARD_SIZE, ships = []) => {
+export const Gameboard = (boardSize = BOARD_SIZE, ships = []) => {
   const board = Array.from({ length: boardSize }, () =>
     Array.from({ length: boardSize }, () => createCell())
   );

@@ -1,5 +1,5 @@
 import { createGame } from "../src/components/game";
-import { createGameboard } from "../src/components/gameboard";
+import { Gameboard } from "../src/components/gameboard";
 import { Player } from "../src/components/player";
 import { UI } from "../src/components/ui";
 import { placeShipsRandomly } from "../src/helpers/placeShipsRandomly";
@@ -106,7 +106,7 @@ describe("createGame", () => {
     };
 
     // Setup mocks
-    createGameboard.mockReturnValue(mockGameboard);
+    Gameboard.mockReturnValue(mockGameboard);
     placeShipsRandomly.mockReturnValue(true);
 
     Player.mockImplementation((type, name, gameboard) => ({
@@ -135,7 +135,7 @@ describe("createGame", () => {
   describe("initGame", () => {
     beforeEach(() => {
       /*
-      createGameboard.mockClear();
+      Gameboard.mockClear();
       Player.mockClear();
       UI.renderBoard.mockClear();
       UI.displayMessage.mockClear();
@@ -146,8 +146,8 @@ describe("createGame", () => {
     });
 
     test("initializes gameboards", () => {
-      expect(createGameboard).toHaveBeenCalledTimes(2);
-      expect(createGameboard).toHaveBeenCalledWith(BOARD_SIZE, battleships);
+      expect(Gameboard).toHaveBeenCalledTimes(2);
+      expect(Gameboard).toHaveBeenCalledWith(BOARD_SIZE, battleships);
     });
 
     test("places ships randomly", () => {

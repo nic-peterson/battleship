@@ -1,4 +1,4 @@
-import { createGameboard } from "../src/components/gameboard";
+import { Gameboard } from "../src/components/gameboard";
 const { Ship } = require("../src/components/ship");
 import { BOARD_SIZE } from "../src/helpers/constants";
 import {
@@ -21,12 +21,12 @@ describe("Gameboard Methods", () => {
   let gameboard;
 
   beforeEach(() => {
-    gameboard = createGameboard(BOARD_SIZE, battleships);
+    gameboard = Gameboard(BOARD_SIZE, battleships);
   });
 
   describe("Gameboard Initialization", () => {
     test("should create a 10x10 gameboard array initialized with empty objects", () => {
-      gameboard = createGameboard(BOARD_SIZE, battleships);
+      gameboard = Gameboard(BOARD_SIZE, battleships);
       const board = gameboard.getBoard();
 
       // Check that the board has 10 rows
@@ -47,7 +47,7 @@ describe("Gameboard Methods", () => {
       });
     });
     test.each([8, 10, 12])("should create a %dx%d gameboard", (boardSize) => {
-      const gameboard = createGameboard(boardSize, battleships);
+      const gameboard = Gameboard(boardSize, battleships);
       const board = gameboard.getBoard();
       expect(board.length).toBe(gameboard.getSize());
       expect(board.length).toBe(boardSize);
@@ -56,7 +56,7 @@ describe("Gameboard Methods", () => {
       });
     });
     test("should create a gameboard with the specified ships", () => {
-      const gameboard = createGameboard(BOARD_SIZE, battleships);
+      const gameboard = Gameboard(BOARD_SIZE, battleships);
       const ships = gameboard.getShips();
       expect(ships).toEqual(battleships);
     });

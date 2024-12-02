@@ -1,5 +1,5 @@
 const { Player } = require("../src/components/player");
-const { createGameboard } = require("../src/components/gameboard");
+const { Gameboard } = require("../src/components/gameboard");
 const { Ship } = require("../src/components/ship");
 const {
   ORIENTATIONS,
@@ -16,8 +16,8 @@ describe("Player Methods", () => {
 
   beforeEach(() => {
     // Initialize gameboards for each player
-    humanGameboard = createGameboard();
-    computerGameboard = createGameboard();
+    humanGameboard = Gameboard();
+    computerGameboard = Gameboard();
 
     // Create a player instance (e.g., human)
     player = Player("human", "Alice", humanGameboard);
