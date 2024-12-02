@@ -13,7 +13,7 @@ export const Game = () => {
   let player2;
 
   // Private Methods
-  const initailizeGameBoards = () => {
+  const initializeGameBoards = () => {
     // Initialize Gameboards
     const player1Gameboard = Gameboard(BOARD_SIZE, [...battleships]);
     const player2Gameboard = Gameboard(BOARD_SIZE, [...battleships]);
@@ -45,7 +45,7 @@ export const Game = () => {
   // Public Methods
   const initGame = () => {
     try {
-      const { player1Gameboard, player2Gameboard } = initailizeGameBoards();
+      const { player1Gameboard, player2Gameboard } = initializeGameBoards();
       const { player1, player2 } = initializePlayers(
         player1Gameboard,
         player2Gameboard
@@ -55,21 +55,12 @@ export const Game = () => {
       currentPlayer = player1;
 
       // set score
-      setScore(player1, player2);
+      setScore();
 
       // Init UI
       UI.initUI(player1, player2);
-
-      return {
-        player1Gameboard,
-        player2Gameboard,
-        player1,
-        player2,
-        currentPlayer,
-      };
     } catch (error) {
       console.error("Game initialization error:", error);
-      UI.displayMessage(`Game initialization failed: ${error.message}`);
       throw error;
     }
   };
@@ -86,7 +77,7 @@ export const Game = () => {
     return gameOver;
   };
 
-  const setScore = (player1, player2) => {
+  const setScore = () => {
     score = { player1: 0, player2: 0 };
   };
 
@@ -108,6 +99,11 @@ export const Game = () => {
 
     // Check if all ships are sunk
     gameOver = opponentBoard.areAllShipsSunk();
+
+    // Switch turns if the game is not over
+    if (!gameOver) {
+      switchTurn();
+    }
 
     return attackResult;
   };
