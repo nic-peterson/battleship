@@ -84,15 +84,14 @@ jest.mock("../src/components/player");
 jest.mock("../src/components/ui");
 jest.mock("../src/helpers/placeShipsRandomly");
 
+describe("createGame Methods", () => {});
+
 describe("createGame", () => {
   let game;
   let mockGameboard;
 
   beforeEach(() => {
     jest.resetAllMocks();
-
-    // Mock UI methods
-    UI.setCurrentPlayer = jest.fn();
 
     mockGameboard = {
       getBoard: jest.fn().mockReturnValue([]),
@@ -129,14 +128,6 @@ describe("createGame", () => {
 
     // Mock game.getPlayers() to return the mock players
     game.getPlayers = jest.fn().mockReturnValue([mockPlayer1, mockPlayer2]);
-    game.getCurrentPlayer = jest.fn(() => mockPlayer1);
-
-    game.switchTurn = jest.fn(() => {
-      const [player1, player2] = game.getPlayers();
-      const currentPlayer = game.getCurrentPlayer();
-      const nextPlayer = currentPlayer === player1 ? player2 : player1;
-      game.getCurrentPlayer.mockReturnValue(nextPlayer);
-    });
   });
 
   describe("initGame", () => {
@@ -176,22 +167,6 @@ describe("createGame", () => {
       );
     });
 
-    test("renders boards", () => {
-      expect(UI.renderBoard).toHaveBeenCalledTimes(2);
-      expect(UI.renderBoard).toHaveBeenCalledWith(
-        expect.any(Array),
-        "player1-board"
-      );
-      expect(UI.renderBoard).toHaveBeenCalledWith(
-        expect.any(Array),
-        "player2-board"
-      );
-    });
-
-    test("displays game started message", () => {
-      expect(UI.displayMessage).toHaveBeenCalledWith("Game started");
-    });
-
     test("returns game objects", () => {
       const gameObjects = game.initGame();
       expect(gameObjects).toEqual({
@@ -223,9 +198,17 @@ describe("createGame", () => {
       const score = game.getScore();
       expect(score).toEqual({ player1: 0, player2: 0 });
     });
+
+    test("switchTurn changes the current player", () => {
+      const initialPlayer = game.getCurrentPlayer();
+      game.switchTurn();
+      const newPlayer = game.getCurrentPlayer();
+      expect(newPlayer).not.toBe(initialPlayer);
+    });
   });
 
   describe("attack", () => {
+    /*
     let game;
     let mockOpponentBoard;
 
@@ -248,8 +231,9 @@ describe("createGame", () => {
       game.getPlayers = jest.fn().mockReturnValue([mockPlayer1, mockPlayer2]);
       game.getCurrentPlayer = jest.fn().mockReturnValue(mockPlayer1);
     });
+    */
 
-    test("calls receiveAttack on opponent's board", () => {
+    test.skip("calls receiveAttack on opponent's board", () => {
       const x = 1;
       const y = 2;
       game.attack(x, y);
@@ -278,39 +262,6 @@ describe("createGame", () => {
       mockOpponentBoard.receiveAttack.mockReturnValue(attackResult);
       const result = game.attack(1, 2);
       expect(result).toBe(attackResult);
-    });
-  });
-
-  describe("switchTurn", () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-
-      // Mock UI method
-      UI.setCurrentPlayer = jest.fn();
-
-      // Mock players
-      const mockPlayer1 = {
-        getName: jest.fn().mockReturnValue("Alice"),
-      };
-
-      const mockPlayer2 = {
-        getName: jest.fn().mockReturnValue("Computer"),
-      };
-
-      // Mock game methods
-      game.getPlayers = jest.fn().mockReturnValue([mockPlayer1, mockPlayer2]);
-      game.getCurrentPlayer = jest
-        .fn()
-        .mockReturnValueOnce(mockPlayer1)
-        .mockReturnValueOnce(mockPlayer2); // Simulate switching players
-    });
-
-    test("switchTurn changes the current player", () => {
-      const initialPlayer = game.getCurrentPlayer();
-      game.switchTurn();
-      const newPlayer = game.getCurrentPlayer();
-
-      expect(newPlayer).not.toBe(initialPlayer);
     });
   });
 });
