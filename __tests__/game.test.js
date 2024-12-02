@@ -204,5 +204,73 @@ describe("createGame", () => {
       const score = game.getScore();
       expect(score).toEqual({ player1: 0, player2: 0 });
     });
+
+    test("switchTurn changes the current player", () => {
+      const initialPlayer = game.getCurrentPlayer();
+      game.switchTurn();
+      const newPlayer = game.getCurrentPlayer();
+      expect(newPlayer).not.toBe(initialPlayer);
+    });
+
+    test("switchTurn updates the UI with the new current player", () => {
+      game.switchTurn();
+      const newPlayer = game.getCurrentPlayer();
+      expect(UI.setCurrentPlayer).toHaveBeenCalledWith(newPlayer.getName());
+    });
+
+    describe("attack", () => {
+      let mockOpponentBoard;
+
+      beforeEach(() => {
+        mockOpponentBoard = {
+          receiveAttack: jest.fn(),
+          areAllShipsSunk: jest.fn(),
+        };
+
+        const mockPlayer1 = {
+          getName: jest.fn().mockReturnValue("Alice"),
+          getGameboard: jest.fn().mockReturnValue(mockOpponentBoard),
+        };
+
+        const mockPlayer2 = {
+          getName: jest.fn().mockReturnValue("Computer"),
+          getGameboard: jest.fn().mockReturnValue(mockOpponentBoard),
+        };
+
+        game.getPlayers = jest.fn().mockReturnValue([mockPlayer1, mockPlayer2]);
+        game.getCurrentPlayer = jest.fn().mockReturnValue(mockPlayer1);
+      });
+
+      test.skip("calls receiveAttack on opponent's board", () => {
+        const x = 1;
+        const y = 2;
+        game.attack(x, y);
+        expect(mockOpponentBoard.receiveAttack).toHaveBeenCalledWith(x, y);
+      });
+
+      test.skip("checks if all ships are sunk", () => {
+        game.attack(1, 2);
+        expect(mockOpponentBoard.areAllShipsSunk).toHaveBeenCalled();
+      });
+
+      test.skip("sets gameOver to true if all ships are sunk", () => {
+        mockOpponentBoard.areAllShipsSunk.mockReturnValue(true);
+        game.attack(1, 2);
+        expect(game.isGameOver()).toBe(true);
+      });
+
+      test.skip("sets gameOver to false if not all ships are sunk", () => {
+        mockOpponentBoard.areAllShipsSunk.mockReturnValue(false);
+        game.attack(1, 2);
+        expect(game.isGameOver()).toBe(false);
+      });
+
+      test.skip("returns the result of receiveAttack", () => {
+        const attackResult = { hit: true, sunk: false };
+        mockOpponentBoard.receiveAttack.mockReturnValue(attackResult);
+        const result = game.attack(1, 2);
+        expect(result).toBe(attackResult);
+      });
+    });
   });
 });

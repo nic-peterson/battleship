@@ -9,6 +9,8 @@ export const createGame = () => {
   let currentPlayer;
   let gameOver = false;
   let score = {};
+  let player1;
+  let player2;
 
   const initGame = () => {
     try {
@@ -30,8 +32,8 @@ export const createGame = () => {
       placeShipsRandomly(player2Gameboard);
 
       // Initialize Players
-      const player1 = createPlayer("human", "Alice", player1Gameboard);
-      const player2 = createPlayer("computer", "Computer", player2Gameboard);
+      player1 = createPlayer("human", "Alice", player1Gameboard);
+      player2 = createPlayer("computer", "Computer", player2Gameboard);
 
       // set current player
       currentPlayer = player1;
@@ -89,6 +91,24 @@ export const createGame = () => {
     return score;
   };
 
+  const switchTurn = () => {
+    currentPlayer = currentPlayer === player1 ? player2 : player1;
+    UI.setCurrentPlayer(currentPlayer.getName());
+  };
+
+  // New method to handle attacks
+  const attack = (x, y) => {
+    const opponent = currentPlayer === player1 ? player2 : player1;
+    const opponentBoard = opponent.getGameboard();
+
+    const attackResult = opponentBoard.receiveAttack(x, y);
+
+    // Check if all ships are sunk
+    gameOver = opponentBoard.areAllShipsSunk();
+
+    return attackResult;
+  };
+
   return {
     initGame,
     getPlayers,
@@ -96,6 +116,8 @@ export const createGame = () => {
     isGameOver,
     setScore,
     getScore,
+    switchTurn,
+    attack,
   };
 };
 
