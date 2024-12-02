@@ -5,7 +5,7 @@ import { placeShipsRandomly } from "../helpers/placeShipsRandomly";
 import { BOARD_SIZE, ERROR_MESSAGES } from "../helpers/constants";
 import { battleships } from "../helpers/battleships";
 
-export const createGame = () => {
+export const Game = () => {
   let currentPlayer;
   let gameOver = false;
   let score = {};

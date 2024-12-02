@@ -1,4 +1,4 @@
-import { createGame } from "../src/components/game";
+import { Game } from "../src/components/game";
 import { Gameboard } from "../src/components/gameboard";
 import { Player } from "../src/components/player";
 import { UI } from "../src/components/ui";
@@ -7,10 +7,10 @@ import { BOARD_SIZE } from "../src/helpers/constants";
 import { battleships } from "../src/helpers/battleships";
 
 /*
-describe("createGame", () => {
+describe("Game", () => {
   let game;
   beforeEach(() => {
-    game = createGame(
+    game = Game(
       { name: "player1", type: "human" },
       { name: "player2", type: "computer" }
     );
@@ -84,11 +84,11 @@ jest.mock("../src/components/player");
 jest.mock("../src/components/ui");
 jest.mock("../src/helpers/placeShipsRandomly");
 
-describe("createGame Methods", () => {
+describe("Game Methods", () => {
   describe("initGame", () => {});
 });
 
-describe("createGame", () => {
+describe("Game", () => {
   let game;
   let mockGameboard;
 
@@ -115,7 +115,7 @@ describe("createGame", () => {
     }));
 
     // Create the game object
-    game = createGame();
+    game = Game();
 
     // Create mock players
     const mockPlayer1 = {

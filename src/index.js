@@ -1,8 +1,5 @@
 import "./styles.css";
-import { createBoilerPlate } from "./helpers/boilerPlate";
-import { createGame } from "./components/game";
+import { Game } from "./components/game";
 
-// createBoilerPlate();
-
-const game = createGame();
+const game = Game();
 game.initGame();
