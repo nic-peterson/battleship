@@ -1,4 +1,4 @@
-import { createPlayer } from "./player";
+import { Player } from "./player";
 import { createGameboard } from "./gameboard";
 import { UI } from "./ui";
 import { placeShipsRandomly } from "../helpers/placeShipsRandomly";
@@ -36,8 +36,8 @@ export const createGame = () => {
 
   const initializePlayers = (player1Gameboard, player2Gameboard) => {
     // Initialize Players
-    player1 = createPlayer("human", "Alice", player1Gameboard);
-    player2 = createPlayer("computer", "Computer", player2Gameboard);
+    player1 = Player("human", "Alice", player1Gameboard);
+    player2 = Player("computer", "Computer", player2Gameboard);
 
     return { player1, player2 };
   };

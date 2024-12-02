@@ -1,4 +1,4 @@
-const { createPlayer } = require("../src/components/player");
+const { Player } = require("../src/components/player");
 const { createGameboard } = require("../src/components/gameboard");
 const { Ship } = require("../src/components/ship");
 const {
@@ -20,7 +20,7 @@ describe("Player Methods", () => {
     computerGameboard = createGameboard();
 
     // Create a player instance (e.g., human)
-    player = createPlayer("human", "Alice", humanGameboard);
+    player = Player("human", "Alice", humanGameboard);
   });
 
   describe("Initialization", () => {

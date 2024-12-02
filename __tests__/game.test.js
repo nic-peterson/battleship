@@ -1,6 +1,6 @@
 import { createGame } from "../src/components/game";
 import { createGameboard } from "../src/components/gameboard";
-import { createPlayer } from "../src/components/player";
+import { Player } from "../src/components/player";
 import { UI } from "../src/components/ui";
 import { placeShipsRandomly } from "../src/helpers/placeShipsRandomly";
 import { BOARD_SIZE } from "../src/helpers/constants";
@@ -109,7 +109,7 @@ describe("createGame", () => {
     createGameboard.mockReturnValue(mockGameboard);
     placeShipsRandomly.mockReturnValue(true);
 
-    createPlayer.mockImplementation((type, name, gameboard) => ({
+    Player.mockImplementation((type, name, gameboard) => ({
       getName: jest.fn().mockReturnValue(name),
       getGameboard: jest.fn().mockReturnValue(gameboard),
     }));
@@ -136,7 +136,7 @@ describe("createGame", () => {
     beforeEach(() => {
       /*
       createGameboard.mockClear();
-      createPlayer.mockClear();
+      Player.mockClear();
       UI.renderBoard.mockClear();
       UI.displayMessage.mockClear();
       placeShipsRandomly.mockClear();
@@ -156,13 +156,9 @@ describe("createGame", () => {
     });
 
     test("initializes players", () => {
-      expect(createPlayer).toHaveBeenCalledTimes(2);
-      expect(createPlayer).toHaveBeenCalledWith(
-        "human",
-        "Alice",
-        expect.any(Object)
-      );
-      expect(createPlayer).toHaveBeenCalledWith(
+      expect(Player).toHaveBeenCalledTimes(2);
+      expect(Player).toHaveBeenCalledWith("human", "Alice", expect.any(Object));
+      expect(Player).toHaveBeenCalledWith(
         "computer",
         "Computer",
         expect.any(Object)

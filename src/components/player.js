@@ -1,6 +1,6 @@
 import { BOARD_SIZE, ERROR_MESSAGES } from "../helpers/constants";
 
-export const createPlayer = (type, name, gameboard) => {
+export const Player = (type, name, gameboard) => {
   const attack = (x, y, opponentGameboard) => {
     // Validate coordinates
     if (
