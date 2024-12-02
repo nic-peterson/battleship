@@ -56,9 +56,6 @@ export const Game = () => {
 
       // set score
       setScore();
-
-      // Init UI
-      UI.initUI(player1, player2);
     } catch (error) {
       console.error("Game initialization error:", error);
       throw error;
@@ -77,6 +74,8 @@ export const Game = () => {
     return gameOver;
   };
 
+  // TODO setScore for any arb amt vs 0
+  // TODO need to call setScore after an attack
   const setScore = () => {
     score = { player1: 0, player2: 0 };
   };
@@ -87,7 +86,6 @@ export const Game = () => {
 
   const switchTurn = () => {
     currentPlayer = currentPlayer === player1 ? player2 : player1;
-    UI.setCurrentPlayer(currentPlayer.getName());
   };
 
   // New method to handle attacks
@@ -113,7 +111,6 @@ export const Game = () => {
     getPlayers,
     getCurrentPlayer,
     isGameOver,
-    setScore,
     getScore,
     switchTurn,
     attack,
