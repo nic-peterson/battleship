@@ -58,6 +58,11 @@ export const UI = (() => {
       id: "message",
       parent: gameDiv,
     });
+
+    renderBoard(player1.getGameboard().getBoard(), "player1-board");
+    renderBoard(player2.getGameboard().getBoard(), "player2-board");
+
+    UI.displayMessage("Game started");
   };
 
   const renderBoard = (board, containerId) => {

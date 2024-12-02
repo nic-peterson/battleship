@@ -60,12 +60,6 @@ export const createGame = () => {
       // Init UI
       UI.initUI(player1, player2);
 
-      // Render Boards
-      UI.renderBoard(player1Gameboard.getBoard(), "player1-board");
-      UI.renderBoard(player2Gameboard.getBoard(), "player2-board");
-
-      UI.displayMessage("Game started");
-
       return {
         player1Gameboard,
         player2Gameboard,
