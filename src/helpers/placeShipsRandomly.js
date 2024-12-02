@@ -1,4 +1,4 @@
-import { createShip } from "../components/ship";
+import { Ship } from "../components/ship";
 
 export const placeShipsRandomly = (gameboard) => {
   const orientations = ["horizontal", "vertical"];

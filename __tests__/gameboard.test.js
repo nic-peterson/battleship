@@ -1,5 +1,5 @@
 import { createGameboard } from "../src/components/gameboard";
-const { createShip } = require("../src/components/ship");
+const { Ship } = require("../src/components/ship");
 import { BOARD_SIZE } from "../src/helpers/constants";
 import {
   CellStatus,
@@ -65,7 +65,7 @@ describe("Gameboard Methods", () => {
   describe("Ship Placement", () => {
     describe("Valid Placements", () => {
       test("should place a ship horizontally without errors", () => {
-        const ship = createShip(3);
+        const ship = Ship(3);
         gameboard.placeShip(ship, 0, 0, ORIENTATIONS.HORIZONTAL);
         const board = gameboard.getBoard();
         const coordinates = [
@@ -78,7 +78,7 @@ describe("Gameboard Methods", () => {
       });
 
       test("should place a ship vertically without errors", () => {
-        const ship = createShip(3);
+        const ship = Ship(3);
         gameboard.placeShip(ship, 2, 2, ORIENTATIONS.VERTICAL);
         const board = gameboard.getBoard();
         const coordinates = [
@@ -91,7 +91,7 @@ describe("Gameboard Methods", () => {
       });
 
       test("should place a ship at the extreme left edge horizontally", () => {
-        const ship = createShip(1);
+        const ship = Ship(1);
         gameboard.placeShip(ship, 0, 5, ORIENTATIONS.HORIZONTAL);
         const board = gameboard.getBoard();
         const coordinates = [[0, 5]];
@@ -100,7 +100,7 @@ describe("Gameboard Methods", () => {
       });
 
       test("should place a ship at the extreme right edge horizontally", () => {
-        const ship = createShip(1);
+        const ship = Ship(1);
         gameboard.placeShip(ship, 9, 5, ORIENTATIONS.HORIZONTAL);
         const board = gameboard.getBoard();
         const coordinates = [[9, 5]];
@@ -109,7 +109,7 @@ describe("Gameboard Methods", () => {
       });
 
       test("should place a ship at the extreme top edge vertically", () => {
-        const ship = createShip(1);
+        const ship = Ship(1);
         gameboard.placeShip(ship, 5, 0, ORIENTATIONS.VERTICAL);
         const board = gameboard.getBoard();
         const coordinates = [[5, 0]];
@@ -118,7 +118,7 @@ describe("Gameboard Methods", () => {
       });
 
       test("should place a ship at the extreme bottom edge vertically", () => {
-        const ship = createShip(1);
+        const ship = Ship(1);
         gameboard.placeShip(ship, 5, 9, ORIENTATIONS.VERTICAL);
         const board = gameboard.getBoard();
         const coordinates = [[5, 9]];
@@ -127,8 +127,8 @@ describe("Gameboard Methods", () => {
       });
 
       test("should place multiple ships without overlap", () => {
-        const ship1 = createShip(3);
-        const ship2 = createShip(2);
+        const ship1 = Ship(3);
+        const ship2 = Ship(2);
         gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
         gameboard.placeShip(ship2, 2, 2, ORIENTATIONS.VERTICAL);
         const board = gameboard.getBoard();
@@ -245,7 +245,7 @@ describe("Gameboard Methods", () => {
       ])(
         "should throw an error when placing a ship with $description",
         ({ x, y, orientation, shipLength = 3, error }) => {
-          const ship = createShip(shipLength);
+          const ship = Ship(shipLength);
           expect(() => {
             gameboard.placeShip(ship, x, y, orientation);
           }).toThrow(error);
@@ -253,8 +253,8 @@ describe("Gameboard Methods", () => {
       );
 
       test("should throw an error when placing overlapping ships", () => {
-        const ship1 = createShip(3);
-        const ship2 = createShip(2);
+        const ship1 = Ship(3);
+        const ship2 = Ship(2);
         gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
 
         expect(() => {
@@ -267,7 +267,7 @@ describe("Gameboard Methods", () => {
   describe("Receiving Attacks", () => {
     describe("Hits and Sinks", () => {
       test("should register a hit on a ship", () => {
-        const ship = createShip(2);
+        const ship = Ship(2);
         gameboard.placeShip(ship, 1, 1, ORIENTATIONS.HORIZONTAL);
 
         const attackResult = gameboard.receiveAttack(1, 1);
@@ -282,7 +282,7 @@ describe("Gameboard Methods", () => {
       });
 
       test("should register a sink when all parts of the ship are hit", () => {
-        const ship = createShip(2);
+        const ship = Ship(2);
         gameboard.placeShip(ship, 1, 1, ORIENTATIONS.HORIZONTAL);
 
         gameboard.receiveAttack(1, 1);
@@ -319,7 +319,7 @@ describe("Gameboard Methods", () => {
       });
 
       test("should register a hit on a ship placed at the extreme corner", () => {
-        const ship = createShip(1);
+        const ship = Ship(1);
         gameboard.placeShip(ship, 9, 9, ORIENTATIONS.HORIZONTAL);
         const attackResult = gameboard.receiveAttack(9, 9);
         const board = gameboard.getBoard();
@@ -347,8 +347,8 @@ describe("Gameboard Methods", () => {
 
     describe("Multiple Attacks", () => {
       test("should register multiple hits and sinks correctly", () => {
-        const ship1 = createShip(2);
-        const ship2 = createShip(3);
+        const ship1 = Ship(2);
+        const ship2 = Ship(3);
         gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
         gameboard.placeShip(ship2, 2, 2, ORIENTATIONS.VERTICAL);
 
@@ -409,7 +409,7 @@ describe("Gameboard Methods", () => {
     });
 
     test("should return all hits", () => {
-      const ship = createShip(2);
+      const ship = Ship(2);
       gameboard.placeShip(ship, 1, 1, ORIENTATIONS.HORIZONTAL);
       gameboard.receiveAttack(1, 1);
       gameboard.receiveAttack(2, 1);
@@ -421,8 +421,8 @@ describe("Gameboard Methods", () => {
     });
 
     test("should return true if all ships are sunk", () => {
-      const ship1 = createShip(1);
-      const ship2 = createShip(2);
+      const ship1 = Ship(1);
+      const ship2 = Ship(2);
       gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
       gameboard.placeShip(ship2, 2, 2, ORIENTATIONS.VERTICAL);
 
@@ -434,8 +434,8 @@ describe("Gameboard Methods", () => {
     });
 
     test("should return false if not all ships are sunk", () => {
-      const ship1 = createShip(1);
-      const ship2 = createShip(2);
+      const ship1 = Ship(1);
+      const ship2 = Ship(2);
       gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
       gameboard.placeShip(ship2, 2, 2, ORIENTATIONS.VERTICAL);
 
@@ -447,11 +447,11 @@ describe("Gameboard Methods", () => {
 
     test("should return true if all ships are placed", () => {
       // Assuming total ships to place is defined elsewhere, e.g., battleships.js
-      const ship1 = createShip(3);
-      const ship2 = createShip(2);
-      const ship3 = createShip(4);
-      const ship4 = createShip(5);
-      const ship5 = createShip(3);
+      const ship1 = Ship(3);
+      const ship2 = Ship(2);
+      const ship3 = Ship(4);
+      const ship4 = Ship(5);
+      const ship5 = Ship(3);
 
       gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
       gameboard.placeShip(ship2, 1, 1, ORIENTATIONS.VERTICAL);
@@ -467,8 +467,8 @@ describe("Gameboard Methods", () => {
     });
 
     test("should return false if not all ships are placed", () => {
-      const ship1 = createShip(3);
-      const ship2 = createShip(2);
+      const ship1 = Ship(3);
+      const ship2 = Ship(2);
       gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
       // ship2 not placed
 
@@ -485,7 +485,7 @@ describe("Gameboard Methods", () => {
     });
 
     test("should return all attacks (hits and misses)", () => {
-      const ship = createShip(2);
+      const ship = Ship(2);
       gameboard.placeShip(ship, 1, 1, ORIENTATIONS.HORIZONTAL);
 
       gameboard.receiveAttack(1, 1); // Hit
