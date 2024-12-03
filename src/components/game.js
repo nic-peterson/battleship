@@ -77,7 +77,13 @@ export const Game = () => {
   // TODO setScore for any arb amt vs 0
   // TODO need to call setScore after an attack
   const setScore = () => {
-    score = { player1: 0, player2: 0 };
+    score[player1.getName()] = 0;
+    score[player2.getName()] = 0;
+  };
+
+  const updateScore = (player) => {
+    const playerName = player.getName();
+    score[playerName] += 1;
   };
 
   const getScore = () => {
@@ -94,6 +100,13 @@ export const Game = () => {
     const opponentBoard = opponent.getGameboard();
 
     const attackResult = opponentBoard.receiveAttack(x, y);
+
+    // Update score if ship is sunk
+    console.log("attackResult", attackResult);
+    if (attackResult.sunk) {
+      console.log("currentPlayer", currentPlayer);
+      updateScore(currentPlayer);
+    }
 
     // Check if all ships are sunk
     gameOver = opponentBoard.areAllShipsSunk();

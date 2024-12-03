@@ -190,7 +190,7 @@ export const Gameboard = (boardSize = BOARD_SIZE, ships = []) => {
       hits.push({ x, y });
       return {
         result: CellStatus.HIT,
-        shipSunk: cell.ship.isSunk(),
+        sunk: cell.ship.isSunk(),
         coordinates: { x, y },
       };
     } else {

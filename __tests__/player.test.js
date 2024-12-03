@@ -43,7 +43,7 @@ describe("Player Methods", () => {
       // Assert
       expect(attackResult).toEqual({
         result: CellStatus.HIT,
-        shipSunk: false,
+        sunk: false,
         coordinates: { x: 3, y: 3 },
       });
       expect(ship.getHits()).toBe(1);

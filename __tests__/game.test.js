@@ -76,8 +76,24 @@ describe("Game Module", () => {
     expect(result).toEqual({ hit: true, sunk: false });
   });
 
+  test("attack should update score when a ship is sunk", () => {
+    const [player1, player2] = game.getPlayers();
+    const opponentBoard = player2.getGameboard();
+
+    // Mock receiveAttack to return a sunk ship
+    opponentBoard.receiveAttack = jest.fn().mockReturnValue({
+      hit: true,
+      sunk: true,
+    });
+
+    game.attack(2, 2);
+
+    const score = game.getScore();
+    expect(score).toEqual({ Alice: 1, Computer: 0 });
+  });
+
   test("score should initialize correctly", () => {
     const score = game.getScore();
-    expect(score).toEqual({ player1: 0, player2: 0 });
+    expect(score).toEqual({ Alice: 0, Computer: 0 });
   });
 });
