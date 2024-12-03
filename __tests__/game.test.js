@@ -3,7 +3,7 @@ import { Gameboard } from "../src/components/gameboard";
 import { Player } from "../src/components/player";
 import { UI } from "../src/components/ui";
 import { placeShipsRandomly } from "../src/helpers/placeShipsRandomly";
-import { BOARD_SIZE } from "../src/helpers/constants";
+import { BOARD_SIZE, ERROR_MESSAGES } from "../src/helpers/constants";
 import { battleships } from "../src/helpers/battleships";
 
 jest.mock("../src/components/ui");
@@ -90,6 +90,80 @@ describe("Game Module", () => {
 
     const score = game.getScore();
     expect(score).toEqual({ Alice: 1, Computer: 0 });
+  });
+
+  test("should throw error when attacking out-of-bounds coordinates", () => {
+    expect(() => game.attack(-1, 0)).toThrow(
+      ERROR_MESSAGES.INVALID_COORDINATES
+    );
+    expect(() => game.attack(0, BOARD_SIZE)).toThrow(
+      ERROR_MESSAGES.INVALID_COORDINATES
+    );
+    expect(() => game.attack("a", 5)).toThrow(
+      ERROR_MESSAGES.INVALID_COORDINATES
+    );
+  });
+
+  test("should throw error when attacking an already attacked coordinate", () => {
+    const [player1, player2] = game.getPlayers();
+    const opponentBoard = player2.getGameboard();
+
+    // Mock hasBeenAttacked to return true
+    opponentBoard.hasBeenAttacked = jest.fn().mockReturnValue(true);
+
+    expect(() => game.attack(0, 0)).toThrow(ERROR_MESSAGES.ALREADY_ATTACKED);
+  });
+
+  test("should not switch turns after an invalid attack", () => {
+    const initialPlayer = game.getCurrentPlayer();
+
+    // Attempt an invalid attack
+    try {
+      game.attack(-1, 0);
+    } catch (e) {
+      // Expected to throw an error
+    }
+
+    const currentPlayer = game.getCurrentPlayer();
+    expect(currentPlayer).toBe(initialPlayer);
+  });
+
+  test("getOpponent should return the correct opponent", () => {
+    const opponent = game.getOpponent();
+    const [player1, player2] = game.getPlayers();
+    expect(opponent).toBe(player2);
+
+    // Perform an attack to switch turns
+    game.attack(0, 0);
+
+    const newOpponent = game.getOpponent();
+    expect(newOpponent).toBe(player1);
+  });
+
+  test("resetGame should reset the game state", () => {
+    game.attack(0, 0);
+    expect(game.getCurrentPlayer()).not.toBe(game.getPlayers()[0]);
+
+    game.resetGame();
+    expect(game.getCurrentPlayer()).toBe(game.getPlayers()[0]);
+    expect(game.isGameOver()).toBe(false);
+    expect(game.getScore()).toEqual({ Alice: 0, Computer: 0 });
+  });
+
+  test.skip("should declare game over when all opponent ships are sunk without mocks", () => {
+    const [player1, player2] = game.getPlayers();
+    const opponentBoard = player2.getGameboard();
+
+    // Get all ship positions
+    const ships = opponentBoard.getShips();
+    ships.forEach((ship) => {
+      const positions = ship.getPositions();
+      positions.forEach(({ x, y }) => {
+        game.attack(x, y);
+      });
+    });
+
+    expect(game.isGameOver()).toBe(true);
   });
 
   test("score should initialize correctly", () => {

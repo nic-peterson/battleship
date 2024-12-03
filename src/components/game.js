@@ -62,6 +62,14 @@ export const Game = () => {
     }
   };
 
+  const resetGame = () => {
+    const { player1Gameboard, player2Gameboard } = initializeGameBoards();
+    initializePlayers(player1Gameboard, player2Gameboard);
+    currentPlayer = player1;
+    gameOver = false;
+    setScore();
+  };
+
   const getPlayers = () => {
     return [player1, player2];
   };
@@ -70,12 +78,14 @@ export const Game = () => {
     return currentPlayer;
   };
 
+  const getOpponent = () => {
+    return currentPlayer === player1 ? player2 : player1;
+  };
+
   const isGameOver = () => {
     return gameOver;
   };
 
-  // TODO setScore for any arb amt vs 0
-  // TODO need to call setScore after an attack
   const setScore = () => {
     score[player1.getName()] = 0;
     score[player2.getName()] = 0;
@@ -99,6 +109,22 @@ export const Game = () => {
     const opponent = currentPlayer === player1 ? player2 : player1;
     const opponentBoard = opponent.getGameboard();
 
+    // Validate coordinates
+    if (
+      typeof x !== "number" ||
+      typeof y !== "number" ||
+      x < 0 ||
+      y < 0 ||
+      x >= BOARD_SIZE ||
+      y >= BOARD_SIZE
+    ) {
+      throw new Error(ERROR_MESSAGES.INVALID_COORDINATES);
+    }
+
+    if (opponentBoard.hasBeenAttacked(x, y)) {
+      throw new Error(ERROR_MESSAGES.ALREADY_ATTACKED);
+    }
+
     const attackResult = opponentBoard.receiveAttack(x, y);
 
     // Update score if ship is sunk
@@ -121,11 +147,12 @@ export const Game = () => {
 
   return {
     initGame,
+    resetGame,
     getPlayers,
     getCurrentPlayer,
+    getOpponent,
     isGameOver,
     getScore,
-    switchTurn,
     attack,
   };
 };
