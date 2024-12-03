@@ -9,6 +9,94 @@ const {
 } = require("../src/helpers/constants"); // Assuming that the constants are exported from a separate file
 // const { before } = require("lodash");
 
+// player.test.js
+
+describe("Player Module", () => {
+  let player;
+  let mockGameboard;
+
+  beforeEach(() => {
+    // Mock Gameboard
+    mockGameboard = {
+      receiveAttack: jest.fn(),
+      hasBeenAttacked: jest.fn(),
+      getSize: jest.fn().mockReturnValue(10), // Assuming a 10x10 board
+    };
+
+    // Initialize player
+    player = Player("human", "Alice", mockGameboard);
+  });
+
+  test("should initialize with correct name and type", () => {
+    expect(player.getName()).toBe("Alice");
+    expect(player.getType()).toBe("human");
+    expect(player.getGameboard()).toBe(mockGameboard);
+  });
+
+  test("should attack opponent's gameboard at specified coordinates", () => {
+    // Arrange
+    mockGameboard.hasBeenAttacked.mockReturnValue(false);
+    mockGameboard.receiveAttack.mockReturnValue({
+      result: "hit",
+      sunk: false,
+      coordinates: { x: 3, y: 3 },
+    });
+
+    // Act
+    const attackResult = player.attack(3, 3, mockGameboard);
+
+    // Assert
+    expect(mockGameboard.hasBeenAttacked).toHaveBeenCalledWith(3, 3);
+    expect(mockGameboard.receiveAttack).toHaveBeenCalledWith(3, 3);
+    expect(attackResult).toEqual({
+      result: "hit",
+      sunk: false,
+      coordinates: { x: 3, y: 3 },
+    });
+  });
+
+  test("should throw error when attacking already attacked coordinate", () => {
+    // Arrange
+    mockGameboard.hasBeenAttacked.mockReturnValue(true);
+
+    // Act & Assert
+    expect(() => player.attack(3, 3, mockGameboard)).toThrow(
+      "This coordinate has already been attacked."
+    );
+  });
+
+  test("should generate valid coordinates that have not been attacked", () => {
+    // Arrange
+    mockGameboard.hasBeenAttacked.mockReturnValue(false);
+
+    // Act
+    const [x, y] = player.getValidCoordinates(mockGameboard);
+
+    // Assert
+    expect(x).toBeGreaterThanOrEqual(0);
+    expect(x).toBeLessThan(10);
+    expect(y).toBeGreaterThanOrEqual(0);
+    expect(y).toBeLessThan(10);
+    expect(mockGameboard.hasBeenAttacked).toHaveBeenCalledWith(x, y);
+  });
+
+  test("should handle computer player generating valid attack coordinates", () => {
+    // Arrange
+    const computerPlayer = Player("computer", "Computer", mockGameboard);
+    mockGameboard.hasBeenAttacked.mockReturnValue(false);
+
+    // Act
+    const [x, y] = computerPlayer.getValidCoordinates(mockGameboard);
+
+    // Assert
+    expect(x).toBeGreaterThanOrEqual(0);
+    expect(x).toBeLessThan(10);
+    expect(y).toBeGreaterThanOrEqual(0);
+    expect(y).toBeLessThan(10);
+    expect(mockGameboard.hasBeenAttacked).toHaveBeenCalledWith(x, y);
+  });
+});
+/*
 describe("Player Methods", () => {
   let player;
   let humanGameboard;
@@ -117,3 +205,4 @@ describe("Player Methods", () => {
     });
   });
 });
+*/

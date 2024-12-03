@@ -14,11 +14,7 @@ export const Player = (type, name, gameboard) => {
       throw new Error(ERROR_MESSAGES.INVALID_COORDINATES);
     }
 
-    const attacks = opponentGameboard.getAllAttacks(); // Returns a Set of "x,y"
-
-    const coord = `${x},${y}`;
-
-    if (attacks.has(coord)) {
+    if (opponentGameboard.hasBeenAttacked(x, y)) {
       throw new Error(ERROR_MESSAGES.ALREADY_ATTACKED);
     }
 
