@@ -150,20 +150,66 @@ describe("Game Module", () => {
     expect(game.getScore()).toEqual({ Alice: 0, Computer: 0 });
   });
 
-  test.skip("should declare game over when all opponent ships are sunk without mocks", () => {
+  test("should declare game over when all opponent ships are sunk without mocks", () => {
     const [player1, player2] = game.getPlayers();
-    const opponentBoard = player2.getGameboard();
+    const player1Board = player1.getGameboard();
+    const player2Board = player2.getGameboard();
 
-    // Get all ship positions
-    const ships = opponentBoard.getShips();
-    ships.forEach((ship) => {
-      const positions = ship.getPositions();
-      positions.forEach(({ x, y }) => {
-        game.attack(x, y);
-      });
-    });
+    const player1Ships = player1Board.getPlacedShips();
+    const player2Ships = player2Board.getPlacedShips();
 
+    const player1ShipPositions = player1Ships.flatMap(
+      ({ positions }) => positions
+    );
+    const player2ShipPositions = player2Ships.flatMap(
+      ({ positions }) => positions
+    );
+
+    // Keep track of positions attacked
+    let player1AttackIndex = 0;
+    let player2AttackIndex = 0;
+
+    while (!game.isGameOver()) {
+      const currentPlayer = game.getCurrentPlayer();
+
+      if (currentPlayer === player1) {
+        // Player 1 attacks player 2's ship positions
+        if (player1AttackIndex < player2ShipPositions.length) {
+          const { x, y } = player2ShipPositions[player1AttackIndex++];
+          game.attack(x, y);
+        } else {
+          // If all positions have been attacked, attack random positions
+          const x = Math.floor(Math.random() * BOARD_SIZE);
+          const y = Math.floor(Math.random() * BOARD_SIZE);
+          try {
+            game.attack(x, y);
+          } catch (e) {
+            // Ignore errors for already attacked cells
+          }
+        }
+      } else {
+        // Player 2 (AI) attacks player 1's ship positions or random positions
+        if (player2AttackIndex < player1ShipPositions.length) {
+          const { x, y } = player1ShipPositions[player2AttackIndex++];
+          game.attack(x, y);
+        } else {
+          const x = Math.floor(Math.random() * BOARD_SIZE);
+          const y = Math.floor(Math.random() * BOARD_SIZE);
+          try {
+            game.attack(x, y);
+          } catch (e) {
+            // Ignore errors for already attacked cells
+          }
+        }
+      }
+    }
+
+    // At this point, the game should be over
     expect(game.isGameOver()).toBe(true);
+
+    // Optionally, check which player won
+    const winner = game.getCurrentPlayer();
+    expect(winner).toBe(player1); // Assuming player1 sank all opponent's ships first
   });
 
   test("score should initialize correctly", () => {

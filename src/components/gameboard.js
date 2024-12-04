@@ -26,7 +26,9 @@ export const Gameboard = (boardSize = BOARD_SIZE, ships = []) => {
     Array.from({ length: boardSize }, () => createCell())
   );
 
-  const placedShips = []; // Array to keep track of all ships placed
+  // Array to keep track of all ships placed
+  // {ship, positions}
+  const placedShips = [];
 
   const hits = []; // Array to keep track of all hits
 
@@ -37,6 +39,8 @@ export const Gameboard = (boardSize = BOARD_SIZE, ships = []) => {
   const getSize = () => boardSize;
 
   const getShips = () => ships;
+
+  const getPlacedShips = () => placedShips;
 
   /**
    * Places a ship on the gameboard at the specified coordinates and orientation.
@@ -145,6 +149,7 @@ export const Gameboard = (boardSize = BOARD_SIZE, ships = []) => {
    */
   const placeShipOnBoard = (ship, x, y, orientation) => {
     const shipLength = ship.getLength();
+    const positions = [];
 
     for (let i = 0; i < shipLength; i++) {
       const posX = orientation === ORIENTATIONS.HORIZONTAL ? x + i : x;
@@ -152,10 +157,11 @@ export const Gameboard = (boardSize = BOARD_SIZE, ships = []) => {
 
       board[posY][posX].ship = ship;
       board[posY][posX].status = CellStatus.SHIP;
+      positions.push({ x: posX, y: posY });
     }
 
     if (!placedShips.includes(ship)) {
-      placedShips.push(ship);
+      placedShips.push({ ship, positions });
     }
   };
 
@@ -225,7 +231,7 @@ export const Gameboard = (boardSize = BOARD_SIZE, ships = []) => {
    */
   const areAllShipsSunk = () => {
     if (placedShips.length === 0) return false;
-    return placedShips.every((ship) => ship.isSunk());
+    return placedShips.every((ship) => ship.ship.isSunk());
   };
 
   /**
@@ -279,6 +285,7 @@ export const Gameboard = (boardSize = BOARD_SIZE, ships = []) => {
     getMissedAttacks,
     getHits,
     getShips,
+    getPlacedShips,
     areAllShipsSunk,
     allShipsPlaced,
     hasBeenAttacked,

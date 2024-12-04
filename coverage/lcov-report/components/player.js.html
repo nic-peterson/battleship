@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">4.54% </span>
+                <span class="strong">45% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>1/22</span>
+                <span class='fraction'>9/20</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>3/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.26% </span>
+                <span class="strong">41.17% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>1/19</span>
+                <span class='fraction'>7/17</span>
             </div>
         
             
@@ -107,14 +107,10 @@
 <a name='L42'></a><a href='#L42'>42</a>
 <a name='L43'></a><a href='#L43'>43</a>
 <a name='L44'></a><a href='#L44'>44</a>
-<a name='L45'></a><a href='#L45'>45</a>
-<a name='L46'></a><a href='#L46'>46</a>
-<a name='L47'></a><a href='#L47'>47</a>
-<a name='L48'></a><a href='#L48'>48</a>
-<a name='L49'></a><a href='#L49'>49</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L45'></a><a href='#L45'>45</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">30x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -128,10 +124,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -140,13 +132,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">43x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">30x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">52x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">30x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -157,12 +149,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">30x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { BOARD_SIZE, ERROR_MESSAGES } from "../helpers/constants";
 &nbsp;
-export const createPlayer = <span class="fstat-no" title="function not covered" >(t</span>ype, name, gameboard) =&gt; {
-  const attack = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(x</span>, y, opponentGameboard) =&gt; {</span>
+export const Player = (type, name, gameboard) =&gt; {
+  const attack = <span class="fstat-no" title="function not covered" >(x</span>, y, opponentGameboard) =&gt; {
     // Validate coordinates
 <span class="cstat-no" title="statement not covered" >    if (</span>
       typeof x !== "number" ||
@@ -175,11 +167,7 @@ export const createPlayer = <span class="fstat-no" title="function not covered" 
 <span class="cstat-no" title="statement not covered" >      throw new Error(ERROR_MESSAGES.INVALID_COORDINATES);</span>
     }
 &nbsp;
-    const attacks = <span class="cstat-no" title="statement not covered" >opponentGameboard.getAllAttacks();</span> // Returns a Set of "x,y"
-&nbsp;
-    const coord = <span class="cstat-no" title="statement not covered" >`${x},${y}`;</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >    if (attacks.has(coord)) {</span>
+<span class="cstat-no" title="statement not covered" >    if (opponentGameboard.hasBeenAttacked(x, y)) {</span>
 <span class="cstat-no" title="statement not covered" >      throw new Error(ERROR_MESSAGES.ALREADY_ATTACKED);</span>
     }
 &nbsp;
@@ -188,13 +176,13 @@ export const createPlayer = <span class="fstat-no" title="function not covered" 
 <span class="cstat-no" title="statement not covered" >    return attackResult;</span>
   };
 &nbsp;
-  const getName = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >name;</span></span>
+  const getName = () =&gt; name;
 &nbsp;
-  const getType = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >type;</span></span>
+  const getType = <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >type;</span>
 &nbsp;
-  const getGameboard = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >gameboard;</span></span>
+  const getGameboard = () =&gt; gameboard;
 &nbsp;
-  const getValidCoordinates = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(o</span>pponentGameboard) =&gt; {</span>
+  const getValidCoordinates = <span class="fstat-no" title="function not covered" >(o</span>pponentGameboard) =&gt; {
     let x, y;
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    do {</span>
@@ -205,7 +193,7 @@ export const createPlayer = <span class="fstat-no" title="function not covered" 
 <span class="cstat-no" title="statement not covered" >    return [x, y];</span>
   };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return { attack, getName, getType, getGameboard, getValidCoordinates };</span>
+  return { attack, getName, getType, getGameboard, getValidCoordinates };
 };
 &nbsp;</pre></td></tr></table></pre>
 
@@ -214,7 +202,7 @@ export const createPlayer = <span class="fstat-no" title="function not covered" 
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-12-02T03:05:22.592Z
+                at 2024-12-04T02:00:12.197Z
             </div>
         <script src="../prettify.js"></script>
         <script>

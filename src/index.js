@@ -4,8 +4,6 @@ import { UI } from "./components/ui";
 
 const game = Game();
 game.initGame();
-
-// get the players from the game
 const [player1, player2] = game.getPlayers();
 
 // initialize the UI

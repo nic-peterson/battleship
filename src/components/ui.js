@@ -65,7 +65,7 @@ export const UI = (() => {
     UI.displayMessage("Game started");
   };
 
-  const renderBoard = (board, containerId) => {
+  const renderBoard = (board, containerId, isOwnBoard = false) => {
     const container = document.getElementById(containerId);
 
     if (!container) {

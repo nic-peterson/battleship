@@ -128,7 +128,6 @@ export const Game = () => {
     const attackResult = opponentBoard.receiveAttack(x, y);
 
     // Update score if ship is sunk
-    console.log("attackResult", attackResult);
     if (attackResult.sunk) {
       console.log("currentPlayer", currentPlayer);
       updateScore(currentPlayer);
