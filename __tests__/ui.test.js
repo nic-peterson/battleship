@@ -74,13 +74,13 @@ describe("UI", () => {
   });
 
   test("should update score", () => {
-    UI.setScore(player1, 5, player2, 3);
+    UI.updateScore(player1, 5, player2, 3);
     const scoreDiv = document.getElementById("score");
     expect(scoreDiv.textContent).toBe("Alice: 5 | Bob: 3");
   });
 
   test("should update current player", () => {
-    UI.setCurrentPlayer("Bob");
+    UI.updateCurrentPlayer("Bob");
     const currentPlayerDiv = document.getElementById("current-player");
     expect(currentPlayerDiv.textContent).toBe("Current Player: Bob");
   });
@@ -92,15 +92,24 @@ describe("UI", () => {
   });
 
   test("should render board correctly", () => {
+    // Create mock ship objects
+    const mockShipNotSunk = {
+      isSunk: jest.fn().mockReturnValue(false),
+    };
+
+    const mockShipSunk = {
+      isSunk: jest.fn().mockReturnValue(true),
+    };
+
     // Create a mock board
     const mockBoard = [
       [
         { ship: null, status: null },
-        { ship: {}, status: "hit" },
+        { ship: mockShipNotSunk, status: "hit" },
       ],
       [
         { ship: null, status: "miss" },
-        { ship: {}, status: null },
+        { ship: mockShipSunk, status: null },
       ],
     ];
 
@@ -112,16 +121,23 @@ describe("UI", () => {
 
     // Check cell classes
     const cellArray = Array.from(cells);
+
+    // Cell [0][0]
     expect(cellArray[0].classList.contains("ship")).toBe(false);
     expect(cellArray[0].classList.contains("hit")).toBe(false);
     expect(cellArray[0].classList.contains("miss")).toBe(false);
 
+    // Cell [0][1]
     expect(cellArray[1].classList.contains("ship")).toBe(true);
     expect(cellArray[1].classList.contains("hit")).toBe(true);
+    expect(cellArray[1].classList.contains("sunk")).toBe(false);
 
+    // Cell [1][0]
     expect(cellArray[2].classList.contains("miss")).toBe(true);
 
+    // Cell [1][1]
     expect(cellArray[3].classList.contains("ship")).toBe(true);
+    expect(cellArray[3].classList.contains("sunk")).toBe(true);
   });
 
   test("should throw an error if container ID is invalid", () => {
@@ -129,6 +145,29 @@ describe("UI", () => {
     expect(() => {
       UI.renderBoard(mockBoard, "invalid-id");
     }).toThrowError("Container not found");
+  });
+
+  test("renderBoard should not throw an error when container is found", () => {
+    const mockBoard = [[{ ship: null, status: null }]];
+    const container = document.createElement("div");
+    container.id = "valid-container";
+    document.body.appendChild(container);
+
+    expect(() => {
+      UI.renderBoard(mockBoard, "valid-container");
+    }).not.toThrow();
+  });
+
+  test("renderBoard should not display ships on opponent's board", () => {
+    const mockBoard = [[{ ship: {}, status: null }]];
+    const container = document.createElement("div");
+    container.id = "opponent-board";
+    document.body.appendChild(container);
+
+    UI.renderBoard(mockBoard, "opponent-board", false);
+
+    const cell = container.querySelector(".board-cell");
+    expect(cell.classList.contains("ship")).toBe(false);
   });
 
   test("should render empty board", () => {

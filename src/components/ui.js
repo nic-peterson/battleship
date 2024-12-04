@@ -41,9 +41,9 @@ export const UI = (() => {
 
     setHeading();
 
-    setScore(player1, 0, player2, 0);
+    updateScore(player1, 0, player2, 0);
 
-    setCurrentPlayer(player1.getName());
+    updateCurrentPlayer(player1.getName());
 
     const gameDiv = createElement("div", {
       id: "game",
@@ -59,10 +59,10 @@ export const UI = (() => {
       parent: gameDiv,
     });
 
-    renderBoard(player1.getGameboard().getBoard(), "player1-board");
+    renderBoard(player1.getGameboard().getBoard(), "player1-board", true);
     renderBoard(player2.getGameboard().getBoard(), "player2-board");
 
-    UI.displayMessage("Game started");
+    displayMessage("Game started");
   };
 
   const renderBoard = (board, containerId, isOwnBoard = false) => {
@@ -89,19 +89,35 @@ export const UI = (() => {
         cellElement.dataset.x = x;
         cellElement.dataset.y = y;
 
-        if (cell.ship) cellElement.classList.add("ship");
+        if (cell.ship && isOwnBoard) {
+          cellElement.classList.add("ship");
+          if (cell.ship.isSunk()) {
+            cellElement.classList.add("sunk");
+          }
+        }
+
         if (cell.status === "hit") cellElement.classList.add("hit");
         if (cell.status === "miss") cellElement.classList.add("miss");
       });
     });
   };
 
-  const displayMessage = (message) => {
+  const displayMessage = (message, type = "info", duration = 0) => {
     const messageDiv = document.getElementById("message");
-    if (messageDiv) messageDiv.textContent = message;
+    if (messageDiv) {
+      messageDiv.textContent = message;
+      messageDiv.className = `message ${type}`;
+
+      if (duration > 0) {
+        setTimeout(() => {
+          messageDiv.textContent = "";
+          messageDiv.className = "message";
+        }, duration);
+      }
+    }
   };
 
-  const setScore = (player1, player1Score, player2, player2Score) => {
+  const updateScore = (player1, player1Score, player2, player2Score) => {
     const scoreDiv =
       document.getElementById("score") ||
       createElement("div", { id: "score", parent: document.body });
@@ -109,19 +125,35 @@ export const UI = (() => {
     scoreDiv.textContent = `${player1.getName()}: ${player1Score} | ${player2.getName()}: ${player2Score}`;
   };
 
-  const setCurrentPlayer = (playerName) => {
+  const updateCurrentPlayer = (playerName) => {
     const currentPlayerDiv =
       document.getElementById("current-player") ||
       createElement("div", { id: "current-player", parent: document.body });
 
     currentPlayerDiv.textContent = `Current Player: ${playerName}`;
+    // Highlight the current player's section
+    document.querySelectorAll(".player-section").forEach((section) => {
+      section.classList.toggle(
+        "current",
+        section.querySelector("h2").textContent === playerName
+      );
+    });
   };
 
   const addBoardEventListeners = (boardContainerId, handleAttack) => {
     const container = document.getElementById(boardContainerId);
+
+    if (!container) {
+      throw new Error("Container not found");
+    }
+
     container.addEventListener("click", (event) => {
       const cell = event.target;
-      if (cell.classList.contains("board-cell")) {
+      if (
+        cell.classList.contains("board-cell") &&
+        !cell.classList.contains("hit") &&
+        !cell.classList.contains("miss")
+      ) {
         const x = parseInt(cell.dataset.x, 10);
         const y = parseInt(cell.dataset.y, 10);
         handleAttack(x, y);
@@ -129,12 +161,45 @@ export const UI = (() => {
     });
   };
 
+  const enableBoardInteraction = (boardContainerId) => {
+    const container = document.getElementById(boardContainerId);
+    container.classList.remove("disabled");
+  };
+
+  const disableBoardInteraction = (boardContainerId) => {
+    const container = document.getElementById(boardContainerId);
+    container.classList.add("disabled");
+  };
+
+  const showGameOverScreen = (winnerName) => {
+    const gameOverDiv = createElement("div", {
+      id: "game-over",
+      classes: ["overlay"],
+      parent: document.body,
+    });
+
+    createElement("h2", {
+      textContent: `${winnerName} wins!`,
+      parent: gameOverDiv,
+    });
+
+    const restartButton = createElement("button", {
+      textContent: "Play Again",
+      parent: gameOverDiv,
+    });
+
+    restartButton.addEventListener("click", () => {
+      // Logic to restart the game
+      location.reload(); // Simple way to reload the page
+    });
+  };
+
   return {
     initUI,
     renderBoard,
     displayMessage,
-    setScore,
-    setCurrentPlayer,
+    updateScore,
+    updateCurrentPlayer,
     addBoardEventListeners,
   };
 })();
