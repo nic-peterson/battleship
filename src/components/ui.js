@@ -1,3 +1,4 @@
+import { CellStatus } from "../helpers/constants";
 export const UI = (() => {
   // Helper to create and append an element
   const createElement = (tag, options = {}) => {
@@ -90,14 +91,17 @@ export const UI = (() => {
         cellElement.dataset.y = y;
 
         if (cell.ship && isOwnBoard) {
-          cellElement.classList.add("ship");
+          cellElement.classList.add(CellStatus.SHIP);
+
           if (cell.ship.isSunk()) {
-            cellElement.classList.add("sunk");
+            cellElement.classList.add(CellStatus.SUNK);
           }
         }
 
-        if (cell.status === "hit") cellElement.classList.add("hit");
-        if (cell.status === "miss") cellElement.classList.add("miss");
+        if (cell.status === CellStatus.HIT)
+          cellElement.classList.add(CellStatus.HIT);
+        if (cell.status === CellStatus.MISS)
+          cellElement.classList.add(CellStatus.MISS);
       });
     });
   };

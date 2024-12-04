@@ -4,6 +4,7 @@ export const CellStatus = {
   SHIP: "ship",
   HIT: "hit",
   MISS: "miss",
+  SUNK: "sunk",
 };
 
 export const ORIENTATIONS = {
