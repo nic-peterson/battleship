@@ -201,5 +201,6 @@ export const UI = (() => {
     updateScore,
     updateCurrentPlayer,
     addBoardEventListeners,
+    showGameOverScreen,
   };
 })();

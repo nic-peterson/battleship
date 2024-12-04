@@ -194,3 +194,57 @@ describe("UI", () => {
     expect(mockHandleAttack).toHaveBeenCalled();
   });
 });
+
+describe("UI - showGameOverScreen", () => {
+  let dom;
+  let container;
+
+  beforeEach(() => {
+    // Create a mock DOM environment
+    dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+    container = dom.window.document;
+    global.document = container;
+    global.location = { reload: jest.fn() }; // Mock location.reload
+  });
+
+  afterEach(() => {
+    global.document = undefined;
+    global.location = undefined;
+  });
+
+  test("should create a game-over overlay with the winner's name", () => {
+    const winnerName = "Alice";
+
+    // Call the showGameOverScreen method
+    UI.showGameOverScreen(winnerName);
+
+    // Check if the game-over overlay exists
+    const gameOverDiv = document.getElementById("game-over");
+    expect(gameOverDiv).not.toBeNull();
+    expect(gameOverDiv.classList.contains("overlay")).toBe(true);
+
+    // Check the winner's message
+    const winnerMessage = gameOverDiv.querySelector("h2");
+    expect(winnerMessage).not.toBeNull();
+    expect(winnerMessage.textContent).toBe("Alice wins!");
+
+    // Check for the restart button
+    const restartButton = gameOverDiv.querySelector("button");
+    expect(restartButton).not.toBeNull();
+    expect(restartButton.textContent).toBe("Play Again");
+  });
+
+  test("should reload the page when the restart button is clicked", () => {
+    const winnerName = "Bob";
+
+    // Call the showGameOverScreen method
+    UI.showGameOverScreen(winnerName);
+
+    // Simulate a button click
+    const restartButton = document.querySelector("#game-over button");
+    restartButton.click();
+
+    // Check if location.reload was called
+    expect(global.location.reload).toHaveBeenCalled();
+  });
+});
