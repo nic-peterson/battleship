@@ -129,7 +129,6 @@ export const Game = () => {
 
     // Update score if ship is sunk
     if (attackResult.sunk) {
-      console.log("currentPlayer", currentPlayer);
       updateScore(currentPlayer);
     }
 

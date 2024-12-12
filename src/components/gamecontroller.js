@@ -22,8 +22,7 @@ export const GameController = (game, ui) => {
     if (!container.dataset.listenerAdded) {
       container.addEventListener("click", (event) => {
         const cell = event.target;
-        console.log(`Cell clicked:`, cell.dataset);
-        console.log("Cell outerHTML:", cell.outerHTML);
+
         if (
           cell.classList.contains("board-cell") &&
           !cell.classList.contains("hit") &&
