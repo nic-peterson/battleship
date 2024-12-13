@@ -1,13 +1,4 @@
 const { Player } = require("../src/components/player");
-const { Gameboard } = require("../src/components/gameboard");
-const { Ship } = require("../src/components/ship");
-const {
-  ORIENTATIONS,
-  ERROR_MESSAGES,
-  CellStatus,
-  BOARD_SIZE,
-} = require("../src/helpers/constants"); // Assuming that the constants are exported from a separate file
-// const { before } = require("lodash");
 
 // player.test.js
 
@@ -24,7 +15,7 @@ describe("Player Module", () => {
     };
 
     // Initialize player
-    player = Player("human", "Alice", mockGameboard);
+    player = Player("human", "Alice", mockGameboard, "player1");
   });
 
   test("should initialize with correct name and type", () => {
@@ -94,6 +85,10 @@ describe("Player Module", () => {
     expect(y).toBeGreaterThanOrEqual(0);
     expect(y).toBeLessThan(10);
     expect(mockGameboard.hasBeenAttacked).toHaveBeenCalledWith(x, y);
+  });
+
+  test("should return player id", () => {
+    expect(player.getId()).toBe("player1");
   });
 });
 /*

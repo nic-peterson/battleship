@@ -31,6 +31,8 @@ export const GameController = (game, ui) => {
           const x = parseInt(cell.getAttribute("data-x"), 10);
           const y = parseInt(cell.getAttribute("data-y"), 10);
           handleAttack(x, y);
+          console.log("Attacking", x, y);
+          console.log("current player", game.getCurrentPlayer().getName());
         }
       });
       container.dataset.listenerAdded = true;
@@ -60,10 +62,14 @@ export const GameController = (game, ui) => {
   // Game Flow Management
   const handleAttack = (x, y) => {
     try {
+      console.log(`Handling attack at (${x}, ${y})`);
       const attackResult = game.attack(x, y);
+      console.log("Attack Result:", attackResult);
 
       const currentPlayer = game.getCurrentPlayer();
       const opponent = game.getOpponent();
+      console.log("Current Player:", currentPlayer.getName());
+      console.log("Opponent:", opponent.getName());
 
       ui.renderBoard(opponent.getGameboard().getBoard(), "player2-board");
       ui.displayMessage(attackResult.hit ? "Hit!" : "Miss!");
@@ -77,10 +83,13 @@ export const GameController = (game, ui) => {
         ui.showGameOverScreen(currentPlayer.getName());
         ui.disableBoardInteraction("player2-board");
       } else {
-        game.switchTurn();
+        console.log("Switching turn");
+        //game.switchTurn();
         ui.updateCurrentPlayer(game.getCurrentPlayer().getName());
       }
     } catch (error) {
+      console.error("Error in handleAttack:", error);
+
       ui.displayMessage(error.message);
     }
   };

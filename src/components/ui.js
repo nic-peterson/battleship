@@ -67,6 +67,10 @@ export const UI = (() => {
   };
 
   const renderBoard = (board, containerId, isOwnBoard = false) => {
+    console.log(
+      `Rendering board for ${containerId} | isOwnBoard: ${isOwnBoard}`
+    );
+    console.log("Board Data:", board);
     const container = document.getElementById(containerId);
 
     if (!container) {

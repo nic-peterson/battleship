@@ -36,8 +36,8 @@ export const Game = () => {
 
   const initializePlayers = (player1Gameboard, player2Gameboard) => {
     // Initialize Players
-    player1 = Player("human", "Alice", player1Gameboard);
-    player2 = Player("computer", "Computer", player2Gameboard);
+    player1 = Player("human", "Alice", player1Gameboard, "player1");
+    player2 = Player("computer", "Computer", player2Gameboard, "player2");
 
     return { player1, player2 };
   };

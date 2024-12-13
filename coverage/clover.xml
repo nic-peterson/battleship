@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1733975264235" clover="3.2.0">
-  <project timestamp="1733975264235" name="All files">
-    <metrics statements="45" coveredstatements="45" conditionals="19" coveredconditionals="19" methods="7" coveredmethods="7" elements="71" coveredelements="71" complexity="0" loc="45" ncloc="45" packages="1" files="1" classes="1"/>
+<coverage generated="1734060676350" clover="3.2.0">
+  <project timestamp="1734060676350" name="All files">
+    <metrics statements="52" coveredstatements="52" conditionals="19" coveredconditionals="19" methods="7" coveredmethods="7" elements="78" coveredelements="78" complexity="0" loc="52" ncloc="52" packages="1" files="1" classes="1"/>
     <file name="gamecontroller.js" path="/Users/nicpeterson/repos/js-battleship/src/components/gamecontroller.js">
-      <metrics statements="45" coveredstatements="45" conditionals="19" coveredconditionals="19" methods="7" coveredmethods="7"/>
+      <metrics statements="52" coveredstatements="52" conditionals="19" coveredconditionals="19" methods="7" coveredmethods="7"/>
       <line num="1" count="1" type="stmt"/>
       <line num="3" count="19" type="stmt"/>
       <line num="4" count="2" type="stmt"/>
@@ -21,34 +21,41 @@
       <line num="31" count="5" type="stmt"/>
       <line num="32" count="5" type="stmt"/>
       <line num="33" count="5" type="stmt"/>
-      <line num="36" count="8" type="stmt"/>
-      <line num="40" count="19" type="stmt"/>
-      <line num="41" count="3" type="stmt"/>
-      <line num="43" count="3" type="cond" truecount="2" falsecount="0"/>
-      <line num="44" count="2" type="stmt"/>
-      <line num="47" count="1" type="stmt"/>
-      <line num="50" count="19" type="stmt"/>
-      <line num="51" count="2" type="stmt"/>
-      <line num="53" count="2" type="cond" truecount="2" falsecount="0"/>
-      <line num="54" count="1" type="stmt"/>
-      <line num="57" count="1" type="stmt"/>
-      <line num="61" count="19" type="stmt"/>
-      <line num="62" count="10" type="stmt"/>
-      <line num="63" count="10" type="stmt"/>
-      <line num="65" count="9" type="stmt"/>
-      <line num="66" count="9" type="stmt"/>
-      <line num="68" count="9" type="stmt"/>
-      <line num="69" count="8" type="cond" truecount="2" falsecount="0"/>
-      <line num="71" count="8" type="cond" truecount="2" falsecount="0"/>
-      <line num="72" count="2" type="stmt"/>
-      <line num="73" count="2" type="stmt"/>
-      <line num="76" count="8" type="cond" truecount="2" falsecount="0"/>
-      <line num="77" count="1" type="stmt"/>
-      <line num="78" count="1" type="stmt"/>
-      <line num="80" count="7" type="stmt"/>
-      <line num="81" count="7" type="stmt"/>
-      <line num="84" count="2" type="stmt"/>
-      <line num="88" count="19" type="stmt"/>
+      <line num="34" count="5" type="stmt"/>
+      <line num="35" count="5" type="stmt"/>
+      <line num="38" count="8" type="stmt"/>
+      <line num="42" count="19" type="stmt"/>
+      <line num="43" count="3" type="stmt"/>
+      <line num="45" count="3" type="cond" truecount="2" falsecount="0"/>
+      <line num="46" count="2" type="stmt"/>
+      <line num="49" count="1" type="stmt"/>
+      <line num="52" count="19" type="stmt"/>
+      <line num="53" count="2" type="stmt"/>
+      <line num="55" count="2" type="cond" truecount="2" falsecount="0"/>
+      <line num="56" count="1" type="stmt"/>
+      <line num="59" count="1" type="stmt"/>
+      <line num="63" count="19" type="stmt"/>
+      <line num="64" count="10" type="stmt"/>
+      <line num="65" count="10" type="stmt"/>
+      <line num="66" count="10" type="stmt"/>
+      <line num="67" count="9" type="stmt"/>
+      <line num="69" count="9" type="stmt"/>
+      <line num="70" count="9" type="stmt"/>
+      <line num="71" count="9" type="stmt"/>
+      <line num="72" count="9" type="stmt"/>
+      <line num="74" count="9" type="stmt"/>
+      <line num="75" count="8" type="cond" truecount="2" falsecount="0"/>
+      <line num="77" count="8" type="cond" truecount="2" falsecount="0"/>
+      <line num="78" count="2" type="stmt"/>
+      <line num="79" count="2" type="stmt"/>
+      <line num="82" count="8" type="cond" truecount="2" falsecount="0"/>
+      <line num="83" count="1" type="stmt"/>
+      <line num="84" count="1" type="stmt"/>
+      <line num="86" count="7" type="stmt"/>
+      <line num="88" count="7" type="stmt"/>
+      <line num="91" count="2" type="stmt"/>
+      <line num="93" count="2" type="stmt"/>
+      <line num="97" count="19" type="stmt"/>
     </file>
   </project>
 </coverage>
