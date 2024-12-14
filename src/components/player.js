@@ -1,6 +1,8 @@
 import { BOARD_SIZE, ERROR_MESSAGES } from "../helpers/constants";
 
-export const Player = (type, name, gameboard, id) => {
+export const Player = (type, name, id) => {
+  let gameboard = null; // Initialize without a gameboard
+
   const attack = (x, y, opponentGameboard) => {
     // Validate coordinates
     if (
@@ -31,6 +33,10 @@ export const Player = (type, name, gameboard, id) => {
 
   const getGameboard = () => gameboard;
 
+  const setGameboard = (newGameboard) => {
+    gameboard = newGameboard;
+  };
+
   const getValidCoordinates = (opponentGameboard) => {
     let x, y;
 
@@ -42,5 +48,13 @@ export const Player = (type, name, gameboard, id) => {
     return [x, y];
   };
 
-  return { attack, getName, getId, getType, getGameboard, getValidCoordinates };
+  return {
+    attack,
+    getName,
+    getId,
+    getType,
+    getGameboard,
+    setGameboard,
+    getValidCoordinates,
+  };
 };
