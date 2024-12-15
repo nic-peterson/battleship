@@ -26,7 +26,6 @@ describe("Gameboard Methods", () => {
 
   describe("Gameboard Initialization", () => {
     test("should create a 10x10 gameboard array initialized with empty objects", () => {
-      gameboard = Gameboard(BOARD_SIZE, battleships);
       const board = gameboard.getBoard();
 
       // Check that the board has 10 rows
@@ -46,13 +45,13 @@ describe("Gameboard Methods", () => {
         });
       });
     });
-    test.each([8, 10, 12])("should create a %dx%d gameboard", (boardSize) => {
-      const gameboard = Gameboard(boardSize, battleships);
+    test.each([8, 10, 12])("should create a %dx%d gameboard", (size) => {
+      const gameboard = Gameboard(size, battleships);
       const board = gameboard.getBoard();
       expect(board.length).toBe(gameboard.getSize());
-      expect(board.length).toBe(boardSize);
+      expect(board.length).toBe(size);
       board.forEach((row) => {
-        expect(row.length).toBe(boardSize);
+        expect(row.length).toBe(size);
       });
     });
     test("should create a gameboard with the specified ships", () => {
@@ -143,6 +142,31 @@ describe("Gameboard Methods", () => {
           [2, 2],
           [2, 3],
         ]);
+      });
+
+      test("should place all ships without errors", () => {
+        // Attempt to place all ships randomly
+        expect(() => {
+          gameboard.placeShipsRandomly();
+        }).not.toThrow();
+
+        // Retrieve the placed ships from the gameboard
+        const placedShips = gameboard.getPlacedShips();
+
+        // Check that the number of placed ships equals the number of ships to place
+        expect(placedShips.length).toBe(battleships.length);
+
+        // Verify that the total ship length matches the expected total
+        const totalPlacedShipCells = placedShips.reduce(
+          (sum, { ship }) => sum + ship.getLength(),
+          0
+        );
+        const expectedTotal = battleships.reduce(
+          (sum, ship) => sum + ship.length,
+          0
+        );
+
+        expect(totalPlacedShipCells).toBe(expectedTotal);
       });
     });
 
