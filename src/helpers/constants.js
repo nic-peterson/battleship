@@ -1,3 +1,5 @@
+import { Player } from "../components/player";
+
 // src/constants.js
 export const CellStatus = {
   EMPTY: "empty",
@@ -24,4 +26,17 @@ export const ERROR_MESSAGES = {
   ALREADY_ATTACKED: "This coordinate has already been attacked.",
   PLAYER1_BOARD_FAILED: "Player 1 Gameboard creation failed.",
   PLAYER2_BOARD_FAILED: "Player 2 Gameboard creation failed.",
+};
+
+export const PLAYERS = {
+  Player1: {
+    type: "human",
+    name: "Alice",
+    id: "player1",
+  },
+  Player2: {
+    type: "cpu",
+    name: "Computer",
+    id: "player2",
+  },
 };
