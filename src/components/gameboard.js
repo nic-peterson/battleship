@@ -58,7 +58,7 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
     }
   };
 
-  const initialize = () => {
+  const initializeGame = () => {
     board = createBoard();
     //placeShipsRandomly();
   };
@@ -171,12 +171,21 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
   // ? Public methods
 
   const getBoard = () => board;
-
   const getSize = () => size;
-
   const getShips = () => ships;
-
   const getPlacedShips = () => placedShips;
+  /**
+   * Retrieves the coordinates of all cells that have been hit.
+   *
+   * @returns {Array<{x: number, y: number}>} An array of objects representing the coordinates of hit cells.
+   */
+  const getHits = () => hits;
+  /**
+   * Retrieves the coordinates of missed attacks on the game board.
+   *
+   * @returns {Array<{x: number, y: number}>} An array of objects representing the coordinates of missed attacks.
+   */
+  const getMissedAttacks = () => misses;
 
   /**
    * Places a ship on the gameboard at the specified coordinates and orientation.
@@ -213,6 +222,7 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
     for (let battleship of ships) {
       let placed = false;
       let attempts = 0;
+      const ship = Ship(battleship.length);
 
       while (!placed && attempts < MAX_ATTEMPTS) {
         attempts++;
@@ -223,15 +233,13 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
           orientations[Math.floor(Math.random() * orientations.length)];
 
         try {
-          const ship = Ship(battleship.length);
-
           placeShip(ship, x, y, orientation);
           placed = true;
         } catch (error) {
           // Ignore error and try again
           if (attempts >= MAX_ATTEMPTS) {
             throw new Error(
-              `Failed to place ship after ${MAX_ATTEMPTS} attempts`
+              `Unable to place ship length ${battleship.length} after ${MAX_ATTEMPTS_PER_SHIP} attempts`
             );
           }
         }
@@ -302,24 +310,6 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
   };
 
   /**
-   * Retrieves the coordinates of missed attacks on the game board.
-   *
-   * @returns {Array<{x: number, y: number}>} An array of objects representing the coordinates of missed attacks.
-   */
-  const getMissedAttacks = () => {
-    return misses;
-  };
-
-  /**
-   * Retrieves the coordinates of all cells that have been hit.
-   *
-   * @returns {Array<{x: number, y: number}>} An array of objects representing the coordinates of hit cells.
-   */
-  const getHits = () => {
-    return hits;
-  };
-
-  /**
    * Checks if all placed ships are sunk.
    *
    * @returns {boolean} True if all placed ships are sunk, false otherwise.
@@ -358,13 +348,16 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
    * @returns {void}
    */
   const reset = () => {
-    board = createBoard();
+    initializeGame();
     placedShips = [];
+    hits = [];
+    misses = [];
+    allAttacks.clear();
     // placeShipsRandomly();
   };
 
   // ! Initialize immediately on creation
-  initialize();
+  initializeGame();
 
   return {
     getBoard,
