@@ -1,10 +1,9 @@
 import { Player } from "./player";
 import { Gameboard } from "./gameboard";
-import { UI } from "./ui";
+
 import { placeShipsRandomly } from "../helpers/placeShipsRandomly";
 import { BOARD_SIZE, ERROR_MESSAGES } from "../helpers/constants";
 import { battleships } from "../helpers/battleships";
-import { set } from "lodash";
 
 export const Game = () => {
   let currentPlayer;
@@ -16,56 +15,9 @@ export const Game = () => {
   // Private Methods
 
   /**
-   * initializeGameBoards
-   *
-   * Initializes game boards for both players, places ships randomly,
-   * and ensures that the boards are correctly created.
-   *
-   * @returns {Object} - Contains player1Gameboard and player2Gameboard
-   */
-  const initializeGameBoards = () => {
-    // Initialize Gameboards
-    const player1Gameboard = Gameboard(BOARD_SIZE, [...battleships]);
-    const player2Gameboard = Gameboard(BOARD_SIZE, [...battleships]);
-
-    // Ensure gameboards are created correctly
-    if (!player1Gameboard || !player1Gameboard.getBoard) {
-      throw new Error(ERROR_MESSAGES.PLAYER1_BOARD_FAILED);
-    }
-
-    if (!player2Gameboard || !player2Gameboard.getBoard) {
-      throw new Error(ERROR_MESSAGES.PLAYER2_BOARD_FAILED);
-    }
-
-    // Place ships randomly
-    placeShipsRandomly(player1Gameboard);
-    placeShipsRandomly(player2Gameboard);
-
-    return { player1Gameboard, player2Gameboard };
-  };
-
-  /**
-   * initializePlayers
-   *
-   * Creates Player instances and associates them with their gameboards.
-   *
-   * @param {Object} playerGameboards - Contains player1Gameboard and player2Gameboard
-   * @returns {Object} - Contains player1 and player2
-   */
-  const initializePlayers = (playerGameboards) => {
-    const { player1Gameboard, player2Gameboard } = playerGameboards;
-
-    // Initialize Players with type, name, gameboard, and identifier
-    player1 = Player("human", "Alice", player1Gameboard, "player1");
-    player2 = Player("computer", "Computer", player2Gameboard, "player2");
-
-    return { player1, player2 };
-  };
-
-  /**
    * setScore
    *
-   * Initializes or resets the score for both players.
+   * s or resets the score for both players.
    */
   const setScore = () => {
     score[player1.getName()] = 0;
@@ -93,23 +45,40 @@ export const Game = () => {
    *
    * @returns {void}
    */
-  const initGame = () => {
-    try {
-      // Step 1: Initialize Gameboards
-      const playerGameboards = initializeGameBoards();
-
-      // Step 2: Initialize Players with their respective Gameboards
-      const players = initializePlayers(playerGameboards);
-
-      // Step 3: Set the current player to player1 (e.g., Player 1 starts)
-      currentPlayer = players.player1;
-
-      // Step 4: Initialize scores
-      setScore();
-    } catch (error) {
-      console.error("Game initialization error:", error);
-      throw error;
+  const initializeGame = (p1, p2) => {
+    if (!p1?.getName || !p2?.getName) {
+      throw new Error("Invalid player objects provided");
     }
+
+    if (!p1 || !p2) {
+      throw new Error("Both players are required to initialize game.");
+    }
+
+    if (p1.getName() === p2.getName()) {
+      throw new Error("Players must have unique names.");
+    }
+
+    if (!p1.getGameboard() || !p2.getGameboard()) {
+      throw new Error(
+        "Both players must have gameboards before initializing game."
+      );
+    }
+
+    player1 = p1;
+    player2 = p2;
+
+    // Ship placement is managed via the game controller
+    // e.g., gameController.placeShipsForPlayer(player1);
+    // e.g., gameController.placeShipsForPlayer(player2);
+
+    // ! player1.getGameboard().placeShipsRandomly();
+    // ! player2.getGameboard().placeShipsRandomly();
+
+    setCurrentPlayer(player1);
+    setScore();
+    setGameOver(false);
+
+    return { player1, player2, currentPlayer }; // Return initial state for testing
   };
 
   /**
@@ -122,21 +91,16 @@ export const Game = () => {
    */
   const resetGame = () => {
     try {
-      // Re-initialize Gameboards and Players
-      const playerGameboards = initializeGameBoards();
-      const players = initializePlayers(playerGameboards);
-
-      // Reset current player to player1
-      currentPlayer = players.player1;
-
-      // Reset game over status
-      gameOver = false;
-
-      // Reset scores
+      if (!player1 || !player2) {
+        throw new Error("Game not initialized");
+      }
+      setCurrentPlayer(player1);
       setScore();
+      setGameOver(false);
 
-      // Optional: Reset UI or other components if necessary
-      // UI.resetUI();
+      // Reset player gameboards
+      player1.getGameboard().reset();
+      player2.getGameboard().reset();
     } catch (error) {
       console.error("Game reset error:", error);
       throw error;
@@ -156,7 +120,7 @@ export const Game = () => {
       console.warn("Cannot switch turn. The game is already over.");
       return;
     }
-    currentPlayer = currentPlayer === player1 ? player2 : player1;
+    setCurrentPlayer(currentPlayer === player1 ? player2 : player1);
     console.log(`Switched turn to: ${currentPlayer.getName()}`);
   };
 
@@ -236,6 +200,17 @@ export const Game = () => {
   };
 
   /**
+   * setCurrentPlayer
+   * Direct state management method, primarily for testing/initialization
+   */
+  const setCurrentPlayer = (player) => {
+    if (!player || ![player1, player2].includes(player)) {
+      throw new Error("Invalid player provided");
+    }
+    currentPlayer = player;
+  };
+
+  /**
    * getOpponent
    *
    * Returns the opponent of the current player.
@@ -262,10 +237,10 @@ export const Game = () => {
    *
    * Manually sets the game over status (useful for testing).
    *
-   * @param {boolean} value - The new game over status
+   * @param {boolean} status - The new game over status
    */
-  const setGameOver = (value) => {
-    gameOver = value;
+  const setGameOver = (status) => {
+    gameOver = status;
   };
 
   /**
@@ -280,7 +255,7 @@ export const Game = () => {
   };
 
   return {
-    initGame,
+    initializeGame,
     resetGame,
     getPlayers,
     getCurrentPlayer,

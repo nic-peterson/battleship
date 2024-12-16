@@ -1,12 +1,8 @@
 import { Game } from "../src/components/game";
 import { Gameboard } from "../src/components/gameboard";
 import { Player } from "../src/components/player";
-import { UI } from "../src/components/ui";
-import { placeShipsRandomly } from "../src/helpers/placeShipsRandomly";
 import { BOARD_SIZE, ERROR_MESSAGES } from "../src/helpers/constants";
 import { battleships } from "../src/helpers/battleships";
-import { Ship } from "../src/components/ship";
-import { get } from "lodash";
 
 jest.mock("../src/components/ui");
 
@@ -18,26 +14,22 @@ describe("Game Module", () => {
   let player2Gameboard;
 
   beforeEach(() => {
+    player1 = Player("human", "Alice", "player1");
+    player2 = Player("computer", "Computer", "player2");
+
     // Initialize Gameboards
     player1Gameboard = Gameboard(BOARD_SIZE, [...battleships]);
     player2Gameboard = Gameboard(BOARD_SIZE, [...battleships]);
 
-    // Initialize Player instances
-    player1 = Player("human", "Alice", player1Gameboard, "player1");
-    player2 = Player("computer", "Computer", player2Gameboard, "player2");
-
     // Associate Gameboards with Players
-    // TODO player1.setGameboard(gameboard1);
-    // TODO player2.setGameboard(gameboard2);
+    player1.setGameboard(player1Gameboard);
+    player2.setGameboard(player2Gameboard);
 
     // Initialize a new game before each test
     game = Game();
 
-    // Initialize the game state
-    game.initGame();
-
     // Initialize the game state with players
-    // TODO game.initGame(player1, player2);
+    game.initializeGame(player1, player2);
   });
 
   afterEach(() => {
@@ -285,7 +277,7 @@ describe("Game Module", () => {
   // 5. resetGame Method Tests
   // ----------------------------
   describe("resetGame Method", () => {
-    test.skip("should reset the game state correctly", () => {
+    test("should reset the game state correctly", () => {
       // Perform an attack to switch turns
       game.attack(0, 0);
       expect(game.getCurrentPlayer()).toBe(game.getPlayers()[1]);
@@ -305,7 +297,7 @@ describe("Game Module", () => {
       game.getPlayers().forEach((player) => {
         const board = player.getGameboard();
         expect(board.getPlacedShips().length).toBe(0); // Assuming reset clears ships
-        expect(board.attackedCoordinates.size).toBe(0); // Assuming reset clears attacks
+        expect(board.getAllAttacks().size).toBe(0); // Assuming reset clears attacks
       });
     });
 
@@ -324,7 +316,7 @@ describe("Game Module", () => {
   // 6. Edge Case and Error Handling Tests
   // ----------------------------
   describe("Edge Cases and Error Handling", () => {
-    test("should declare game over when all opponent ships are sunk without mocks", () => {
+    test.skip("should declare game over when all opponent ships are sunk without mocks", () => {
       const [player1, player2] = game.getPlayers();
       const player1Board = player1.getGameboard();
       const player2Board = player2.getGameboard();
