@@ -8,6 +8,8 @@ describe("UI", () => {
   let player1;
   let player2;
 
+  let ui;
+
   beforeEach(() => {
     dom = new JSDOM(
       '<!DOCTYPE html><div id="board"></div><div id="message"></div>'
@@ -33,8 +35,9 @@ describe("UI", () => {
       getGameboard: jest.fn().mockReturnValue(mockGameboard),
     };
 
+    ui = UI();
     // Initialize the UI
-    UI.initUI(player1, player2);
+    ui.initUI(player1, player2);
   });
 
   afterEach(() => {
@@ -56,7 +59,7 @@ describe("UI", () => {
     player1.getName.mockReturnValue("Dynamic Player 1");
     player2.getName.mockReturnValue("Dynamic Player 2");
 
-    UI.initUI(player1, player2);
+    ui.initUI(player1, player2);
 
     const playerSections = document.querySelectorAll(".player-section h2");
     expect(playerSections[0].textContent).toBe("Dynamic Player 1");
@@ -74,19 +77,19 @@ describe("UI", () => {
   });
 
   test("should update score", () => {
-    UI.updateScore(player1, 5, player2, 3);
+    ui.updateScore(player1, 5, player2, 3);
     const scoreDiv = document.getElementById("score");
     expect(scoreDiv.textContent).toBe("Alice: 5 | Bob: 3");
   });
 
   test("should update current player", () => {
-    UI.updateCurrentPlayer("Bob");
+    ui.updateCurrentPlayer("Bob");
     const currentPlayerDiv = document.getElementById("current-player");
     expect(currentPlayerDiv.textContent).toBe("Current Player: Bob");
   });
 
   test("should display messages", () => {
-    UI.displayMessage("Test message");
+    ui.displayMessage("Test message");
     const messageDiv = document.getElementById("message");
     expect(messageDiv.textContent).toBe("Test message");
   });
@@ -113,7 +116,7 @@ describe("UI", () => {
       ],
     ];
 
-    UI.renderBoard(mockBoard, "player1-board", true);
+    ui.renderBoard(mockBoard, "player1-board", true);
     const boardContainer = document.getElementById("player1-board");
     expect(boardContainer).not.toBeNull();
     const cells = boardContainer.querySelectorAll(".board-cell");
@@ -143,7 +146,7 @@ describe("UI", () => {
   test("should throw an error if container ID is invalid", () => {
     const mockBoard = [[{ ship: null, status: null }]];
     expect(() => {
-      UI.renderBoard(mockBoard, "invalid-id");
+      ui.renderBoard(mockBoard, "invalid-id");
     }).toThrowError("Container not found");
   });
 
@@ -154,7 +157,7 @@ describe("UI", () => {
     document.body.appendChild(container);
 
     expect(() => {
-      UI.renderBoard(mockBoard, "valid-container");
+      ui.renderBoard(mockBoard, "valid-container");
     }).not.toThrow();
   });
 
@@ -164,7 +167,7 @@ describe("UI", () => {
     container.id = "opponent-board";
     document.body.appendChild(container);
 
-    UI.renderBoard(mockBoard, "opponent-board", false);
+    ui.renderBoard(mockBoard, "opponent-board", false);
 
     const cell = container.querySelector(".board-cell");
     expect(cell.classList.contains("ship")).toBe(false);
@@ -172,7 +175,7 @@ describe("UI", () => {
 
   test("should render empty board", () => {
     const mockBoard = [];
-    UI.renderBoard(mockBoard, "player1-board");
+    ui.renderBoard(mockBoard, "player1-board");
     const boardContainer = document.getElementById("player1-board");
     expect(boardContainer.children.length).toBe(0);
   });
@@ -184,9 +187,9 @@ describe("UI", () => {
     const mockBoard = [[{ ship: null, status: null }]];
 
     // Render the board before adding event listeners
-    UI.renderBoard(mockBoard, "player2-board");
+    ui.renderBoard(mockBoard, "player2-board");
 
-    UI.addBoardEventListeners("player2-board", mockHandleAttack);
+    ui.addBoardEventListeners("player2-board", mockHandleAttack);
 
     const cell = document.querySelector("#player2-board .board-cell");
     cell.click();
@@ -198,6 +201,7 @@ describe("UI", () => {
 describe("UI - showGameOverScreen", () => {
   let dom;
   let container;
+  let ui;
 
   beforeEach(() => {
     // Create a mock DOM environment
@@ -205,6 +209,9 @@ describe("UI - showGameOverScreen", () => {
     container = dom.window.document;
     global.document = container;
     global.location = { reload: jest.fn() }; // Mock location.reload
+    ui = UI();
+    // Initialize the UI
+    // ui.initUI(player1, player2);
   });
 
   afterEach(() => {
@@ -216,7 +223,7 @@ describe("UI - showGameOverScreen", () => {
     const winnerName = "Alice";
 
     // Call the showGameOverScreen method
-    UI.showGameOverScreen(winnerName);
+    ui.showGameOverScreen(winnerName);
 
     // Check if the game-over overlay exists
     const gameOverDiv = document.getElementById("game-over");
@@ -238,7 +245,7 @@ describe("UI - showGameOverScreen", () => {
     const winnerName = "Bob";
 
     // Call the showGameOverScreen method
-    UI.showGameOverScreen(winnerName);
+    ui.showGameOverScreen(winnerName);
 
     // Simulate a button click
     const restartButton = document.querySelector("#game-over button");

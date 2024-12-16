@@ -1,5 +1,7 @@
+// ui.js
 import { CellStatus } from "../helpers/constants";
-export const UI = (() => {
+
+export const UI = () => {
   // Helper to create and append an element
   const createElement = (tag, options = {}) => {
     const element = document.createElement(tag);
@@ -10,7 +12,7 @@ export const UI = (() => {
     return element;
   };
 
-  // Private
+  // Private methods
   const setHeading = () => {
     createElement("h1", {
       textContent: "Battleship",
@@ -36,7 +38,7 @@ export const UI = (() => {
     });
   };
 
-  // Public
+  // Public methods
   const initUI = (player1, player2) => {
     const players = [player1, player2];
 
@@ -61,20 +63,16 @@ export const UI = (() => {
     });
 
     renderBoard(player1.getGameboard().getBoard(), "player1-board", true);
-    renderBoard(player2.getGameboard().getBoard(), "player2-board");
+    renderBoard(player2.getGameboard().getBoard(), "player2-board", false);
 
     displayMessage("Game started");
   };
 
   const renderBoard = (board, containerId, isOwnBoard = false) => {
-    console.log(
-      `Rendering board for ${containerId} | isOwnBoard: ${isOwnBoard}`
-    );
-    console.log("Board Data:", board);
     const container = document.getElementById(containerId);
 
     if (!container) {
-      throw new Error("Container not found"); // Explicit error for invalid container ID
+      throw new Error("Container not found");
     }
 
     container.innerHTML = ""; // Clear previous content
@@ -210,5 +208,7 @@ export const UI = (() => {
     updateCurrentPlayer,
     addBoardEventListeners,
     showGameOverScreen,
+    enableBoardInteraction,
+    disableBoardInteraction,
   };
-})();
+};
