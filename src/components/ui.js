@@ -68,6 +68,45 @@ export const UI = () => {
     displayMessage("Game started");
   };
 
+  const resetUI = () => {
+    // Remove the game container without affecting #message
+    const gameContainer = document.getElementById("game");
+    if (gameContainer) {
+      // Remove all child elements except #message
+      const messageDiv = document.getElementById("message");
+      gameContainer.innerHTML = ""; // Clear all children
+      if (messageDiv) {
+        gameContainer.appendChild(messageDiv); // Re-add messageDiv if necessary
+      }
+    }
+
+    // Remove the heading
+    const heading = document.querySelector("h1");
+    if (heading) {
+      heading.remove();
+    }
+
+    // Remove the score div
+    const scoreDiv = document.getElementById("score");
+    if (scoreDiv) {
+      scoreDiv.remove();
+    }
+
+    // Remove the current player div
+    const currentPlayerDiv = document.getElementById("current-player");
+    if (currentPlayerDiv) {
+      currentPlayerDiv.remove();
+    }
+
+    // Clear the message div's text content without removing it
+    const messageDiv = document.getElementById("message");
+    if (messageDiv) {
+      messageDiv.textContent = "";
+      // Optionally, reset other properties if needed
+      // e.g., messageDiv.className = "message info";
+    }
+  };
+
   const renderBoard = (board, containerId, isOwnBoard = false) => {
     const container = document.getElementById(containerId);
 
@@ -202,6 +241,7 @@ export const UI = () => {
 
   return {
     initUI,
+    resetUI,
     renderBoard,
     displayMessage,
     updateScore,

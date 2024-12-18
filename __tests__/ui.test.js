@@ -255,3 +255,159 @@ describe("UI - showGameOverScreen", () => {
     expect(global.location.reload).toHaveBeenCalled();
   });
 });
+
+describe("UI - resetUI", () => {
+  let dom;
+  let container;
+  let ui;
+
+  beforeEach(() => {
+    // Create a mock DOM environment
+    dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+    container = dom.window.document;
+    global.document = container;
+
+    // Initialize a new UI instance before each test
+    ui = UI();
+
+    // Set up the DOM as it would be after initUI is called
+    document.body.innerHTML = `
+      <h1>Battleship</h1>
+      <div id="score">Player 1: 0 | Computer: 0</div>
+      <div id="current-player">Current Player: Player 1</div>
+      <div id="game">
+        <div class="player-section">
+          <h2>Player 1</h2>
+          <div id="player1-board" class="board">
+            <div class="board-row">
+              <div class="board-cell" data-x="0" data-y="0"></div>
+              <div class="board-cell" data-x="1" data-y="0"></div>
+              <!-- More cells... -->
+            </div>
+            <!-- More rows... -->
+          </div>
+        </div>
+        <div class="player-section">
+          <h2>Computer</h2>
+          <div id="player2-board" class="board">
+            <div class="board-row">
+              <div class="board-cell" data-x="0" data-y="0"></div>
+              <div class="board-cell" data-x="1" data-y="0"></div>
+              <!-- More cells... -->
+            </div>
+            <!-- More rows... -->
+          </div>
+        </div>
+        <div id="message" class="message info">Game started</div>
+      </div>
+    `;
+  });
+
+  test("should remove child elements within the game container", () => {
+    // Ensure the game container exists before reset
+    const gameContainer = document.getElementById("game");
+    expect(gameContainer).not.toBeNull();
+
+    // Ensure that child elements exist before reset
+    const playerSections = gameContainer.querySelectorAll(".player-section");
+    expect(playerSections.length).toBeGreaterThan(0);
+
+    // Call resetUI
+    ui.resetUI();
+
+    // Assert that player sections are removed
+    const updatedPlayerSections =
+      gameContainer.querySelectorAll(".player-section");
+    expect(updatedPlayerSections.length).toBe(0);
+
+    // Ensure that #message div still exists and is cleared
+    const messageDiv = gameContainer.querySelector("#message");
+    expect(messageDiv).not.toBeNull();
+    expect(messageDiv.textContent).toBe(""); // It should be cleared
+  });
+
+  test("should remove the heading", () => {
+    // Ensure the heading exists before reset
+    expect(document.querySelector("h1")).not.toBeNull();
+
+    // Call resetUI
+    ui.resetUI();
+
+    // Assert that the heading is removed
+    expect(document.querySelector("h1")).toBeNull();
+  });
+
+  test("should remove the score div", () => {
+    // Ensure the score div exists before reset
+    expect(document.getElementById("score")).not.toBeNull();
+
+    // Call resetUI
+    ui.resetUI();
+
+    // Assert that the score div is removed
+    expect(document.getElementById("score")).toBeNull();
+  });
+
+  test("should remove the current player div", () => {
+    // Ensure the current player div exists before reset
+    expect(document.getElementById("current-player")).not.toBeNull();
+
+    // Call resetUI
+    ui.resetUI();
+
+    // Assert that the current player div is removed
+    expect(document.getElementById("current-player")).toBeNull();
+  });
+
+  test("should clear the message div", () => {
+    // Ensure the message div exists before reset
+    const messageDiv = document.getElementById("message");
+    expect(messageDiv).not.toBeNull();
+    expect(messageDiv.textContent).toBe("Game started");
+    expect(messageDiv.className).toBe("message info");
+
+    // Call resetUI
+    ui.resetUI();
+
+    // Assert that the message div is cleared but not removed
+    expect(document.getElementById("message")).not.toBeNull();
+    expect(messageDiv.textContent).toBe("");
+    expect(messageDiv.className).toBe("message info"); // Assuming you reset the text but keep classes
+  });
+
+  test("should remove all player sections", () => {
+    // Ensure player sections exist before reset
+    const playerSections = document.querySelectorAll(".player-section");
+    expect(playerSections.length).toBe(2); // Player 1 and Computer
+
+    // Call resetUI
+    ui.resetUI();
+
+    // Assert that player sections are removed
+    expect(document.querySelectorAll(".player-section").length).toBe(0);
+  });
+
+  test("should not throw an error if elements are already removed", () => {
+    // Call resetUI once to remove elements
+    ui.resetUI();
+
+    // Call resetUI again; should not throw
+    expect(() => ui.resetUI()).not.toThrow();
+  });
+
+  test("should not remove elements that are not part of the initial UI", () => {
+    // Add an extra element to the DOM
+    const extraDiv = document.createElement("div");
+    extraDiv.id = "extra-element";
+    document.body.appendChild(extraDiv);
+
+    // Ensure the extra element exists before reset
+    expect(document.getElementById("extra-element")).not.toBeNull();
+
+    // Call resetUI
+    ui.resetUI();
+
+    // Assert that the extra element is still present
+    expect(document.getElementById("extra-element")).not.toBeNull();
+  });
+});
