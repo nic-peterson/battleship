@@ -5,12 +5,20 @@ import { placeShipsRandomly } from "../helpers/placeShipsRandomly";
 import { BOARD_SIZE, ERROR_MESSAGES } from "../helpers/constants";
 import { battleships } from "../helpers/battleships";
 
-export const Game = () => {
+export const Game = (p1 = null, p2 = null) => {
   let currentPlayer;
   let gameOver = false;
   let score = {};
-  let player1;
-  let player2;
+  let player1 = p1;
+  let player2 = p2;
+
+  const requiredMethods = [
+    "getName",
+    "getType",
+    "getId",
+    "setGameboard",
+    "getGameboard",
+  ];
 
   // Private Methods
 
@@ -36,6 +44,14 @@ export const Game = () => {
     score[playerName] += 1;
   };
 
+  const validatePlayer = (player, playerLabel) => {
+    requiredMethods.forEach((method) => {
+      if (typeof player[method] !== "function") {
+        throw new Error(`${playerLabel} is missing required method: ${method}`);
+      }
+    });
+  };
+
   // Public Methods
   /**
    * initGame
@@ -45,27 +61,24 @@ export const Game = () => {
    *
    * @returns {void}
    */
-  const initializeGame = (p1, p2) => {
-    if (!p1?.getName || !p2?.getName) {
-      throw new Error("Invalid player objects provided");
+  const initializeGame = () => {
+    if (!player1 || !player2) {
+      throw new Error(ERROR_MESSAGES.PLAYER_REQUIRED);
     }
 
-    if (!p1 || !p2) {
-      throw new Error("Both players are required to initialize game.");
+    validatePlayer(player1, "Player1");
+    validatePlayer(player2, "Player2");
+
+    if (player1.getName() === player2.getName()) {
+      throw new Error(ERROR_MESSAGES.UNIQUE_NAME);
     }
 
-    if (p1.getName() === p2.getName()) {
-      throw new Error("Players must have unique names.");
+    if (!player1.getGameboard() || !player2.getGameboard()) {
+      throw new Error(ERROR_MESSAGES.GAMEBOARDS_REQUIRED);
     }
 
-    if (!p1.getGameboard() || !p2.getGameboard()) {
-      throw new Error(
-        "Both players must have gameboards before initializing game."
-      );
-    }
-
-    player1 = p1;
-    player2 = p2;
+    //player1 = p1;
+    //player2 = p2;
 
     // Ship placement is managed via the game controller
     // e.g., gameController.placeShipsForPlayer(player1);
@@ -251,7 +264,8 @@ export const Game = () => {
    * @returns {Object} - The score object
    */
   const getScore = () => {
-    return score;
+    // ({...score}) returns a shallow copy of the score object
+    return { ...score };
   };
 
   return {

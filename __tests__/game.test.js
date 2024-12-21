@@ -26,10 +26,10 @@ describe("Game Module", () => {
     player2.setGameboard(player2Gameboard);
 
     // Initialize a new game before each test
-    game = Game();
+    game = Game(player1, player2);
 
     // Initialize the game state with players
-    game.initializeGame(player1, player2);
+    game.initializeGame();
   });
 
   afterEach(() => {
