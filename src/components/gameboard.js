@@ -284,7 +284,7 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
     } else {
       cell.status = CellStatus.MISS;
       misses.push({ x, y });
-      return { result: CellStatus.MISS, coordinates: { x, y } };
+      return { result: CellStatus.MISS, sunk: null, coordinates: { x, y } };
     }
   };
 

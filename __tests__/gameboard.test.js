@@ -328,6 +328,7 @@ describe("Gameboard Methods", () => {
 
         expect(attackResult).toEqual({
           result: CellStatus.MISS,
+          sunk: null,
           coordinates: { x: 0, y: 0 },
         });
         expect(gameboard.getBoard()[0][0].status).toBe(CellStatus.MISS);
@@ -362,6 +363,7 @@ describe("Gameboard Methods", () => {
 
         expect(attackResult).toEqual({
           result: CellStatus.MISS,
+          sunk: null,
           coordinates: { x: 0, y: 9 },
         });
         expect(board[9][0].status).toBe(CellStatus.MISS);
