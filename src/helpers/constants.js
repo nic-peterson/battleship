@@ -26,6 +26,12 @@ export const ERROR_MESSAGES = {
   ALREADY_ATTACKED: "This coordinate has already been attacked.",
   PLAYER1_BOARD_FAILED: "Player 1 Gameboard creation failed.",
   PLAYER2_BOARD_FAILED: "Player 2 Gameboard creation failed.",
+  PLAYER_REQUIRED: "Both players are required to initialize game.",
+  INVALID_PLAYER_OBJECT: "Invalid player objects provided.",
+  UNIQUE_NAME: "Players must have unique names.",
+  GAMEBOARDS_REQUIRED:
+    "Both players must have gameboards before initializing game.",
+  GAMECONTROLLER_INIT_ERROR: "Error initializing GameController:",
 };
 
 export const PLAYERS = {
