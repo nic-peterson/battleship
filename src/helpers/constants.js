@@ -16,6 +16,11 @@ export const ORIENTATIONS = {
 
 export const BOARD_SIZE = 10;
 
+export const PLAYER_BOARDS = {
+  player1: "player1-board",
+  player2: "player2-board",
+};
+
 export const ERROR_MESSAGES = {
   INVALID_ORIENTATION: "Invalid orientation. Use 'horizontal' or 'vertical'.",
   INVALID_COORDINATES: `Ship placement coorindates are out of bounds [0-${BOARD_SIZE}].`,
