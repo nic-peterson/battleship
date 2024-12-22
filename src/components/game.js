@@ -1,12 +1,12 @@
 import { Player } from "./player";
 import { Gameboard } from "./gameboard";
-
 import { placeShipsRandomly } from "../helpers/placeShipsRandomly";
 import { BOARD_SIZE, ERROR_MESSAGES } from "../helpers/constants";
 import { battleships } from "../helpers/battleships";
 
 export const Game = (p1 = null, p2 = null) => {
   let currentPlayer;
+  let gameStarted = false;
   let gameOver = false;
   let score = {};
   let player1 = p1;
@@ -65,6 +65,10 @@ export const Game = (p1 = null, p2 = null) => {
     if (!player1 || !player2) {
       throw new Error(ERROR_MESSAGES.PLAYER_REQUIRED);
     }
+    if (gameStarted) {
+      // Possibly throw an error or just ignore
+      throw new Error(ERROR_MESSAGES.ALREADY_STARTED);
+    }
 
     validatePlayer(player1, "Player1");
     validatePlayer(player2, "Player2");
@@ -77,18 +81,10 @@ export const Game = (p1 = null, p2 = null) => {
       throw new Error(ERROR_MESSAGES.GAMEBOARDS_REQUIRED);
     }
 
-    //player1 = p1;
-    //player2 = p2;
-
-    // Ship placement is managed via the game controller
-    // e.g., gameController.placeShipsForPlayer(player1);
-    // e.g., gameController.placeShipsForPlayer(player2);
-
-    // ! player1.getGameboard().placeShipsRandomly();
-    // ! player2.getGameboard().placeShipsRandomly();
-
     setCurrentPlayer(player1);
     setScore();
+
+    setGameStarted(true);
     setGameOver(false);
 
     return { player1, player2, currentPlayer }; // Return initial state for testing
@@ -105,13 +101,16 @@ export const Game = (p1 = null, p2 = null) => {
   const resetGame = () => {
     try {
       if (!player1 || !player2) {
-        throw new Error("Game not initialized");
+        throw new Error(ERROR_MESSAGES.GAME_NOT_INITIALIZED);
       }
       setCurrentPlayer(player1);
       setScore();
+
       setGameOver(false);
+      setGameStarted(false);
 
       // Reset player gameboards
+      // TODO should this be done in the GameController class?
       player1.getGameboard().reset();
       player2.getGameboard().reset();
     } catch (error) {
@@ -148,7 +147,7 @@ export const Game = (p1 = null, p2 = null) => {
    */
   const attack = (x, y) => {
     if (gameOver) {
-      throw new Error("Game is already over.");
+      throw new Error(ERROR_MESSAGES.GAME_OVER);
     }
 
     const opponent = getOpponent();
@@ -178,7 +177,9 @@ export const Game = (p1 = null, p2 = null) => {
     }
 
     // Check if all ships are sunk
-    gameOver = opponentBoard.areAllShipsSunk();
+    if (opponentBoard.areAllShipsSunk()) {
+      setGameOver(true);
+    }
 
     // Switch turns if the game is not over
     if (!isGameOver()) {
@@ -218,7 +219,7 @@ export const Game = (p1 = null, p2 = null) => {
    */
   const setCurrentPlayer = (player) => {
     if (!player || ![player1, player2].includes(player)) {
-      throw new Error("Invalid player provided");
+      throw new Error(ERROR_MESSAGES.INVALID_PLAYER);
     }
     currentPlayer = player;
   };
@@ -243,6 +244,19 @@ export const Game = (p1 = null, p2 = null) => {
    */
   const isGameOver = () => {
     return gameOver;
+  };
+
+  /**
+   * Checks whether the game has started.
+   *
+   * @returns {boolean} Returns `true` if the game has started, otherwise `false`.
+   */
+  const isGameStarted = () => {
+    return gameStarted;
+  };
+
+  const setGameStarted = (status) => {
+    gameStarted = status;
   };
 
   /**
@@ -275,7 +289,9 @@ export const Game = (p1 = null, p2 = null) => {
     getCurrentPlayer,
     getOpponent,
     isGameOver,
+    isGameStarted,
     setGameOver,
+    setGameStarted,
     getScore,
     attack,
     switchTurn,
