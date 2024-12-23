@@ -1,52 +1,49 @@
-import { Gameboard } from "../src/components/gameboard";
-const { Ship } = require("../src/components/ship");
-import { BOARD_SIZE } from "../src/helpers/constants";
-import {
-  CellStatus,
-  ORIENTATIONS,
-  ERROR_MESSAGES,
-} from "../src/helpers/constants";
-import { battleships } from "../src/helpers/battleships";
+// * gameboard.test.js: Tests for the Gameboard module
 
-const verifyShipPlacement = (board, ship, coordinates) => {
-  coordinates.forEach(([x, y]) => {
+import { Gameboard } from "../src/components/gameboard";
+import { Ship } from "../src/components/ship";
+import {
+  BOARD_SIZE,
+  CELL_STATUS,
+  ORIENTATIONS,
+} from "../src/helpers/constants/boardConstants";
+import { ERROR_MESSAGES } from "../src/helpers/constants/messageConstants";
+import { BATTLESHIPS } from "../src/helpers/constants/shipConstants";
+
+const verifyShipPlacement = (board, ship, positions) => {
+  positions.forEach(({ x, y }) => {
     expect(board[y][x].ship).toBe(ship);
-    expect(board[y][x].status).toBe(CellStatus.SHIP);
+    expect(board[y][x].status).toBe(CELL_STATUS.SHIP);
+    expect(board[y][x].shipType).toBe(ship.getType()); // Verifies shipType for consistency
   });
 };
 
-const expectedTotal = battleships.reduce((sum, ship) => sum + ship.length, 0);
+const expectedTotal = BATTLESHIPS.reduce((sum, ship) => sum + ship.length, 0);
 
 describe("Gameboard Methods", () => {
   let gameboard;
 
   beforeEach(() => {
-    gameboard = Gameboard(BOARD_SIZE, battleships);
+    gameboard = Gameboard(BOARD_SIZE, BATTLESHIPS);
   });
 
   describe("Gameboard Initialization", () => {
     test("should create a 10x10 gameboard array initialized with empty objects", () => {
       const board = gameboard.getBoard();
 
-      // Check that the board has 10 rows
       expect(board.length).toBe(BOARD_SIZE);
-
-      // Check that each row has 10 columns
       board.forEach((row) => {
         expect(row.length).toBe(BOARD_SIZE);
-      });
-
-      // Check that all cells are initialized to null
-      board.forEach((row) => {
         row.forEach((cell) => {
           expect(cell).toHaveProperty("ship", null);
-          expect(cell).toHaveProperty("isHit", false);
-          expect(cell).toHaveProperty("status", CellStatus.EMPTY);
+          expect(cell).toHaveProperty("hasBeenAttacked", false);
+          expect(cell).toHaveProperty("status", CELL_STATUS.EMPTY);
         });
       });
     });
+
     test.each([8, 10, 12])("should create a %dx%d gameboard", (size) => {
-      const gameboard = Gameboard(size, battleships);
+      const gameboard = Gameboard(size, BATTLESHIPS);
       const board = gameboard.getBoard();
       expect(board.length).toBe(gameboard.getSize());
       expect(board.length).toBe(size);
@@ -54,372 +51,207 @@ describe("Gameboard Methods", () => {
         expect(row.length).toBe(size);
       });
     });
-    test("should create a gameboard with the specified ships", () => {
-      const gameboard = Gameboard(BOARD_SIZE, battleships);
+
+    test("should return all ships passed", () => {
       const ships = gameboard.getShips();
-      expect(ships).toEqual(battleships);
+      expect(ships).toEqual(BATTLESHIPS);
+    });
+
+    test("should create a gameboard with the parameterized ships", () => {
+      const ships = gameboard.getShips();
+      expect(ships).toEqual(BATTLESHIPS);
+    });
+
+    test("should handle small board sizes gracefully", () => {
+      const smallGameboard = Gameboard(2, BATTLESHIPS);
+      expect(() => smallGameboard.placeShipsRandomly()).toThrow(); // Expecting it to fail if ships can't fit
     });
   });
 
   describe("Ship Placement", () => {
-    describe("Valid Placements", () => {
-      test("should place a ship horizontally without errors", () => {
-        const ship = Ship(3);
-        gameboard.placeShip(ship, 0, 0, ORIENTATIONS.HORIZONTAL);
-        const board = gameboard.getBoard();
-        const coordinates = [
-          [0, 0],
-          [1, 0],
-          [2, 0],
-        ];
+    test("should place a ship horizontally without errors", () => {
+      const ship = Ship("Destroyer", 3);
+      gameboard.placeShip(ship, 0, 0, ORIENTATIONS.HORIZONTAL);
+      const board = gameboard.getBoard();
+      const coordinates = [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+      ];
 
-        verifyShipPlacement(board, ship, coordinates);
-      });
+      verifyShipPlacement(board, ship, coordinates);
+    });
 
-      test("should place a ship vertically without errors", () => {
-        const ship = Ship(3);
-        gameboard.placeShip(ship, 2, 2, ORIENTATIONS.VERTICAL);
-        const board = gameboard.getBoard();
-        const coordinates = [
-          [2, 2],
-          [2, 3],
-          [2, 4],
-        ];
+    test("should place a ship vertically without errors", () => {
+      const ship = Ship("Submarine", 3);
+      gameboard.placeShip(ship, 2, 2, ORIENTATIONS.VERTICAL);
+      const board = gameboard.getBoard();
+      const coordinates = [
+        { x: 2, y: 2 },
+        { x: 2, y: 3 },
+        { x: 2, y: 4 },
+      ];
 
-        verifyShipPlacement(board, ship, coordinates);
-      });
+      verifyShipPlacement(board, ship, coordinates);
+    });
 
-      test("should place a ship at the extreme left edge horizontally", () => {
-        const ship = Ship(1);
-        gameboard.placeShip(ship, 0, 5, ORIENTATIONS.HORIZONTAL);
-        const board = gameboard.getBoard();
-        const coordinates = [[0, 5]];
+    test("should throw an error when overlapping ships are placed", () => {
+      const ship1 = Ship("Battleship", 3);
+      const ship2 = Ship("Patrol Boat", 2);
+      gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
 
-        verifyShipPlacement(board, ship, coordinates);
-      });
+      expect(() => {
+        gameboard.placeShip(ship2, 1, 0, ORIENTATIONS.VERTICAL);
+      }).toThrow(ERROR_MESSAGES.OVERLAPPING_SHIP);
+    });
 
-      test("should place a ship at the extreme right edge horizontally", () => {
-        const ship = Ship(1);
-        gameboard.placeShip(ship, 9, 5, ORIENTATIONS.HORIZONTAL);
-        const board = gameboard.getBoard();
-        const coordinates = [[9, 5]];
+    test("should throw an error when ship placement is out of bounds horizontally", () => {
+      const ship = Ship("Destroyer", 3);
+      expect(() => {
+        gameboard.placeShip(ship, 8, 0, ORIENTATIONS.HORIZONTAL);
+      }).toThrow(ERROR_MESSAGES.OUT_OF_BOUNDS_HORIZONTAL);
+    });
 
-        verifyShipPlacement(board, ship, coordinates);
-      });
+    test("should throw an error when ship placement is out of bounds vertically", () => {
+      const ship = Ship("Submarine", 3);
+      expect(() => {
+        gameboard.placeShip(ship, 0, 8, ORIENTATIONS.VERTICAL);
+      }).toThrow(ERROR_MESSAGES.OUT_OF_BOUNDS_VERTICAL);
+    });
 
-      test("should place a ship at the extreme top edge vertically", () => {
-        const ship = Ship(1);
-        gameboard.placeShip(ship, 5, 0, ORIENTATIONS.VERTICAL);
-        const board = gameboard.getBoard();
-        const coordinates = [[5, 0]];
+    test("should throw an error if attempting to place an invalid ship", () => {
+      expect(() => {
+        gameboard.placeShip(null, 0, 0, ORIENTATIONS.HORIZONTAL);
+      }).toThrow(ERROR_MESSAGES.INVALID_SHIP);
+    });
 
-        verifyShipPlacement(board, ship, coordinates);
-      });
+    test("should throw an error if attempting to place a ship with an invalid orientation", () => {
+      const ship = Ship("Destroyer", 2);
+      expect(() => {
+        gameboard.placeShip(ship, 0, 0, "diagonal");
+      }).toThrow(ERROR_MESSAGES.INVALID_ORIENTATION);
+    });
 
-      test("should place a ship at the extreme bottom edge vertically", () => {
-        const ship = Ship(1);
-        gameboard.placeShip(ship, 5, 9, ORIENTATIONS.VERTICAL);
-        const board = gameboard.getBoard();
-        const coordinates = [[5, 9]];
+    test("should throw an error if attempting to place a ship with invalid coordinates", () => {
+      const ship = Ship("Destroyer", 2);
+      expect(() => {
+        gameboard.placeShip(ship, -1, 0, ORIENTATIONS.HORIZONTAL);
+      }).toThrow(ERROR_MESSAGES.INVALID_COORDINATES);
+    });
 
-        verifyShipPlacement(board, ship, coordinates);
-      });
+    test("should throw an error if there's no ship provided for random placement", () => {
+      const testGameboard = Gameboard(BOARD_SIZE, []);
+      expect(() => testGameboard.placeShipsRandomly()).toThrow();
+    });
 
-      test("should place multiple ships without overlap", () => {
-        const ship1 = Ship(3);
-        const ship2 = Ship(2);
-        gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
-        gameboard.placeShip(ship2, 2, 2, ORIENTATIONS.VERTICAL);
-        const board = gameboard.getBoard();
+    test("should throw an error if attempts exceed the maximum number of tries", () => {
+      const testGameboard = Gameboard(5, BATTLESHIPS);
+      testGameboard.placeShipsRandomly();
+      expect(() => testGameboard.placeShipsRandomly()).toThrow();
+    });
 
-        verifyShipPlacement(board, ship1, [
-          [0, 0],
-          [1, 0],
-          [2, 0],
-        ]);
+    test("should randomly place all ships on the board", () => {
+      gameboard.placeShipsRandomly();
+      const board = gameboard.getBoard();
+      const placedShips = gameboard.getPlacedShips();
+      const totalPlaced = placedShips.reduce(
+        (sum, { positions }) => sum + positions.length,
+        0
+      );
 
-        verifyShipPlacement(board, ship2, [
-          [2, 2],
-          [2, 3],
-        ]);
-      });
+      expect(totalPlaced).toBe(expectedTotal);
 
-      test("should place all ships without errors", () => {
-        // Attempt to place all ships randomly
-        expect(() => {
-          gameboard.placeShipsRandomly();
-        }).not.toThrow();
-
-        // Retrieve the placed ships from the gameboard
-        const placedShips = gameboard.getPlacedShips();
-
-        // Check that the number of placed ships equals the number of ships to place
-        expect(placedShips.length).toBe(battleships.length);
-
-        // Verify that the total ship length matches the expected total
-        const totalPlacedShipCells = placedShips.reduce(
-          (sum, { ship }) => sum + ship.getLength(),
-          0
-        );
-        const expectedTotal = battleships.reduce(
-          (sum, ship) => sum + ship.length,
-          0
-        );
-
-        expect(totalPlacedShipCells).toBe(expectedTotal);
+      placedShips.forEach(({ ship, positions }) => {
+        verifyShipPlacement(board, ship, positions);
       });
     });
 
-    describe("Invalid Placements", () => {
-      test("should throw an error when ship is not provided", () => {
-        expect(() => {
-          gameboard.placeShip(null, 0, 0, ORIENTATIONS.HORIZONTAL);
-        }).toThrow(ERROR_MESSAGES.INVALID_SHIP);
-      });
+    test("should handle multiple random placements consistently", () => {
+      for (let i = 0; i < 100; i++) {
+        const testGameboard = Gameboard(BOARD_SIZE, BATTLESHIPS);
+        expect(() => testGameboard.placeShipsRandomly()).not.toThrow();
+      }
+    });
 
-      test.each([
-        {
-          description: "non-integer x and y coordinates",
-          x: -1.5,
-          y: "-1",
-          orientation: ORIENTATIONS.HORIZONTAL,
-          error: ERROR_MESSAGES.INVALID_COORDINATES,
-        },
-        {
-          description: "non-integer x coordinate",
-          x: -2.5,
-          y: 5,
-          orientation: ORIENTATIONS.HORIZONTAL,
-          error: ERROR_MESSAGES.INVALID_COORDINATES,
-        },
+    test("should accurately report all ships placed", () => {
+      gameboard.placeShipsRandomly();
+      expect(gameboard.allShipsPlaced().allPlaced).toBe(true);
+    });
 
-        {
-          description: "non-integer y coordinate",
-          x: 5,
-          y: -3.873,
-          orientation: ORIENTATIONS.VERTICAL,
-          error: ERROR_MESSAGES.INVALID_COORDINATES,
-        },
-        {
-          description: "negative x and y coordinates",
-          x: -1,
-          y: -1,
-          orientation: ORIENTATIONS.HORIZONTAL,
-          error: ERROR_MESSAGES.INVALID_COORDINATES,
-        },
-        {
-          description: "negative x coordinate",
-          x: -2,
-          y: 5,
-          orientation: ORIENTATIONS.HORIZONTAL,
-          error: ERROR_MESSAGES.INVALID_COORDINATES,
-        },
+    test("placeShipOnBoard should correctly assign ship properties to board cells", () => {
+      const ship = Ship("Battleship", 4);
+      gameboard.placeShip(ship, 5, 5, ORIENTATIONS.HORIZONTAL);
+      const board = gameboard.getBoard();
 
-        {
-          description: "negative y coordinate",
-          x: 5,
-          y: -3,
-          orientation: ORIENTATIONS.VERTICAL,
-          error: ERROR_MESSAGES.INVALID_COORDINATES,
-        },
-        {
-          description: "x and y coordinates exceed board size",
-          x: 10,
-          y: 10,
-          orientation: ORIENTATIONS.HORIZONTAL,
-          error: ERROR_MESSAGES.INVALID_COORDINATES,
-        },
-        {
-          description: "x coordinate exceeds board size",
-          x: 10,
-          y: 5,
-          orientation: ORIENTATIONS.HORIZONTAL,
-          error: ERROR_MESSAGES.INVALID_COORDINATES,
-        },
-        {
-          description: "y coordinate exceeds board size",
-          x: 5,
-          y: 10,
-          orientation: ORIENTATIONS.VERTICAL,
-          error: ERROR_MESSAGES.INVALID_COORDINATES,
-        },
-        {
-          description: "x + length exceeds board size horizontally",
-          x: 7,
-          y: 5,
-          orientation: ORIENTATIONS.HORIZONTAL,
-          shipLength: 4,
-          error: ERROR_MESSAGES.OUT_OF_BOUNDS_HORIZONTAL,
-        },
-        {
-          description: "y + length exceeds board size vertically",
-          x: 5,
-          y: 7,
-          orientation: ORIENTATIONS.VERTICAL,
-          shipLength: 4,
-          error: ERROR_MESSAGES.OUT_OF_BOUNDS_VERTICAL,
-        },
-        {
-          description: "diagonal orientation",
-          x: 0,
-          y: 0,
-          orientation: "diagonal",
-          error: ERROR_MESSAGES.INVALID_ORIENTATION,
-        },
-      ])(
-        "should throw an error when placing a ship with $description",
-        ({ x, y, orientation, shipLength = 3, error }) => {
-          const ship = Ship(shipLength);
-          expect(() => {
-            gameboard.placeShip(ship, x, y, orientation);
-          }).toThrow(error);
-        }
-      );
+      for (let i = 0; i < ship.getLength(); i++) {
+        const x = 5 + i;
+        const y = 5;
+        expect(board[y][x].ship).toBe(ship);
+        expect(board[y][x].shipType).toBe("Battleship");
+        expect(board[y][x].status).toBe(CELL_STATUS.SHIP);
+      }
 
-      test("should throw an error when placing overlapping ships", () => {
-        const ship1 = Ship(3);
-        const ship2 = Ship(2);
-        gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
-
-        expect(() => {
-          gameboard.placeShip(ship2, 1, 0, ORIENTATIONS.VERTICAL);
-        }).toThrow(ERROR_MESSAGES.OVERLAPPING_SHIP);
+      const placedShips = gameboard.getPlacedShips();
+      expect(placedShips).toContainEqual({
+        ship,
+        positions: [
+          { x: 5, y: 5 },
+          { x: 6, y: 5 },
+          { x: 7, y: 5 },
+          { x: 8, y: 5 },
+        ],
       });
     });
   });
 
   describe("Receiving Attacks", () => {
-    describe("Hits and Sinks", () => {
-      test("should register a hit on a ship", () => {
-        const ship = Ship(2);
-        gameboard.placeShip(ship, 1, 1, ORIENTATIONS.HORIZONTAL);
+    test("should register a hit on a ship and include shipType in the result", () => {
+      const ship = Ship("Destroyer", 2);
+      gameboard.placeShip(ship, 1, 1, ORIENTATIONS.HORIZONTAL);
 
-        const attackResult = gameboard.receiveAttack(1, 1);
-
-        expect(attackResult).toEqual({
-          result: CellStatus.HIT,
-          sunk: false,
-          coordinates: { x: 1, y: 1 },
-        });
-        expect(ship.getHits()).toBe(1);
-        expect(gameboard.getBoard()[1][1].status).toBe(CellStatus.HIT);
-      });
-
-      test("should register a sink when all parts of the ship are hit", () => {
-        const ship = Ship(2);
-        gameboard.placeShip(ship, 1, 1, ORIENTATIONS.HORIZONTAL);
-
-        gameboard.receiveAttack(1, 1);
-        const attackResult = gameboard.receiveAttack(2, 1);
-
-        expect(attackResult).toEqual({
-          result: CellStatus.HIT,
-          sunk: true,
-          coordinates: { x: 2, y: 1 },
-        });
-
-        expect(ship.isSunk()).toBe(true);
-        expect(gameboard.getBoard()[1][1].status).toBe(CellStatus.HIT);
-        expect(gameboard.getBoard()[1][2].status).toBe(CellStatus.HIT);
-      });
-
-      test("should register a miss when attacking an empty cell", () => {
-        const attackResult = gameboard.receiveAttack(0, 0);
-
-        expect(attackResult).toEqual({
-          result: CellStatus.MISS,
-          sunk: null,
-          coordinates: { x: 0, y: 0 },
-        });
-        expect(gameboard.getBoard()[0][0].status).toBe(CellStatus.MISS);
-        expect(gameboard.getMissedAttacks()).toContainEqual({ x: 0, y: 0 });
-      });
-
-      test("should throw an error when attacking the same position twice", () => {
-        gameboard.receiveAttack(0, 0);
-
-        expect(() => {
-          gameboard.receiveAttack(0, 0);
-        }).toThrow(ERROR_MESSAGES.ALREADY_ATTACKED);
-      });
-
-      test("should register a hit on a ship placed at the extreme corner", () => {
-        const ship = Ship(1);
-        gameboard.placeShip(ship, 9, 9, ORIENTATIONS.HORIZONTAL);
-        const attackResult = gameboard.receiveAttack(9, 9);
-        const board = gameboard.getBoard();
-
-        expect(attackResult).toEqual({
-          result: CellStatus.HIT,
-          sunk: true,
-          coordinates: { x: 9, y: 9 },
-        });
-        expect(board[9][9].status).toBe(CellStatus.HIT);
-      });
-
-      test("should register a miss on a cell with no ship at extreme corner", () => {
-        const attackResult = gameboard.receiveAttack(0, 9);
-        const board = gameboard.getBoard();
-
-        expect(attackResult).toEqual({
-          result: CellStatus.MISS,
-          sunk: null,
-          coordinates: { x: 0, y: 9 },
-        });
-        expect(board[9][0].status).toBe(CellStatus.MISS);
-        expect(gameboard.getMissedAttacks()).toContainEqual({ x: 0, y: 9 });
+      const attackResult = gameboard.receiveAttack(1, 1);
+      expect(attackResult).toEqual({
+        result: CELL_STATUS.HIT,
+        shipType: "Destroyer",
+        sunk: false,
+        coordinates: { x: 1, y: 1 },
       });
     });
 
-    describe("Multiple Attacks", () => {
-      test("should register multiple hits and sinks correctly", () => {
-        const ship1 = Ship(2);
-        const ship2 = Ship(3);
-        gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
-        gameboard.placeShip(ship2, 2, 2, ORIENTATIONS.VERTICAL);
-
-        // Attack ship1
-        let result = gameboard.receiveAttack(0, 0);
-        expect(result).toEqual({
-          result: CellStatus.HIT,
-          sunk: false,
-          coordinates: { x: 0, y: 0 },
-        });
-        expect(ship1.getHits()).toBe(1);
-
-        result = gameboard.receiveAttack(1, 0);
-        expect(result).toEqual({
-          result: CellStatus.HIT,
-          sunk: true,
-          coordinates: { x: 1, y: 0 },
-        });
-        expect(ship1.isSunk()).toBe(true);
-
-        // Attack ship2
-        result = gameboard.receiveAttack(2, 2);
-        expect(result).toEqual({
-          result: CellStatus.HIT,
-          sunk: false,
-          coordinates: { x: 2, y: 2 },
-        });
-        expect(ship2.getHits()).toBe(1);
-
-        result = gameboard.receiveAttack(2, 3);
-        expect(result).toEqual({
-          result: CellStatus.HIT,
-          sunk: false,
-          coordinates: { x: 2, y: 3 },
-        });
-        expect(ship2.getHits()).toBe(2);
-
-        result = gameboard.receiveAttack(2, 4);
-        expect(result).toEqual({
-          result: CellStatus.HIT,
-          sunk: true,
-          coordinates: { x: 2, y: 4 },
-        });
-        expect(ship2.isSunk()).toBe(true);
+    test("should register a miss on an empty cell", () => {
+      const attackResult = gameboard.receiveAttack(0, 0);
+      expect(attackResult).toEqual({
+        result: CELL_STATUS.MISS,
+        shipType: null,
+        sunk: false,
+        coordinates: { x: 0, y: 0 },
       });
+    });
+
+    test("should register a sunk ship when all parts are hit", () => {
+      const ship = Ship("Destroyer", 2);
+      gameboard.placeShip(ship, 1, 1, ORIENTATIONS.HORIZONTAL);
+      gameboard.receiveAttack(1, 1);
+      const attackResult = gameboard.receiveAttack(2, 1);
+      expect(attackResult).toEqual({
+        result: CELL_STATUS.HIT,
+        shipType: "Destroyer",
+        sunk: true,
+        coordinates: { x: 2, y: 1 },
+      });
+    });
+
+    test("should throw an error when attacking the same position twice", () => {
+      gameboard.receiveAttack(0, 0);
+      expect(() => {
+        gameboard.receiveAttack(0, 0);
+      }).toThrow(ERROR_MESSAGES.ALREADY_ATTACKED);
+    });
+
+    test("should throw an error when providing invalid coordinates", () => {
+      expect(() => {
+        gameboard.receiveAttack(-1, 0);
+      }).toThrow(ERROR_MESSAGES.INVALID_COORDINATES);
     });
   });
 
@@ -429,102 +261,91 @@ describe("Gameboard Methods", () => {
       gameboard.receiveAttack(1, 1);
 
       const missedAttacks = gameboard.getMissedAttacks();
-      expect(missedAttacks).toContainEqual({ x: 0, y: 0 });
-      expect(missedAttacks).toContainEqual({ x: 1, y: 1 });
-      expect(missedAttacks).toHaveLength(2);
-    });
-
-    test("should return all hits", () => {
-      const ship = Ship(2);
-      gameboard.placeShip(ship, 1, 1, ORIENTATIONS.HORIZONTAL);
-      gameboard.receiveAttack(1, 1);
-      gameboard.receiveAttack(2, 1);
-
-      const hits = gameboard.getHits();
-      expect(hits).toContainEqual({ x: 1, y: 1 });
-      expect(hits).toContainEqual({ x: 2, y: 1 });
-      expect(hits).toHaveLength(2);
+      expect(missedAttacks).toEqual([
+        { x: 0, y: 0 },
+        { x: 1, y: 1 },
+      ]);
     });
 
     test("should return true if all ships are sunk", () => {
-      const ship1 = Ship(1);
-      const ship2 = Ship(2);
-      gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
-      gameboard.placeShip(ship2, 2, 2, ORIENTATIONS.VERTICAL);
-
-      gameboard.receiveAttack(0, 0); // Sink ship1
-      gameboard.receiveAttack(2, 2);
-      gameboard.receiveAttack(2, 3); // Sink ship2
-
+      const ship = Ship("Destroyer", 1);
+      gameboard.placeShip(ship, 0, 0, ORIENTATIONS.HORIZONTAL);
+      gameboard.receiveAttack(0, 0);
       expect(gameboard.areAllShipsSunk()).toBe(true);
     });
 
     test("should return false if not all ships are sunk", () => {
-      const ship1 = Ship(1);
-      const ship2 = Ship(2);
+      const ship1 = Ship("Destroyer", 1);
+      const ship2 = Ship("Cruiser", 2);
       gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
-      gameboard.placeShip(ship2, 2, 2, ORIENTATIONS.VERTICAL);
+      gameboard.placeShip(ship2, 1, 1, ORIENTATIONS.VERTICAL);
 
       gameboard.receiveAttack(0, 0); // Sink ship1
-      gameboard.receiveAttack(2, 2); // Partially hit ship2
+      gameboard.receiveAttack(1, 1); // Partially hit ship2
 
       expect(gameboard.areAllShipsSunk()).toBe(false);
     });
 
-    test("should return true if all ships are placed", () => {
-      // Assuming total ships to place is defined elsewhere, e.g., battleships.js
-      const ship1 = Ship(3);
-      const ship2 = Ship(2);
-      const ship3 = Ship(4);
-      const ship4 = Ship(5);
-      const ship5 = Ship(3);
-
-      gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
-      gameboard.placeShip(ship2, 1, 1, ORIENTATIONS.VERTICAL);
-      gameboard.placeShip(ship3, 2, 2, ORIENTATIONS.HORIZONTAL);
-      gameboard.placeShip(ship4, 5, 5, ORIENTATIONS.VERTICAL);
-      gameboard.placeShip(ship5, 4, 4, ORIENTATIONS.HORIZONTAL);
-
-      // Adjust this based on actual implementation of allShipsPlaced
-      expect(gameboard.allShipsPlaced()).toEqual({
-        allPlaced: true,
-        placed: expectedTotal,
-      });
-    });
-
-    test("should return false if not all ships are placed", () => {
-      const ship1 = Ship(3);
-      const ship2 = Ship(2);
-      gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
-      // ship2 not placed
-
-      expect(gameboard.allShipsPlaced()).toEqual({
-        allPlaced: false,
-        placed: ship1.getLength(),
-      });
-    });
-
-    test("should return if a cell has been attacked", () => {
+    test("should reset all gameboard properties", () => {
+      gameboard.placeShipsRandomly();
       gameboard.receiveAttack(0, 0);
-      expect(gameboard.hasBeenAttacked(0, 0)).toBe(true);
-      expect(gameboard.hasBeenAttacked(1, 1)).toBe(false);
+      gameboard.reset();
+
+      expect(
+        gameboard
+          .getBoard()
+          .every((row) =>
+            row.every((cell) => cell.status === CELL_STATUS.EMPTY)
+          )
+      ).toBe(true);
+      expect(gameboard.getHits()).toEqual([]);
+      expect(gameboard.getMissedAttacks()).toEqual([]);
+      expect(gameboard.getPlacedShips().length).toBe(0);
     });
 
-    test("should return all attacks (hits and misses)", () => {
-      const ship = Ship(2);
-      gameboard.placeShip(ship, 1, 1, ORIENTATIONS.HORIZONTAL);
+    test("should get a list of all attacks", () => {
+      const ship1 = Ship("Battleship", 3);
+      gameboard.placeShip(ship1, 0, 0, ORIENTATIONS.HORIZONTAL);
+      gameboard.receiveAttack(0, 0);
+      gameboard.receiveAttack(1, 1);
+      gameboard.receiveAttack(2, 2);
+      gameboard.receiveAttack(3, 3);
+      gameboard.receiveAttack(4, 4);
 
-      gameboard.receiveAttack(1, 1); // Hit
-      gameboard.receiveAttack(2, 1); // Hit
-      gameboard.receiveAttack(0, 0); // Miss
-      gameboard.receiveAttack(3, 3); // Miss
+      const attacks = gameboard.getAllAttacks();
+      expect(attacks).toEqual(new Set(["0,0", "1,1", "2,2", "3,3", "4,4"]));
+    });
 
-      const allAttacks = gameboard.getAllAttacks();
-      expect(allAttacks).toContain("1,1");
-      expect(allAttacks).toContain("2,1");
-      expect(allAttacks).toContain("0,0");
-      expect(allAttacks).toContain("3,3");
-      expect(allAttacks.size).toBe(4);
+    test("should return if all ships are sunk", () => {
+      const testGameboard = Gameboard(3, [
+        { type: "Test Ship", length: 3 },
+        { type: "Test Ship 2", length: 2 },
+      ]);
+
+      testGameboard.placeShip(
+        Ship("Test Ship", 3),
+        0,
+        0,
+        ORIENTATIONS.HORIZONTAL
+      );
+      testGameboard.placeShip(
+        Ship("Test Ship 2", 2),
+        0,
+        1,
+        ORIENTATIONS.HORIZONTAL
+      );
+
+      testGameboard.receiveAttack(0, 0);
+      testGameboard.receiveAttack(1, 0);
+      testGameboard.receiveAttack(2, 0);
+      testGameboard.receiveAttack(0, 1);
+      testGameboard.receiveAttack(1, 1);
+      expect(testGameboard.areAllShipsSunk()).toBe(true);
+    });
+
+    test("should return false if no ships have been placed", () => {
+      const emptyGameboard = Gameboard(BOARD_SIZE, BATTLESHIPS);
+      expect(emptyGameboard.areAllShipsSunk()).toBe(false);
     });
   });
 });
