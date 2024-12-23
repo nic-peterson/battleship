@@ -24,15 +24,124 @@ import { createBoard, createCell } from "../helpers/gameboardUtils.js";
  */
 
 export const Gameboard = (size = BOARD_SIZE, ships = []) => {
-  // ? Private Variables
+  // * Private Variables
   let board = [];
   let placedShips = [];
   let hits = [];
   let misses = [];
   let allAttacks = new Set();
 
-  // ? Private methods
+  // * Initialize
+  /**
+   * Initializes the game board by creating a new board with the specified size and cell creation function.
+   *
+   * @function
+   * @name initializeBoard
+   * @returns {void}
+   */
+  const initializeBoard = () => {
+    board = createBoard(size, createCell);
+  };
 
+  /**
+   * Resets the game board to its initial state.
+   * Clears all placed ships, hits, misses, and all recorded attacks.
+   */
+  const reset = () => {
+    initializeBoard();
+    placedShips = [];
+    hits = [];
+    misses = [];
+    allAttacks.clear();
+  };
+
+  const getBoard = () => board;
+  const getSize = () => size;
+
+  // * Placing Ships
+  const getShips = () => ships;
+  const getPlacedShips = () => placedShips;
+  const allShipsPlaced = () => {
+    const expectedTotal = ships.reduce((total, ship) => total + ship.length, 0);
+
+    let actualTotal = 0;
+    board.forEach((row) => {
+      row.forEach((cell) => {
+        if (cell.ship !== null) {
+          actualTotal++;
+        }
+      });
+    });
+
+    return { allPlaced: actualTotal === expectedTotal, placed: actualTotal };
+  };
+
+  // ? Placing Ships
+  const placeShipOnBoard = (ship, x, y, orientation) => {
+    const shipLength = ship.getLength();
+    const positions = [];
+
+    for (let i = 0; i < shipLength; i++) {
+      const posX = orientation === ORIENTATIONS.HORIZONTAL ? x + i : x;
+      const posY = orientation === ORIENTATIONS.VERTICAL ? y + i : y;
+
+      board[posY][posX].ship = ship;
+      board[posY][posX].shipType = ship.getType();
+      board[posY][posX].status = CELL_STATUS.SHIP;
+      positions.push({ x: posX, y: posY });
+    }
+
+    if (!placedShips.includes(ship)) {
+      placedShips.push({ ship, positions });
+    }
+  };
+
+  const placeShip = (ship, x, y, orientation) => {
+    validateShipPlacement(ship, x, y, orientation);
+    checkOutOfBounds(ship, x, y, orientation);
+    checkOverlap(ship, x, y, orientation);
+    placeShipOnBoard(ship, x, y, orientation);
+  };
+
+  const placeShipsRandomly = () => {
+    if (!ships || !Array.isArray(ships) || ships.length === 0) {
+      throw new Error("No ships provided for random placement");
+    }
+
+    validateShipsCanFit();
+
+    const orientations = [ORIENTATIONS.HORIZONTAL, ORIENTATIONS.VERTICAL];
+    const MAX_ATTEMPTS = 100; // Prevent infinite loops
+
+    for (let battleship of ships) {
+      let placed = false;
+      let attempts = 0;
+      const ship = Ship(battleship.type, battleship.length);
+
+      while (!placed && attempts < MAX_ATTEMPTS) {
+        attempts++;
+
+        const x = Math.floor(Math.random() * size);
+        const y = Math.floor(Math.random() * size);
+        const orientation =
+          orientations[Math.floor(Math.random() * orientations.length)];
+
+        try {
+          placeShip(ship, x, y, orientation);
+          placed = true;
+        } catch (error) {
+          // Ignore error and try again
+          if (attempts >= MAX_ATTEMPTS) {
+            throw new Error(
+              `Unable to place ship length ${battleship.length} after ${MAX_ATTEMPTS} attempts`
+            );
+          }
+        }
+      }
+    }
+  };
+
+  // ? Error Checking
   /**
    * Validates whether the total ship space fits within the board.
    * @param {Array<Object>} ships - The array of ships to be placed.
@@ -48,10 +157,6 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
         `Ships require ${totalShipSpace} spaces but board only has ${boardSpace} spaces`
       );
     }
-  };
-
-  const initializeBoard = () => {
-    board = createBoard(size, createCell);
   };
 
   const validateShipPlacement = (ship, x, y, orientation) => {
@@ -102,77 +207,9 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
     }
   };
 
-  const placeShipOnBoard = (ship, x, y, orientation) => {
-    const shipLength = ship.getLength();
-    const positions = [];
-
-    for (let i = 0; i < shipLength; i++) {
-      const posX = orientation === ORIENTATIONS.HORIZONTAL ? x + i : x;
-      const posY = orientation === ORIENTATIONS.VERTICAL ? y + i : y;
-
-      board[posY][posX].ship = ship;
-      board[posY][posX].shipType = ship.getType();
-      board[posY][posX].status = CELL_STATUS.SHIP;
-      positions.push({ x: posX, y: posY });
-    }
-
-    if (!placedShips.includes(ship)) {
-      placedShips.push({ ship, positions });
-    }
-  };
-
-  const getBoard = () => board;
-  const getSize = () => size;
-  const getShips = () => ships;
-  const getPlacedShips = () => placedShips;
-
+  // * Attacks
   const getHits = () => hits;
   const getMissedAttacks = () => misses;
-
-  const placeShip = (ship, x, y, orientation) => {
-    validateShipPlacement(ship, x, y, orientation);
-    checkOutOfBounds(ship, x, y, orientation);
-    checkOverlap(ship, x, y, orientation);
-    placeShipOnBoard(ship, x, y, orientation);
-  };
-
-  const placeShipsRandomly = () => {
-    if (!ships || !Array.isArray(ships) || ships.length === 0) {
-      throw new Error("No ships provided for random placement");
-    }
-
-    validateShipsCanFit();
-
-    const orientations = [ORIENTATIONS.HORIZONTAL, ORIENTATIONS.VERTICAL];
-    const MAX_ATTEMPTS = 100; // Prevent infinite loops
-
-    for (let battleship of ships) {
-      let placed = false;
-      let attempts = 0;
-      const ship = Ship(battleship.type, battleship.length);
-
-      while (!placed && attempts < MAX_ATTEMPTS) {
-        attempts++;
-
-        const x = Math.floor(Math.random() * size);
-        const y = Math.floor(Math.random() * size);
-        const orientation =
-          orientations[Math.floor(Math.random() * orientations.length)];
-
-        try {
-          placeShip(ship, x, y, orientation);
-          placed = true;
-        } catch (error) {
-          // Ignore error and try again
-          if (attempts >= MAX_ATTEMPTS) {
-            throw new Error(
-              `Unable to place ship length ${battleship.length} after ${MAX_ATTEMPTS} attempts`
-            );
-          }
-        }
-      }
-    }
-  };
 
   const receiveAttack = (x, y) => {
     if (x < 0 || x >= size || y < 0 || y >= size) {
@@ -226,31 +263,8 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
     return placedShips.every((ship) => ship.ship.isSunk());
   };
 
-  const allShipsPlaced = () => {
-    const expectedTotal = ships.reduce((total, ship) => total + ship.length, 0);
-
-    let actualTotal = 0;
-    board.forEach((row) => {
-      row.forEach((cell) => {
-        if (cell.ship !== null) {
-          actualTotal++;
-        }
-      });
-    });
-
-    return { allPlaced: actualTotal === expectedTotal, placed: actualTotal };
-  };
-
-  const reset = () => {
-    initializeBoard();
-    placedShips = [];
-    hits = [];
-    misses = [];
-    allAttacks.clear();
-  };
-
+  // ? Instantiate the gameboard object
   initializeBoard();
-
   return {
     getBoard,
     getSize,
