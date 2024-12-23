@@ -1,3 +1,4 @@
+// * ship.js
 /**
  * Creates a ship object with the specified length.
  *
@@ -10,7 +11,7 @@
  * @throws {Error} If the length is not a positive integer.
  */
 
-export const Ship = (length) => {
+export const Ship = (type, length) => {
   if (!Number.isInteger(length) || length < 1) {
     throw new Error("Length must be a positive integer.");
   }
@@ -27,12 +28,15 @@ export const Ship = (length) => {
 
   const getLength = () => length;
 
+  const getType = () => type;
+
   const isSunk = () => hits === length;
 
   return {
     hit,
     getHits,
     getLength,
+    getType,
     isSunk,
   };
 };

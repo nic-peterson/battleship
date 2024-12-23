@@ -1,51 +1,67 @@
+// * ship.test.js
 const { Ship } = require("../src/components/ship");
+const { BATTLESHIPS } = require("../src/helpers/constants");
 
 describe("Ship", () => {
-  test("throws an error if length is not a positive integer", () => {
-    expect(() => Ship(-1)).toThrow("Length must be a positive integer.");
-    expect(() => Ship(0)).toThrow("Length must be a positive integer.");
-    expect(() => Ship("4")).toThrow("Length must be a positive integer.");
+  describe("Error handling", () => {
+    test("throws an error if length is not a positive integer", () => {
+      const shipType = "Carrier";
+      expect(() => Ship(shipType, -1)).toThrow(
+        "Length must be a positive integer."
+      );
+      expect(() => Ship(shipType, 0)).toThrow(
+        "Length must be a positive integer."
+      );
+      expect(() => Ship(shipType, "4")).toThrow(
+        "Length must be a positive integer."
+      );
+    });
   });
 
-  test("has a length", () => {
-    const ship = Ship(4);
-    expect(ship.getLength()).toBe(4);
-  });
+  describe("Ship Methods", () => {
+    let ship;
+    let type;
+    let length;
 
-  test("tracks the number of times it has been hit", () => {
-    const ship = Ship(3);
-    ship.hit();
-    ship.hit();
-    expect(ship.getHits()).toBe(2);
-  });
+    beforeEach(() => {
+      ({ type, length } = BATTLESHIPS[0]);
+      ship = Ship(type, length);
+    });
 
-  test("is not sunk if hits are less than length", () => {
-    const ship = Ship(3);
-    ship.hit();
-    expect(ship.isSunk()).toBe(false);
-  });
+    test("should have a length and a type", () => {
+      expect(ship.getType()).toBe(type);
+      expect(ship.getLength()).toBe(length);
+    });
+    test("tracks the number of times it has been hit", () => {
+      ship.hit();
+      ship.hit();
+      expect(ship.getHits()).toBe(2);
+    });
 
-  test("is sunk if hits are equal to length", () => {
-    const ship = Ship(3);
-    ship.hit();
-    ship.hit();
-    ship.hit();
-    expect(ship.isSunk()).toBe(true);
-  });
+    test("is not sunk if hits are less than length", () => {
+      ship.hit();
+      expect(ship.isSunk()).toBe(false);
+    });
 
-  test("does not increase hit count beyond ship length", () => {
-    const ship = Ship(3);
-    ship.hit();
-    ship.hit();
-    ship.hit();
-    ship.hit(); // Extra hit
-    expect(ship.getHits()).toBe(3); // Should not exceed 3
-  });
+    test("is sunk if hits are equal to length", () => {
+      for (let i = 0; i < length; i++) {
+        ship.hit();
+      }
+      expect(ship.isSunk()).toBe(true);
+    });
 
-  test("does not throw an error for redundant hit calls", () => {
-    const ship = Ship(2);
-    ship.hit();
-    ship.hit();
-    expect(() => ship.hit()).not.toThrow();
+    test("does not increase hit count beyond ship length", () => {
+      for (let i = 0; i < length + 1; i++) {
+        ship.hit();
+      }
+      expect(ship.getHits()).toBe(length); // Should not exceed length
+    });
+
+    test("does not throw an error for redundant hit calls", () => {
+      for (let i = 0; i < length; i++) {
+        ship.hit();
+      }
+      expect(() => ship.hit()).not.toThrow();
+    });
   });
 });
