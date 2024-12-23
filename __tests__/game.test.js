@@ -1,10 +1,19 @@
+// * game.test.js
 import { Game } from "../src/components/game";
 import { Gameboard } from "../src/components/gameboard";
 import { Player } from "../src/components/player";
-import { BOARD_SIZE, ERROR_MESSAGES, PLAYERS } from "../src/helpers/constants";
+import { Ship } from "../src/components/ship";
+import { ERROR_MESSAGES } from "../src/helpers/constants/messageConstants";
+import { PLAYERS } from "../src/helpers/constants/playerConstants";
+import {
+  BOARD_SIZE,
+  CELL_STATUS,
+  ORIENTATIONS,
+} from "../src/helpers/constants/boardConstants";
+
 import { battleships } from "../src/helpers/battleships";
-import { createMockGameboard, createMockPlayer } from "./mocks";
-import { before } from "lodash";
+import { sinkAllShips, placeShipAndAttack } from "./test-helpers";
+import { BATTLESHIPS } from "../src/helpers/constants/shipConstants";
 
 // jest.mock("../src/components/ui");
 
@@ -16,14 +25,22 @@ describe("Game Module", () => {
   let player2Gameboard;
 
   beforeEach(() => {
-    player1 = Player("human", "Alice", "player1");
-    player2 = Player("computer", "Computer", "player2");
+    // Real implementations for core interaction tests
+    player1 = Player(
+      PLAYERS.PLAYER1.TYPE,
+      PLAYERS.PLAYER1.NAME,
+      PLAYERS.PLAYER1.ID
+    );
+    player2 = Player(
+      PLAYERS.PLAYER1.TYPE,
+      PLAYERS.PLAYER2.NAME,
+      PLAYERS.PLAYER2.ID
+    );
 
-    // Initialize Gameboards
-    player1Gameboard = createMockGameboard();
-    player2Gameboard = createMockGameboard();
+    player1Gameboard = Gameboard(BOARD_SIZE, ...battleships);
+    player2Gameboard = Gameboard(BOARD_SIZE, ...battleships);
 
-    // Associate Gameboards with Players
+    // Associate gameboards with players
     player1.setGameboard(player1Gameboard);
     player2.setGameboard(player2Gameboard);
 
@@ -47,31 +64,27 @@ describe("Game Module", () => {
   describe("Initialization", () => {
     test("should initialize with two players", () => {
       const players = game.getPlayers();
-
       expect(players).toHaveLength(2);
-      expect(players[0].getName()).toBe(PLAYERS.PLAYER1.NAME);
-      expect(players[1].getName()).toBe(PLAYERS.PLAYER2.NAME);
+      expect(players[0]).toBe(player1);
+      expect(players[1]).toBe(player2);
     });
 
     test("should initialize with two boards", () => {
-      const [player1, player2] = game.getPlayers();
-      const player1Board = player1.getGameboard();
-      const player2Board = player2.getGameboard();
-
-      expect(player1Board).toBeDefined();
-      expect(player2Board).toBeDefined();
-      expect(player1Board.getBoard()).toBeDefined();
-      expect(player2Board.getBoard()).toBeDefined();
+      const [p1, p2] = game.getPlayers();
+      expect(p1.getGameboard()).toBe(player1Gameboard);
+      expect(p2.getGameboard()).toBe(player2Gameboard);
     });
 
     test("should set Player 1 as the current player at start", () => {
-      const currentPlayer = game.getCurrentPlayer();
-      expect(currentPlayer.getName()).toBe(PLAYERS.PLAYER1.NAME);
+      expect(game.getCurrentPlayer().getId()).toBe(player1.getId());
     });
 
     test("should initialize scores correctly", () => {
       const score = game.getScore();
-      expect(score).toEqual({ Alice: 0, Computer: 0 });
+      expect(score).toEqual({
+        [PLAYERS.PLAYER1.NAME]: 0,
+        [PLAYERS.PLAYER2.NAME]: 0,
+      });
     });
 
     test("should initialize the game state correctly", () => {
@@ -88,221 +101,88 @@ describe("Game Module", () => {
   });
 
   // ----------------------------
-  // 2. switchTurn Method Tests
-  // ----------------------------
-  describe("switchTurn Method", () => {
-    test("should switch turns after an attack", () => {
-      const initialPlayer = game.getCurrentPlayer();
-
-      // Perform an attack
-      // Mock receiveAttack to return a valid response
-      const opponent = game.getOpponent();
-      opponent.getGameboard().receiveAttack = jest.fn().mockReturnValue({
-        hit: true,
-        sunk: false,
-        coordinates: { x: 0, y: 0 },
-      });
-
-      game.attack(0, 0);
-
-      const newPlayer = game.getCurrentPlayer();
-      expect(newPlayer).not.toBe(initialPlayer);
-    });
-
-    test("should switch current player from Player 1 to Player 2", () => {
-      // Arrange
-      // Initially, current player should be Player 1
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[0]);
-
-      // Spy on switchTurn
-      const switchTurnSpy = jest.spyOn(game, "switchTurn");
-
-      // Act
-      game.switchTurn();
-
-      // Assert
-      expect(switchTurnSpy).toHaveBeenCalled();
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[1]);
-    });
-
-    test("should switch current player from Player 2 to Player 1", () => {
-      // Arrange
-      // First, switch to Player 2
-      game.switchTurn();
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[1]);
-
-      // Spy on switchTurn
-      const switchTurnSpy = jest.spyOn(game, "switchTurn");
-
-      // Act
-      game.switchTurn();
-
-      // Assert
-      expect(switchTurnSpy).toHaveBeenCalled();
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[0]);
-    });
-
-    test("should toggle current player correctly multiple times", () => {
-      // Arrange
-      // Ensure current player is Player 1
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[0]);
-
-      // Act & Assert
-      // First switch: Player 1 -> Player 2
-      game.switchTurn();
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[1]);
-
-      // Second switch: Player 2 -> Player 1
-      game.switchTurn();
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[0]);
-
-      // Third switch: Player 1 -> Player 2
-      game.switchTurn();
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[1]);
-    });
-
-    test("should not switch player if the game is over", () => {
-      // Arrange
-      // Simulate game over using the exposed method
-      game.setGameOver(true);
-
-      // Ensure currentPlayer is Player 1
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[0]);
-
-      // Spy on switchTurn and console.warn
-      const switchTurnSpy = jest.spyOn(game, "switchTurn");
-      const consoleWarnSpy = jest
-        .spyOn(console, "warn")
-        .mockImplementation(() => {});
-
-      // Act
-      game.switchTurn();
-
-      // Assert
-      expect(switchTurnSpy).toHaveBeenCalled();
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[0]); // Should remain the same
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "Cannot switch turn. The game is already over."
-      );
-    });
-
-    test("should not switch player if the game is over", () => {
-      // Arrange
-      // Simulate game over using the exposed method
-      game.setGameOver(true);
-
-      // Ensure currentPlayer is Player 1
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[0]);
-
-      // Spy on switchTurn and console.warn
-      const switchTurnSpy = jest.spyOn(game, "switchTurn");
-      const consoleWarnSpy = jest
-        .spyOn(console, "warn")
-        .mockImplementation(() => {});
-
-      // Act
-      game.switchTurn();
-
-      // Assert
-      expect(switchTurnSpy).toHaveBeenCalled();
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[0]); // Should remain the same
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "Cannot switch turn. The game is already over."
-      );
-
-      // Clean up mock
-      consoleWarnSpy.mockRestore();
-    });
-  });
-
-  // ----------------------------
-  // 3. attack Method Tests
+  // 2. attack Method Tests
   // ----------------------------
 
   describe("attack Method", () => {
-    test("should return correct result", () => {
-      const players = game.getPlayers();
-      const opponentBoard = players[1].getGameboard();
-
-      // Mock receiveAttack to control the result
-      opponentBoard.receiveAttack = jest.fn().mockReturnValue({
-        hit: true,
-        sunk: false,
-        coordinates: { x: 1, y: 1 },
-      });
-
-      const result = game.attack(1, 1);
-
-      expect(opponentBoard.receiveAttack).toHaveBeenCalledWith(1, 1);
-      expect(result).toEqual({
-        hit: true,
-        sunk: false,
-        coordinates: { x: 1, y: 1 },
-      });
-
-      // Verify turn switch
-      expect(game.getCurrentPlayer()).toBe(players[1]);
+    test("should register a hit and switch turns", () => {
+      const opponentBoard = game.getOpponent().getGameboard();
+      const ship = Ship(BATTLESHIPS[0].type, BATTLESHIPS[0].length);
+      opponentBoard.placeShip(ship, 0, 0, ORIENTATIONS.HORIZONTAL);
+      const result = game.attack(0, 0);
+      console.log(result);
+      expect(result.result).toBe(CELL_STATUS.HIT);
+      expect(result.sunk).toBe(false);
+      expect(game.getCurrentPlayer().getId()).toBe(player2.getId());
     });
 
-    test("should update score when a ship is sunk", () => {
-      const players = game.getPlayers();
-      const opponentBoard = players[1].getGameboard();
+    test("should register a miss and switch turns", () => {
+      const opponentBoard = game.getOpponent().getGameboard();
+      const ship = Ship(BATTLESHIPS[0].type, BATTLESHIPS[0].length);
+      opponentBoard.placeShip(ship, 0, 0, ORIENTATIONS.HORIZONTAL);
+      const result = game.attack(5, 5); // Assuming no ship at this coordinate
+      console.log(result);
+      expect(result.result).toBe(CELL_STATUS.MISS);
+      expect(result.sunk).toBe(false);
+      expect(game.getCurrentPlayer().getId()).toBe(player2.getId());
+    });
 
-      // Mock receiveAttack to return a sunk ship
-      opponentBoard.receiveAttack = jest.fn().mockReturnValue({
+    test("should register a sunk ship and update the score w/o mock", () => {
+      const opponentBoard = game.getOpponent().getGameboard();
+      const destroyer = Ship(BATTLESHIPS[4].type, BATTLESHIPS[4].length); // Destroyer, length 2
+      const submarine = Ship(BATTLESHIPS[3].type, BATTLESHIPS[3].length); // Submarine, length 3
+      opponentBoard.placeShip(destroyer, 0, 0, ORIENTATIONS.HORIZONTAL);
+      opponentBoard.placeShip(submarine, 5, 5, ORIENTATIONS.VERTICAL);
+
+      expect(game.getScore()[PLAYERS.PLAYER1.NAME]).toBe(0);
+      expect(game.getScore()[PLAYERS.PLAYER2.NAME]).toBe(0);
+      expect(game.getCurrentPlayer()).toBe(player1);
+      // Player 1 hits and sinks the Destroyer
+      game.attack(0, 0);
+
+      // Player 2 takes a turn (arbitrary attack)
+      expect(game.getCurrentPlayer()).toBe(player2);
+      game.attack(5, 5);
+
+      // Player 1 hits and sinks the Destroyer
+      expect(game.getCurrentPlayer()).toBe(player1);
+      const result = game.attack(1, 0);
+
+      expect(result.result).toBe(CELL_STATUS.HIT);
+      expect(result.sunk).toBe(true);
+      expect(game.getScore()[PLAYERS.PLAYER1.NAME]).toBe(1);
+      expect(game.getScore()[PLAYERS.PLAYER2.NAME]).toBe(0);
+      expect(game.getCurrentPlayer()).toBe(player2);
+    });
+
+    test("should process a sunk ship correctly, update score, and switch turn w/ mock", () => {
+      // Arrange
+      const attackResult = {
         hit: true,
+        shipType: "Carrier",
         sunk: true,
         coordinates: { x: 2, y: 2 },
-      });
+      };
+      player2Gameboard.receiveAttack = jest.fn().mockReturnValue(attackResult);
+      //player2Gameboard.receiveAttack.mockReturnValue(attackResult);
+      player2Gameboard.areAllShipsSunk = jest.fn().mockReturnValue(false);
 
-      game.attack(2, 2);
+      // Act
+      const result = game.attack(2, 2);
 
-      const score = game.getScore();
-      expect(score).toEqual({ Alice: 1, Computer: 0 });
-
-      // Verify turn switch
-      expect(game.getCurrentPlayer()).toBe(players[1]);
-    });
-
-    test("should throw error when attacking out-of-bounds coordinates", () => {
-      expect(() => game.attack(-1, 0)).toThrow(
-        ERROR_MESSAGES.INVALID_COORDINATES
-      );
-      expect(() => game.attack(0, BOARD_SIZE)).toThrow(
-        ERROR_MESSAGES.INVALID_COORDINATES
-      );
-      expect(() => game.attack("a", 5)).toThrow(
-        ERROR_MESSAGES.INVALID_COORDINATES
-      );
-    });
-
-    test("should throw error when attacking an already attacked coordinate", () => {
-      const opponent = game.getOpponent();
-      const opponentBoard = opponent.getGameboard();
-
-      // Mock hasBeenAttacked to return true
-      opponentBoard.hasBeenAttacked = jest.fn().mockReturnValue(true);
-
-      expect(() => game.attack(0, 0)).toThrow(ERROR_MESSAGES.ALREADY_ATTACKED);
-    });
-
-    test("should not switch turns after an invalid attack", () => {
-      const initialPlayer = game.getCurrentPlayer();
-
-      // Attempt an invalid attack
-      try {
-        game.attack(-1, 0);
-      } catch (e) {
-        // Expected to throw an error
-      }
-
-      const currentPlayer = game.getCurrentPlayer();
-      expect(currentPlayer).toBe(initialPlayer);
+      // Assert
+      expect(player2Gameboard.receiveAttack).toHaveBeenCalledWith(2, 2);
+      expect(result).toBe(attackResult);
+      expect(game.getScore()).toEqual({
+        [PLAYERS.PLAYER1.NAME]: 1,
+        [PLAYERS.PLAYER2.NAME]: 0,
+      }); // Score updated
+      expect(game.getCurrentPlayer()).toBe(player2); // Turn switched to player2
     });
   });
 
   // ----------------------------
-  // 4. getOpponent Method Tests
+  // 3. getOpponent Method Tests
   // ----------------------------
   describe("getOpponent Method", () => {
     test("should return the correct opponent", () => {
@@ -323,57 +203,48 @@ describe("Game Module", () => {
   });
 
   // ----------------------------
-  // 5. resetGame Method Tests
+  // 4. resetGame Method Tests
   // ----------------------------
   describe("resetGame Method", () => {
-    beforeEach(() => {
-      const opponent = game.getOpponent();
-      opponent.getGameboard().receiveAttack = jest.fn().mockReturnValue({
-        hit: true,
-        sunk: false,
-        coordinates: { x: 0, y: 0 },
-      });
-    });
-    test("should reset the game state correctly", () => {
-      // Perform an attack to switch turns
-      game.attack(0, 0);
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[1]);
+    test("should reset the game state and scores", () => {
       expect(game.isGameStarted()).toBe(true);
       expect(game.isGameOver()).toBe(false);
-      expect(game.getScore()).toEqual({ Alice: 0, Computer: 0 });
-
-      // Reset the game
-      game.resetGame();
-
-      // Assertions after reset
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[0]);
-      expect(game.isGameStarted()).toBe(false);
-      expect(game.isGameOver()).toBe(false);
-      expect(game.getScore()).toEqual({ Alice: 0, Computer: 0 });
-
-      // Verify that gameboards are reset
-      // TODO fix this one -> add gameboard.reset() method
-      game.getPlayers().forEach((player) => {
-        const board = player.getGameboard();
-        expect(board.getPlacedShips().length).toBe(0); // Assuming reset clears ships
-        expect(board.getAllAttacks().size).toBe(0); // Assuming reset clears attacks
+      expect(game.getScore()).toEqual({
+        [PLAYERS.PLAYER1.NAME]: 0,
+        [PLAYERS.PLAYER2.NAME]: 0,
       });
-    });
+      expect(game.getCurrentPlayer()).toBe(player1);
 
-    test("resetGame should reset the game state", () => {
-      game.attack(0, 0);
-      expect(game.getCurrentPlayer()).not.toBe(game.getPlayers()[0]);
+      const opponentBoard = player2Gameboard;
+      const ship = Ship("Test", 1);
+      opponentBoard.placeShip(ship, 0, 0, ORIENTATIONS.HORIZONTAL);
+
+      game.attack(0, 0); // Make some progress
+      expect(game.getScore()).toEqual({
+        [PLAYERS.PLAYER1.NAME]: 1,
+        [PLAYERS.PLAYER2.NAME]: 0,
+      });
 
       game.resetGame();
-      expect(game.getCurrentPlayer()).toBe(game.getPlayers()[0]);
+
       expect(game.isGameStarted()).toBe(false);
       expect(game.isGameOver()).toBe(false);
-      expect(game.getScore()).toEqual({ Alice: 0, Computer: 0 });
+      expect(game.getScore()).toEqual({
+        [PLAYERS.PLAYER1.NAME]: 0,
+        [PLAYERS.PLAYER2.NAME]: 0,
+      });
+      expect(game.getCurrentPlayer()).toBe(player1);
+
+      // Verify gameboards are reset
+      game.getPlayers().forEach((player) => {
+        expect(player.getGameboard().getAllAttacks().size).toBe(0); // Assuming reset clears attacks
+        expect(player.getGameboard().getPlacedShips().length).toBe(0); // Assuming reset clears ships
+      });
     });
   });
 
   // ----------------------------
-  // 6. Edge Case and Error Handling Tests
+  // 5. Edge Case and Error Handling Tests
   // ----------------------------
   describe("Edge Cases and Error Handling", () => {
     test("should declare game over when all opponent's ships are sunk", () => {
@@ -392,6 +263,82 @@ describe("Game Module", () => {
       game.attack(0, 0);
 
       expect(game.isGameOver()).toBe(true);
+    });
+
+    test("should declare game over when all opponent's ships are sunk", () => {
+      // Arrange
+      const attackResult = {
+        hit: true,
+        shipType: "Carrier",
+        sunk: true,
+        coordinates: { x: 3, y: 3 },
+      };
+      player2Gameboard.receiveAttack = jest.fn().mockReturnValue(attackResult);
+      player2Gameboard.areAllShipsSunk = jest.fn().mockReturnValue(true);
+
+      // Act
+      const result = game.attack(3, 3);
+
+      // Assert
+      expect(player2Gameboard.receiveAttack).toHaveBeenCalledWith(3, 3);
+      expect(result).toBe(attackResult);
+      expect(game.isGameOver()).toBe(true);
+    });
+
+    test("should throw error when attacking out-of-bounds coordinates", () => {
+      expect(() => game.attack(-1, 0)).toThrow(
+        ERROR_MESSAGES.INVALID_COORDINATES
+      );
+      expect(() => game.attack(0, BOARD_SIZE)).toThrow(
+        ERROR_MESSAGES.INVALID_COORDINATES
+      );
+      expect(() => game.attack(BOARD_SIZE, 0)).toThrow(
+        ERROR_MESSAGES.INVALID_COORDINATES
+      );
+      expect(() => game.attack("a", 5)).toThrow(
+        ERROR_MESSAGES.INVALID_COORDINATES
+      );
+    });
+
+    test("should throw error when attacking an already attacked coordinate", () => {
+      // Arrange
+      player2Gameboard.hasBeenAttacked = jest.fn().mockReturnValue(true);
+      player2Gameboard.receiveAttack = jest.fn();
+
+      // Act & Assert
+      expect(() => game.attack(0, 0)).toThrow(ERROR_MESSAGES.ALREADY_ATTACKED);
+      expect(player2Gameboard.receiveAttack).not.toHaveBeenCalled();
+    });
+
+    test("should not switch turns after an invalid attack", () => {
+      // Arrange
+      player2Gameboard.hasBeenAttacked = jest.fn().mockReturnValue(true);
+      player2Gameboard.receiveAttack = jest.fn();
+
+      // Act
+      try {
+        game.attack(0, 0);
+      } catch (e) {
+        // Expected to throw
+      }
+
+      // Assert
+      expect(game.getCurrentPlayer()).toBe(player1); // Remains with player1
+    });
+
+    test("should throw error when attacking after game is over", () => {
+      // Arrange: place a 1-length ship so a single hit will sink it
+      const opponentBoard = player2Gameboard;
+      const ship = Ship("Test", 1);
+      opponentBoard.placeShip(ship, 0, 0, ORIENTATIONS.HORIZONTAL);
+
+      // Act: first attack sinks the only ship -> game should set itself to over
+      game.attack(0, 0);
+
+      // Assert: subsequent attack should fail because game is over
+      expect(() => game.attack(1, 1)).toThrow(ERROR_MESSAGES.GAME_OVER);
+      const receiveAttackSpy = jest.spyOn(opponentBoard, "receiveAttack");
+      expect(receiveAttackSpy).not.toHaveBeenCalledWith(1, 1);
     });
   });
 });

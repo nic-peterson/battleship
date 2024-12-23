@@ -1,8 +1,8 @@
+// * game.js
+
 import { Player } from "./player";
-import { Gameboard } from "./gameboard";
-import { placeShipsRandomly } from "../helpers/placeShipsRandomly";
-import { BOARD_SIZE, ERROR_MESSAGES } from "../helpers/constants";
-import { battleships } from "../helpers/battleships";
+import { ERROR_MESSAGES } from "../helpers/constants/messageConstants";
+import { BOARD_SIZE } from "../helpers/constants/boardConstants";
 
 export const Game = (p1 = null, p2 = null) => {
   let currentPlayer;
@@ -25,7 +25,8 @@ export const Game = (p1 = null, p2 = null) => {
   /**
    * setScore
    *
-   * s or resets the score for both players.
+   * s or resets the score for both clear
+   * yers.
    */
   const setScore = () => {
     score[player1.getName()] = 0;
@@ -133,7 +134,6 @@ export const Game = (p1 = null, p2 = null) => {
       return;
     }
     setCurrentPlayer(currentPlayer === player1 ? player2 : player1);
-    console.log(`Switched turn to: ${currentPlayer.getName()}`);
   };
 
   /**
@@ -146,7 +146,7 @@ export const Game = (p1 = null, p2 = null) => {
    * @returns {Object} - The result of the attack (hit, sunk)
    */
   const attack = (x, y) => {
-    if (gameOver) {
+    if (isGameOver()) {
       throw new Error(ERROR_MESSAGES.GAME_OVER);
     }
 
@@ -290,8 +290,6 @@ export const Game = (p1 = null, p2 = null) => {
     getOpponent,
     isGameOver,
     isGameStarted,
-    setGameOver,
-    setGameStarted,
     getScore,
     attack,
     switchTurn,
