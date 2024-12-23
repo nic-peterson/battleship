@@ -1,4 +1,5 @@
-import { BOARD_SIZE, ERROR_MESSAGES } from "../helpers/constants";
+import { BOARD_SIZE } from "../helpers/constants/boardConstants";
+import { ERROR_MESSAGES } from "../helpers/constants/messageConstants";
 
 export const Player = (type, name, id) => {
   let gameboard = null; // Initialize without a gameboard
