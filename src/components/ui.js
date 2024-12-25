@@ -1,6 +1,5 @@
 // ui.js
 import { CELL_STATUS } from "../helpers/constants/boardConstants";
-import { PLAYER_BOARDS } from "../helpers/constants/boardConstants";
 import { CSS_CLASSES, CSS_IDS } from "../helpers/constants/cssConstants";
 import {
   ERROR_MESSAGES,
@@ -224,49 +223,6 @@ export const UI = () => {
         }
       });
     });
-
-    /*
-    container.addEventListener("click", (event) => {
-      console.log("STEPPING INTO ADD EVENT LISTENER");
-      const cell = event.target.closest(`.${CSS_CLASSES.BOARD_CELL}`);
-      console.log("Event target:", event.target);
-      console.log("Cell:", cell);
-
-      if (cell) {
-        console.log("Cell Classes:", cell.classList);
-        console.log("Cell dataset:", cell.dataset);
-        console.log(
-          "Is board-cell:",
-          cell?.classList.contains(CSS_CLASSES.BOARD_CELL)
-        );
-        console.log("Is not hit:", !cell?.classList.contains(CSS_CLASSES.HIT));
-        console.log(
-          "Is not miss:",
-          !cell?.classList.contains(CSS_CLASSES.MISS)
-        );
-        console.log(
-          "Is not sunk:",
-          !cell?.classList.contains(CSS_CLASSES.SUNK)
-        );
-      }
-
-      if (
-        cell & cell.classList.contains(CSS_CLASSES.BOARD_CELL) &&
-        !cell.classList.contains(CSS_CLASSES.HIT) &&
-        !cell.classList.contains(CSS_CLASSES.MISS) &&
-        !cell.classList.contains(CSS_CLASSES.SUNK)
-      ) {
-        console.log("Cell clicked:", cell);
-        const x = parseInt(cell.dataset.x, 10);
-        const y = parseInt(cell.dataset.y, 10);
-        console.log("Event target:", event.target);
-        console.log("Cell coordinates:", x, y);
-        handleAttack(x, y);
-      } else {
-        console.log("Conditional failed. Cell is invalid or already marked.");
-      }
-    });
-    */
   };
 
   const enableBoardInteraction = (boardContainerId) => {
