@@ -1,5 +1,11 @@
 // ui.js
-import { CellStatus } from "../helpers/constants";
+import { CELL_STATUS } from "../helpers/constants/boardConstants";
+import { PLAYER_BOARDS } from "../helpers/constants/boardConstants";
+import { CSS_CLASSES, CSS_IDS } from "../helpers/constants/cssConstants";
+import {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+} from "../helpers/constants/messageConstants";
 
 export const UI = () => {
   // Helper to create and append an element
@@ -33,7 +39,7 @@ export const UI = () => {
 
     createElement("div", {
       id: `player${index + 1}-board`,
-      classes: ["board"],
+      classes: [CSS_CLASSES.BOARD],
       parent: playerDiv,
     });
   };
@@ -46,10 +52,10 @@ export const UI = () => {
 
     updateScore(player1, 0, player2, 0);
 
-    updateCurrentPlayer(player1.getName());
+    updateCurrentPlayer(player1);
 
     const gameDiv = createElement("div", {
-      id: "game",
+      id: CSS_IDS.GAME,
       parent: document.body,
     });
 
@@ -58,22 +64,26 @@ export const UI = () => {
     });
 
     createElement("div", {
-      id: "message",
+      id: CSS_IDS.MESSAGE,
       parent: gameDiv,
     });
 
-    renderBoard(player1.getGameboard().getBoard(), "player1-board", true);
-    renderBoard(player2.getGameboard().getBoard(), "player2-board", false);
+    renderBoard(player1.getGameboard().getBoard(), CSS_IDS.PLAYER1_BOARD, true);
+    renderBoard(
+      player2.getGameboard().getBoard(),
+      CSS_IDS.PLAYER2_BOARD,
+      false
+    );
 
-    displayMessage("Game started");
+    displayMessage(SUCCESS_MESSAGES.GAME_STARTED);
   };
 
   const resetUI = () => {
     // Remove the game container without affecting #message
-    const gameContainer = document.getElementById("game");
+    const gameContainer = document.getElementById(CSS_IDS.GAME);
     if (gameContainer) {
       // Remove all child elements except #message
-      const messageDiv = document.getElementById("message");
+      const messageDiv = document.getElementById(CSS_IDS.MESSAGE);
       gameContainer.innerHTML = ""; // Clear all children
       if (messageDiv) {
         gameContainer.appendChild(messageDiv); // Re-add messageDiv if necessary
@@ -87,19 +97,19 @@ export const UI = () => {
     }
 
     // Remove the score div
-    const scoreDiv = document.getElementById("score");
+    const scoreDiv = document.getElementById(CSS_IDS.SCORE);
     if (scoreDiv) {
       scoreDiv.remove();
     }
 
     // Remove the current player div
-    const currentPlayerDiv = document.getElementById("current-player");
+    const currentPlayerDiv = document.getElementById(CSS_IDS.CURRENT_PLAYER);
     if (currentPlayerDiv) {
       currentPlayerDiv.remove();
     }
 
     // Clear the message div's text content without removing it
-    const messageDiv = document.getElementById("message");
+    const messageDiv = document.getElementById(CSS_IDS.MESSAGE);
     if (messageDiv) {
       messageDiv.textContent = "";
       // Optionally, reset other properties if needed
@@ -111,20 +121,20 @@ export const UI = () => {
     const container = document.getElementById(containerId);
 
     if (!container) {
-      throw new Error("Container not found");
+      throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
     }
 
     container.innerHTML = ""; // Clear previous content
 
     board.forEach((row, y) => {
       const rowElement = createElement("div", {
-        classes: ["board-row"],
+        classes: [CSS_CLASSES.BOARD_ROW],
         parent: container,
       });
 
       row.forEach((cell, x) => {
         const cellElement = createElement("div", {
-          classes: ["board-cell"],
+          classes: [CSS_CLASSES.BOARD_CELL],
           parent: rowElement,
         });
 
@@ -132,23 +142,23 @@ export const UI = () => {
         cellElement.dataset.y = y;
 
         if (cell.ship && isOwnBoard) {
-          cellElement.classList.add(CellStatus.SHIP);
+          cellElement.classList.add(CSS_CLASSES.SHIP);
 
           if (cell.ship.isSunk()) {
-            cellElement.classList.add(CellStatus.SUNK);
+            cellElement.classList.add(CSS_CLASSES.SUNK);
           }
         }
 
-        if (cell.status === CellStatus.HIT)
-          cellElement.classList.add(CellStatus.HIT);
-        if (cell.status === CellStatus.MISS)
-          cellElement.classList.add(CellStatus.MISS);
+        if (cell.status === CELL_STATUS.HIT)
+          cellElement.classList.add(CSS_CLASSES.HIT);
+        if (cell.status === CELL_STATUS.MISS)
+          cellElement.classList.add(CSS_CLASSES.MISS);
       });
     });
   };
 
   const displayMessage = (message, type = "info", duration = 0) => {
-    const messageDiv = document.getElementById("message");
+    const messageDiv = document.getElementById(CSS_IDS.MESSAGE);
     if (messageDiv) {
       messageDiv.textContent = message;
       messageDiv.className = `message ${type}`;
@@ -156,7 +166,7 @@ export const UI = () => {
       if (duration > 0) {
         setTimeout(() => {
           messageDiv.textContent = "";
-          messageDiv.className = "message";
+          messageDiv.className = CSS_CLASSES.MESSAGE;
         }, duration);
       }
     }
@@ -164,23 +174,26 @@ export const UI = () => {
 
   const updateScore = (player1, player1Score, player2, player2Score) => {
     const scoreDiv =
-      document.getElementById("score") ||
-      createElement("div", { id: "score", parent: document.body });
+      document.getElementById(CSS_IDS.SCORE) ||
+      createElement("div", { id: CSS_IDS.SCORE, parent: document.body });
 
     scoreDiv.textContent = `${player1.getName()}: ${player1Score} | ${player2.getName()}: ${player2Score}`;
   };
 
-  const updateCurrentPlayer = (playerName) => {
+  const updateCurrentPlayer = (player) => {
     const currentPlayerDiv =
-      document.getElementById("current-player") ||
-      createElement("div", { id: "current-player", parent: document.body });
+      document.getElementById(CSS_IDS.CURRENT_PLAYER) ||
+      createElement("div", {
+        id: CSS_IDS.CURRENT_PLAYER,
+        parent: document.body,
+      });
 
-    currentPlayerDiv.textContent = `Current Player: ${playerName}`;
+    currentPlayerDiv.textContent = `Current Player: ${player.getName()}`;
     // Highlight the current player's section
     document.querySelectorAll(".player-section").forEach((section) => {
       section.classList.toggle(
         "current",
-        section.querySelector("h2").textContent === playerName
+        section.querySelector("h2").textContent === player.getName()
       );
     });
   };
@@ -189,37 +202,97 @@ export const UI = () => {
     const container = document.getElementById(boardContainerId);
 
     if (!container) {
-      throw new Error("Container not found");
+      throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
     }
 
-    container.addEventListener("click", (event) => {
-      const cell = event.target;
-      if (
-        cell.classList.contains("board-cell") &&
-        !cell.classList.contains("hit") &&
-        !cell.classList.contains("miss")
-      ) {
+    // Select all cells inside the container
+    const cells = container.querySelectorAll(`.${CSS_CLASSES.BOARD_CELL}`);
+
+    cells.forEach((cell) => {
+      cell.addEventListener("click", (event) => {
+        // Extract x, y from cell's data attributes
         const x = parseInt(cell.dataset.x, 10);
         const y = parseInt(cell.dataset.y, 10);
+
+        // Prevent attacking a cell that's already marked
+        if (
+          !cell.classList.contains(CSS_CLASSES.HIT) &&
+          !cell.classList.contains(CSS_CLASSES.MISS) &&
+          !cell.classList.contains(CSS_CLASSES.SUNK)
+        ) {
+          handleAttack(x, y);
+        }
+      });
+    });
+
+    /*
+    container.addEventListener("click", (event) => {
+      console.log("STEPPING INTO ADD EVENT LISTENER");
+      const cell = event.target.closest(`.${CSS_CLASSES.BOARD_CELL}`);
+      console.log("Event target:", event.target);
+      console.log("Cell:", cell);
+
+      if (cell) {
+        console.log("Cell Classes:", cell.classList);
+        console.log("Cell dataset:", cell.dataset);
+        console.log(
+          "Is board-cell:",
+          cell?.classList.contains(CSS_CLASSES.BOARD_CELL)
+        );
+        console.log("Is not hit:", !cell?.classList.contains(CSS_CLASSES.HIT));
+        console.log(
+          "Is not miss:",
+          !cell?.classList.contains(CSS_CLASSES.MISS)
+        );
+        console.log(
+          "Is not sunk:",
+          !cell?.classList.contains(CSS_CLASSES.SUNK)
+        );
+      }
+
+      if (
+        cell & cell.classList.contains(CSS_CLASSES.BOARD_CELL) &&
+        !cell.classList.contains(CSS_CLASSES.HIT) &&
+        !cell.classList.contains(CSS_CLASSES.MISS) &&
+        !cell.classList.contains(CSS_CLASSES.SUNK)
+      ) {
+        console.log("Cell clicked:", cell);
+        const x = parseInt(cell.dataset.x, 10);
+        const y = parseInt(cell.dataset.y, 10);
+        console.log("Event target:", event.target);
+        console.log("Cell coordinates:", x, y);
         handleAttack(x, y);
+      } else {
+        console.log("Conditional failed. Cell is invalid or already marked.");
       }
     });
+    */
   };
 
   const enableBoardInteraction = (boardContainerId) => {
     const container = document.getElementById(boardContainerId);
-    container.classList.remove("disabled");
+
+    if (container) {
+      container.classList.remove(CSS_CLASSES.DISABLED);
+    } else {
+      throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
+    }
   };
 
   const disableBoardInteraction = (boardContainerId) => {
     const container = document.getElementById(boardContainerId);
-    container.classList.add("disabled");
+
+    if (container) {
+      container.classList.add(CSS_CLASSES.DISABLED);
+    } else {
+      throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
+    }
   };
 
   const showGameOverScreen = (winnerName) => {
     const gameOverDiv = createElement("div", {
-      id: "game-over",
-      classes: ["overlay"],
+      id: CSS_IDS.GAME_OVER,
+      classes: [CSS_CLASSES.OVERLAY],
       parent: document.body,
     });
 

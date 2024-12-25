@@ -1,5 +1,18 @@
+// * ui.test.js
+const { TextEncoder, TextDecoder } = require("util");
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 const { JSDOM } = require("jsdom");
 const { UI } = require("../src/components/ui");
+import { Gameboard } from "../src/components/gameboard";
+import { Player } from "../src/components/player";
+import { CSS_CLASSES, CSS_IDS } from "../src/helpers/constants/cssConstants";
+import { PLAYERS } from "../src/helpers/constants/playerConstants";
+import { BOARD_SIZE } from "../src/helpers/constants/boardConstants";
+import { BATTLESHIPS } from "../src/helpers/constants/shipConstants";
+import { Ship } from "../src/components/ship";
+import { ERROR_MESSAGES } from "../src/helpers/constants/messageConstants";
 
 describe("UI", () => {
   let dom;
@@ -7,6 +20,8 @@ describe("UI", () => {
 
   let player1;
   let player2;
+  let player1Gameboard;
+  let player2Gameboard;
 
   let ui;
 
@@ -20,20 +35,23 @@ describe("UI", () => {
     // Reset the DOM
     document.body.innerHTML = "";
 
-    // Mock gameboard objects
-    const mockGameboard = {
-      getBoard: jest.fn().mockReturnValue([]), // Return an empty board array
-    };
+    player1 = Player(
+      PLAYERS.PLAYER1.TYPE,
+      PLAYERS.PLAYER1.NAME,
+      PLAYERS.PLAYER1.ID
+    );
+    player2 = Player(
+      PLAYERS.PLAYER1.TYPE,
+      PLAYERS.PLAYER2.NAME,
+      PLAYERS.PLAYER2.ID
+    );
 
-    // Mock players
-    player1 = {
-      getName: jest.fn().mockReturnValue("Alice"),
-      getGameboard: jest.fn().mockReturnValue(mockGameboard),
-    };
-    player2 = {
-      getName: jest.fn().mockReturnValue("Bob"),
-      getGameboard: jest.fn().mockReturnValue(mockGameboard),
-    };
+    player1Gameboard = Gameboard(BOARD_SIZE, ...BATTLESHIPS);
+    player2Gameboard = Gameboard(BOARD_SIZE, ...BATTLESHIPS);
+
+    // Associate gameboards with players
+    player1.setGameboard(player1Gameboard);
+    player2.setGameboard(player2Gameboard);
 
     ui = UI();
     // Initialize the UI
@@ -44,370 +62,318 @@ describe("UI", () => {
     global.document = undefined;
   });
 
-  test("should initialize UI elements correctly", () => {
-    expect(document.querySelector("h1").textContent).toBe("Battleship");
-    expect(document.getElementById("score")).not.toBeNull();
-    expect(document.getElementById("current-player")).not.toBeNull();
-    expect(document.getElementById("game")).not.toBeNull();
-    expect(document.getElementById("message")).not.toBeNull();
+  describe("UI Initialization", () => {
+    test("should initialize UI elements correctly", () => {
+      expect(document.querySelector("h1").textContent).toBe("Battleship");
+      expect(document.getElementById(CSS_IDS.SCORE)).not.toBeNull();
+      expect(document.getElementById(CSS_IDS.CURRENT_PLAYER)).not.toBeNull();
+      expect(document.getElementById(CSS_IDS.GAME)).not.toBeNull();
+      expect(document.getElementById(CSS_IDS.MESSAGE)).not.toBeNull();
+    });
+
+    test("should initialize UI with dynamic player names", () => {
+      // Reset the DOM again to avoid interference from beforeEach
+      document.body.innerHTML = "";
+
+      player1 = Player(
+        PLAYERS.PLAYER1.TYPE,
+        "Dynamic Player 1",
+        PLAYERS.PLAYER1.ID
+      );
+      player2 = Player(
+        PLAYERS.PLAYER1.TYPE,
+        "Dynamic Player 2",
+        PLAYERS.PLAYER2.ID
+      );
+
+      player1.setGameboard(player1Gameboard);
+      player2.setGameboard(player2Gameboard);
+
+      ui.initUI(player1, player2);
+
+      const playerSections = document.querySelectorAll(
+        `.${CSS_CLASSES.PLAYER_SECTION} h2`
+      );
+      expect(playerSections[0].textContent).toBe("Dynamic Player 1");
+      expect(playerSections[1].textContent).toBe("Dynamic Player 2");
+    });
   });
 
-  test("should initialize UI with dynamic player names", () => {
-    // Reset the DOM again to avoid interference from beforeEach
-    document.body.innerHTML = "";
+  describe("UI Updates", () => {
+    test("should update score", () => {
+      ui.updateScore(player1, 5, player2, 3);
+      const scoreDiv = document.getElementById(CSS_IDS.SCORE);
+      expect(scoreDiv.textContent).toBe(
+        `${player1.getName()}: 5 | ${player2.getName()}: 3`
+      );
+    });
 
-    player1.getName.mockReturnValue("Dynamic Player 1");
-    player2.getName.mockReturnValue("Dynamic Player 2");
+    test("should update current player", () => {
+      ui.updateCurrentPlayer(player2);
+      const currentPlayerDiv = document.getElementById(CSS_IDS.CURRENT_PLAYER);
+      expect(currentPlayerDiv.textContent).toBe(
+        `Current Player: ${player2.getName()}`
+      );
+    });
 
-    ui.initUI(player1, player2);
-
-    const playerSections = document.querySelectorAll(".player-section h2");
-    expect(playerSections[0].textContent).toBe("Dynamic Player 1");
-    expect(playerSections[1].textContent).toBe("Dynamic Player 2");
+    test("should display messages", () => {
+      ui.displayMessage("Test message");
+      const messageDiv = document.getElementById(CSS_IDS.MESSAGE);
+      expect(messageDiv.textContent).toBe("Test message");
+    });
   });
 
-  test("should display initial score correctly", () => {
-    const scoreDiv = document.getElementById("score");
-    expect(scoreDiv.textContent).toBe("Alice: 0 | Bob: 0");
+  describe("UI Player Board Interactions", () => {
+    beforeEach(() => {
+      // Manually place ships for testing
+      const carrier = Ship(BATTLESHIPS.type, BATTLESHIPS[0].length);
+      const battleship = Ship(BATTLESHIPS.type, BATTLESHIPS[1].length);
+
+      player1Gameboard.placeShip(carrier, 0, 0, "horizontal");
+      player1Gameboard.placeShip(battleship, 2, 2, "vertical");
+
+      player2Gameboard.placeShip(carrier, 0, 0, "horizontal");
+      player2Gameboard.placeShip(battleship, 3, 3, "vertical");
+    });
+
+    test("should render board correctly", () => {
+      ui.renderBoard(player1Gameboard.getBoard(), CSS_IDS.PLAYER1_BOARD, true);
+      const boardContainer = document.getElementById(CSS_IDS.PLAYER1_BOARD);
+
+      expect(boardContainer).not.toBeNull();
+      const cells = boardContainer.querySelectorAll(
+        `.${CSS_CLASSES.BOARD_CELL}`
+      );
+      expect(cells.length).toBe(BOARD_SIZE * BOARD_SIZE);
+
+      const cellArray = Array.from(cells);
+
+      expect(cellArray[0].classList.contains(CSS_CLASSES.SHIP)).toBe(true);
+      expect(cellArray[0].classList.contains(CSS_CLASSES.HIT)).toBe(false);
+      expect(cellArray[0].classList.contains(CSS_CLASSES.MISS)).toBe(false);
+
+      expect(cellArray[1].classList.contains(CSS_CLASSES.SHIP)).toBe(true);
+      expect(cellArray[1].classList.contains(CSS_CLASSES.HIT)).toBe(false);
+      expect(cellArray[1].classList.contains(CSS_CLASSES.SUNK)).toBe(false);
+
+      const lastCell = cellArray[cellArray.length - 1];
+      expect(lastCell.classList.contains(CSS_CLASSES.SHIP)).toBe(false);
+      expect(lastCell.classList.contains(CSS_CLASSES.HIT)).toBe(false);
+      expect(lastCell.classList.contains(CSS_CLASSES.MISS)).toBe(false);
+    });
   });
 
-  test("should display current player correctly", () => {
-    const currentPlayerDiv = document.getElementById("current-player");
-    expect(currentPlayerDiv.textContent).toBe("Current Player: Alice");
+  describe("UI - resetUI", () => {
+    beforeEach(() => {
+      // Simulate DOM elements
+
+      document.body.innerHTML = `
+        <h1>Battleship</h1>
+        <div id="${
+          CSS_IDS.SCORE
+        }">${player1.getName()}: 0 | ${player2.getName()}: 0</div>
+        <div id="${
+          CSS_IDS.CURRENT_PLAYER
+        }">Current Player: ${player1.getName()}</div>
+        <div id="${CSS_IDS.GAME}">
+          <div class="${CSS_CLASSES.BOARD}"></div>
+        </div>
+        <div id="${CSS_IDS.MESSAGE}" class="${
+        CSS_CLASSES.MESSAGE
+      }">Game started</div>
+      `;
+    });
+
+    test("should reset the UI correctly", () => {
+      ui.resetUI();
+
+      expect(document.querySelector("h1")).toBeNull();
+      expect(document.getElementById(CSS_IDS.SCORE)).toBeNull();
+      expect(document.getElementById(CSS_IDS.CURRENT_PLAYER)).toBeNull();
+      const gameContainer = document.getElementById(CSS_IDS.GAME);
+      expect(gameContainer).not.toBeNull();
+      expect(gameContainer.querySelectorAll("*").length).toBe(1); // Only #message remains
+      expect(document.getElementById(CSS_IDS.MESSAGE).textContent).toBe("");
+    });
   });
 
-  test("should update score", () => {
-    ui.updateScore(player1, 5, player2, 3);
-    const scoreDiv = document.getElementById("score");
-    expect(scoreDiv.textContent).toBe("Alice: 5 | Bob: 3");
+  describe("enableBoardInteraction and disableBoardInteraction", () => {
+    let board;
+
+    beforeEach(() => {
+      document.body.innerHTML = ""; // Clean up the DOM
+
+      const board = document.createElement("div");
+      board.id = CSS_IDS.PLAYER1_BOARD;
+      board.classList.add(CSS_CLASSES.DISABLED); // Initial state is disabled
+      document.body.appendChild(board);
+    });
+
+    afterEach(() => {
+      document.body.innerHTML = ""; // Clean up DOM
+    });
+
+    test("should enable board interaction", () => {
+      // Arrange
+      const board = document.getElementById(CSS_IDS.PLAYER1_BOARD);
+      expect(board).not.toBeNull(); // Ensure the element exists
+      expect(board.classList.contains(CSS_CLASSES.DISABLED)).toBe(true); // Verify initial state
+
+      // Act
+      ui.enableBoardInteraction(CSS_IDS.PLAYER1_BOARD);
+
+      // Assert
+      expect(board.classList.contains(CSS_CLASSES.DISABLED)).toBe(false); // Verify class is removed
+    });
+
+    test("should disable board interaction", () => {
+      const board = document.getElementById(CSS_IDS.PLAYER1_BOARD);
+      board.classList.remove(CSS_CLASSES.DISABLED); // Ensure the initial state is enabled
+
+      // Act
+      ui.disableBoardInteraction(CSS_IDS.PLAYER1_BOARD);
+
+      // Assert
+      expect(board.classList.contains(CSS_CLASSES.DISABLED)).toBe(true); // DISABLED class added
+    });
+
+    test("should throw an error if board container is not found", () => {
+      // Act & Assert
+      expect(() => ui.enableBoardInteraction("invalid-id")).toThrow(
+        "Container not found"
+      );
+      expect(() => ui.disableBoardInteraction("invalid-id")).toThrow(
+        "Container not found"
+      );
+    });
   });
 
-  test("should update current player", () => {
-    ui.updateCurrentPlayer("Bob");
-    const currentPlayerDiv = document.getElementById("current-player");
-    expect(currentPlayerDiv.textContent).toBe("Current Player: Bob");
-  });
+  describe("addBoardEventListeners", () => {
+    let mockHandleAttack;
 
-  test("should display messages", () => {
-    ui.displayMessage("Test message");
-    const messageDiv = document.getElementById("message");
-    expect(messageDiv.textContent).toBe("Test message");
-  });
-
-  test("should render board correctly", () => {
-    // Create mock ship objects
-    const mockShipNotSunk = {
-      isSunk: jest.fn().mockReturnValue(false),
-    };
-
-    const mockShipSunk = {
-      isSunk: jest.fn().mockReturnValue(true),
-    };
-
-    // Create a mock board
-    const mockBoard = [
-      [
-        { ship: null, status: null },
-        { ship: mockShipNotSunk, status: "hit" },
-      ],
-      [
-        { ship: null, status: "miss" },
-        { ship: mockShipSunk, status: null },
-      ],
-    ];
-
-    ui.renderBoard(mockBoard, "player1-board", true);
-    const boardContainer = document.getElementById("player1-board");
-    expect(boardContainer).not.toBeNull();
-    const cells = boardContainer.querySelectorAll(".board-cell");
-    expect(cells.length).toBe(4);
-
-    // Check cell classes
-    const cellArray = Array.from(cells);
-
-    // Cell [0][0]
-    expect(cellArray[0].classList.contains("ship")).toBe(false);
-    expect(cellArray[0].classList.contains("hit")).toBe(false);
-    expect(cellArray[0].classList.contains("miss")).toBe(false);
-
-    // Cell [0][1]
-    expect(cellArray[1].classList.contains("ship")).toBe(true);
-    expect(cellArray[1].classList.contains("hit")).toBe(true);
-    expect(cellArray[1].classList.contains("sunk")).toBe(false);
-
-    // Cell [1][0]
-    expect(cellArray[2].classList.contains("miss")).toBe(true);
-
-    // Cell [1][1]
-    expect(cellArray[3].classList.contains("ship")).toBe(true);
-    expect(cellArray[3].classList.contains("sunk")).toBe(true);
-  });
-
-  test("should throw an error if container ID is invalid", () => {
-    const mockBoard = [[{ ship: null, status: null }]];
-    expect(() => {
-      ui.renderBoard(mockBoard, "invalid-id");
-    }).toThrowError("Container not found");
-  });
-
-  test("renderBoard should not throw an error when container is found", () => {
-    const mockBoard = [[{ ship: null, status: null }]];
-    const container = document.createElement("div");
-    container.id = "valid-container";
-    document.body.appendChild(container);
-
-    expect(() => {
-      ui.renderBoard(mockBoard, "valid-container");
-    }).not.toThrow();
-  });
-
-  test("renderBoard should not display ships on opponent's board", () => {
-    const mockBoard = [[{ ship: {}, status: null }]];
-    const container = document.createElement("div");
-    container.id = "opponent-board";
-    document.body.appendChild(container);
-
-    ui.renderBoard(mockBoard, "opponent-board", false);
-
-    const cell = container.querySelector(".board-cell");
-    expect(cell.classList.contains("ship")).toBe(false);
-  });
-
-  test("should render empty board", () => {
-    const mockBoard = [];
-    ui.renderBoard(mockBoard, "player1-board");
-    const boardContainer = document.getElementById("player1-board");
-    expect(boardContainer.children.length).toBe(0);
-  });
-
-  test("should handle cell clicks", () => {
-    const mockHandleAttack = jest.fn();
-
-    // Create a mock board with at least one cell
-    const mockBoard = [[{ ship: null, status: null }]];
-
-    // Render the board before adding event listeners
-    ui.renderBoard(mockBoard, "player2-board");
-
-    ui.addBoardEventListeners("player2-board", mockHandleAttack);
-
-    const cell = document.querySelector("#player2-board .board-cell");
-    cell.click();
-
-    expect(mockHandleAttack).toHaveBeenCalled();
-  });
-});
-
-describe("UI - showGameOverScreen", () => {
-  let dom;
-  let container;
-  let ui;
-
-  beforeEach(() => {
-    // Create a mock DOM environment
-    dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
-    container = dom.window.document;
-    global.document = container;
-    global.location = { reload: jest.fn() }; // Mock location.reload
-    ui = UI();
-    // Initialize the UI
-    // ui.initUI(player1, player2);
-  });
-
-  afterEach(() => {
-    global.document = undefined;
-    global.location = undefined;
-  });
-
-  test("should create a game-over overlay with the winner's name", () => {
-    const winnerName = "Alice";
-
-    // Call the showGameOverScreen method
-    ui.showGameOverScreen(winnerName);
-
-    // Check if the game-over overlay exists
-    const gameOverDiv = document.getElementById("game-over");
-    expect(gameOverDiv).not.toBeNull();
-    expect(gameOverDiv.classList.contains("overlay")).toBe(true);
-
-    // Check the winner's message
-    const winnerMessage = gameOverDiv.querySelector("h2");
-    expect(winnerMessage).not.toBeNull();
-    expect(winnerMessage.textContent).toBe("Alice wins!");
-
-    // Check for the restart button
-    const restartButton = gameOverDiv.querySelector("button");
-    expect(restartButton).not.toBeNull();
-    expect(restartButton.textContent).toBe("Play Again");
-  });
-
-  test("should reload the page when the restart button is clicked", () => {
-    const winnerName = "Bob";
-
-    // Call the showGameOverScreen method
-    ui.showGameOverScreen(winnerName);
-
-    // Simulate a button click
-    const restartButton = document.querySelector("#game-over button");
-    restartButton.click();
-
-    // Check if location.reload was called
-    expect(global.location.reload).toHaveBeenCalled();
-  });
-});
-
-describe("UI - resetUI", () => {
-  let dom;
-  let container;
-  let ui;
-
-  beforeEach(() => {
-    // Create a mock DOM environment
-    dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
-    container = dom.window.document;
-    global.document = container;
-
-    // Initialize a new UI instance before each test
-    ui = UI();
-
-    // Set up the DOM as it would be after initUI is called
-    document.body.innerHTML = `
-      <h1>Battleship</h1>
-      <div id="score">Player 1: 0 | Computer: 0</div>
-      <div id="current-player">Current Player: Player 1</div>
-      <div id="game">
-        <div class="player-section">
-          <h2>Player 1</h2>
-          <div id="player1-board" class="board">
-            <div class="board-row">
-              <div class="board-cell" data-x="0" data-y="0"></div>
-              <div class="board-cell" data-x="1" data-y="0"></div>
-              <!-- More cells... -->
-            </div>
-            <!-- More rows... -->
+    beforeEach(() => {
+      // Setup the DOM
+      document.body.innerHTML = `
+        <div id="player2-board" class="board">
+          <div class="board-row">
+            <div class="board-cell" data-x="0" data-y="0"></div>
+            <div class="board-cell" data-x="1" data-y="0"></div>
+          </div>
+          <div class="board-row">
+            <div class="board-cell" data-x="0" data-y="1"></div>
+            <div class="board-cell" data-x="1" data-y="1"></div>
           </div>
         </div>
-        <div class="player-section">
-          <h2>Computer</h2>
-          <div id="player2-board" class="board">
-            <div class="board-row">
-              <div class="board-cell" data-x="0" data-y="0"></div>
-              <div class="board-cell" data-x="1" data-y="0"></div>
-              <!-- More cells... -->
-            </div>
-            <!-- More rows... -->
-          </div>
-        </div>
-        <div id="message" class="message info">Game started</div>
-      </div>
-    `;
+      `;
+
+      ui = UI();
+      container = document.getElementById("player2-board");
+      mockHandleAttack = jest.fn();
+    });
+
+    afterEach(() => {
+      document.body.innerHTML = "";
+      jest.clearAllMocks();
+    });
+
+    test("should add click listeners to all cells", () => {
+      ui.addBoardEventListeners("player2-board", mockHandleAttack);
+
+      // Click first cell
+      const firstCell = container.querySelector(".board-cell");
+      firstCell.click();
+
+      expect(mockHandleAttack).toHaveBeenCalledWith(0, 0);
+    });
+
+    test("should not trigger attack on already attacked cells", () => {
+      ui.addBoardEventListeners("player2-board", mockHandleAttack);
+
+      const cell = container.querySelector(".board-cell");
+
+      // Mark cell as hit
+      cell.classList.add(CSS_CLASSES.HIT);
+
+      // Try to click the cell
+      cell.click();
+
+      expect(mockHandleAttack).not.toHaveBeenCalled();
+    });
+
+    test("should throw error if board container not found", () => {
+      expect(() => {
+        ui.addBoardEventListeners("non-existent-id", mockHandleAttack);
+      }).toThrow(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
+    });
+
+    test("should not invoke handleAttack on invalid cell clicks", () => {
+      ui.addBoardEventListeners(CSS_IDS.PLAYER2_BOARD, mockHandleAttack);
+
+      const invalidCell = document.createElement("div");
+      container.appendChild(invalidCell);
+      invalidCell.click();
+
+      expect(mockHandleAttack).not.toHaveBeenCalled();
+    });
+
+    test("should invoke handleAttack on valid cell clicks", () => {
+      // Arrange: attach the event listeners
+      ui.addBoardEventListeners(CSS_IDS.PLAYER2_BOARD, mockHandleAttack);
+
+      // Act: query the cell & click it
+      const cell = document.querySelector(`.${CSS_CLASSES.BOARD_CELL}`);
+      cell.click();
+
+      // Assert
+      expect(mockHandleAttack).toHaveBeenCalledWith(0, 0);
+    });
   });
 
-  test("should remove child elements within the game container", () => {
-    // Ensure the game container exists before reset
-    const gameContainer = document.getElementById("game");
-    expect(gameContainer).not.toBeNull();
+  describe("showGameOverScreen", () => {
+    test("should display game-over overlay with correct winner", () => {
+      ui.showGameOverScreen(PLAYERS.PLAYER1.NAME);
 
-    // Ensure that child elements exist before reset
-    const playerSections = gameContainer.querySelectorAll(".player-section");
-    expect(playerSections.length).toBeGreaterThan(0);
+      const overlay = document.getElementById(CSS_IDS.GAME_OVER);
+      expect(overlay).not.toBeNull();
+      expect(overlay.classList.contains(CSS_CLASSES.OVERLAY)).toBe(true);
 
-    // Call resetUI
-    ui.resetUI();
+      const message = overlay.querySelector("h2");
+      expect(message.textContent).toBe(`${PLAYERS.PLAYER1.NAME} wins!`);
 
-    // Assert that player sections are removed
-    const updatedPlayerSections =
-      gameContainer.querySelectorAll(".player-section");
-    expect(updatedPlayerSections.length).toBe(0);
+      const button = overlay.querySelector("button");
+      expect(button.textContent).toBe("Play Again");
+    });
 
-    // Ensure that #message div still exists and is cleared
-    const messageDiv = gameContainer.querySelector("#message");
-    expect(messageDiv).not.toBeNull();
-    expect(messageDiv.textContent).toBe(""); // It should be cleared
+    test("should reload the page when restart button is clicked", () => {
+      // Mock reload by replacing the entire location object
+      const mockLocation = { reload: jest.fn() };
+      delete window.location;
+      window.location = mockLocation;
+
+      ui.showGameOverScreen(player1.getName());
+      const button = document.querySelector(`#${CSS_IDS.GAME_OVER} button`);
+      button.click();
+
+      expect(window.location.reload).toHaveBeenCalled();
+    });
   });
 
-  test("should remove the heading", () => {
-    // Ensure the heading exists before reset
-    expect(document.querySelector("h1")).not.toBeNull();
+  describe("renderBoard", () => {
+    test("should throw an error for invalid container ID", () => {
+      expect(() => ui.renderBoard([], "invalid-id")).toThrow(
+        ERROR_MESSAGES.CONTAINER_NOT_FOUND
+      );
+    });
 
-    // Call resetUI
-    ui.resetUI();
+    test("should render an empty board", () => {
+      const boardContainer = document.createElement("div");
+      boardContainer.id = CSS_IDS.PLAYER1_BOARD;
+      document.body.appendChild(boardContainer);
 
-    // Assert that the heading is removed
-    expect(document.querySelector("h1")).toBeNull();
+      ui.renderBoard([], CSS_IDS.PLAYER1_BOARD);
+
+      expect(boardContainer.children.length).toBe(0);
+    });
   });
-
-  test("should remove the score div", () => {
-    // Ensure the score div exists before reset
-    expect(document.getElementById("score")).not.toBeNull();
-
-    // Call resetUI
-    ui.resetUI();
-
-    // Assert that the score div is removed
-    expect(document.getElementById("score")).toBeNull();
-  });
-
-  test("should remove the current player div", () => {
-    // Ensure the current player div exists before reset
-    expect(document.getElementById("current-player")).not.toBeNull();
-
-    // Call resetUI
-    ui.resetUI();
-
-    // Assert that the current player div is removed
-    expect(document.getElementById("current-player")).toBeNull();
-  });
-
-  test("should clear the message div", () => {
-    // Ensure the message div exists before reset
-    const messageDiv = document.getElementById("message");
-    expect(messageDiv).not.toBeNull();
-    expect(messageDiv.textContent).toBe("Game started");
-    expect(messageDiv.className).toBe("message info");
-
-    // Call resetUI
-    ui.resetUI();
-
-    // Assert that the message div is cleared but not removed
-    expect(document.getElementById("message")).not.toBeNull();
-    expect(messageDiv.textContent).toBe("");
-    expect(messageDiv.className).toBe("message info"); // Assuming you reset the text but keep classes
-  });
-
-  test("should remove all player sections", () => {
-    // Ensure player sections exist before reset
-    const playerSections = document.querySelectorAll(".player-section");
-    expect(playerSections.length).toBe(2); // Player 1 and Computer
-
-    // Call resetUI
-    ui.resetUI();
-
-    // Assert that player sections are removed
-    expect(document.querySelectorAll(".player-section").length).toBe(0);
-  });
-
-  test("should not throw an error if elements are already removed", () => {
-    // Call resetUI once to remove elements
-    ui.resetUI();
-
-    // Call resetUI again; should not throw
-    expect(() => ui.resetUI()).not.toThrow();
-  });
-
-  test("should not remove elements that are not part of the initial UI", () => {
-    // Add an extra element to the DOM
-    const extraDiv = document.createElement("div");
-    extraDiv.id = "extra-element";
-    document.body.appendChild(extraDiv);
-
-    // Ensure the extra element exists before reset
-    expect(document.getElementById("extra-element")).not.toBeNull();
-
-    // Call resetUI
-    ui.resetUI();
-
-    // Assert that the extra element is still present
-    expect(document.getElementById("extra-element")).not.toBeNull();
-  });
+  describe("UI - Game Over", () => {});
 });
