@@ -37,8 +37,8 @@ describe("Game Module", () => {
       PLAYERS.PLAYER2.ID
     );
 
-    player1Gameboard = Gameboard(BOARD_SIZE, ...battleships);
-    player2Gameboard = Gameboard(BOARD_SIZE, ...battleships);
+    player1Gameboard = Gameboard(BOARD_SIZE, ...BATTLESHIPS);
+    player2Gameboard = Gameboard(BOARD_SIZE, ...BATTLESHIPS);
 
     // Associate gameboards with players
     player1.setGameboard(player1Gameboard);
