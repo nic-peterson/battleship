@@ -1,7 +1,17 @@
 import { BOARD_SIZE } from "../helpers/constants/boardConstants";
 import { ERROR_MESSAGES } from "../helpers/constants/messageConstants";
+import { PLAYERS } from "../helpers/constants/playerConstants";
 
 export const Player = (type, name, id) => {
+  if (type !== PLAYERS.PLAYER1.TYPE && type !== PLAYERS.PLAYER2.TYPE) {
+    throw new Error(ERROR_MESSAGES.INVALID_PLAYER_TYPE);
+  }
+  if (!name || name.trim() === "") {
+    throw new Error(ERROR_MESSAGES.INVALID_PLAYER_NAME);
+  }
+  if (!id || id.trim() === "") {
+    throw new Error(ERROR_MESSAGES.INVALID_PLAYER_ID);
+  }
   let gameboard = null; // Initialize without a gameboard
   // Track hits that haven't been fully explored
   let activeHits = [];
@@ -199,6 +209,9 @@ export const Player = (type, name, id) => {
 
   // Modify getNextMove to use smart targeting
   const getNextMove = (opponentBoard) => {
+    if (!opponentBoard.getBoard().flat().includes(null)) {
+      throw new Error(ERROR_MESSAGES.NO_VALID_MOVES);
+    }
     return type === "computer" ? makeSmartMove(opponentBoard) : null;
   };
 
@@ -211,5 +224,6 @@ export const Player = (type, name, id) => {
     setGameboard,
     getValidCoordinates,
     getNextMove,
+    makeSmartMove,
   };
 };
