@@ -185,7 +185,12 @@ export const Game = (p1 = null, p2 = null) => {
     if (!isGameOver()) {
       switchTurn();
     } else {
-      console.log(`${currentPlayer.getName()} has won the game!`);
+      // console.log(`${winner.getName()} has won the game!`);
+    }
+
+    // After switching turns, check if it's computer's turn
+    if (!isGameOver() && getCurrentPlayer().getType() === "computer") {
+      return handleComputerTurn();
     }
 
     return attackResult;
@@ -282,6 +287,16 @@ export const Game = (p1 = null, p2 = null) => {
     return { ...score };
   };
 
+  const handleComputerTurn = () => {
+    const currentPlayer = getCurrentPlayer();
+
+    if (currentPlayer.getType() === "computer") {
+      const move = currentPlayer.getNextMove();
+      return attack(move.x, move.y);
+    }
+    return null;
+  };
+
   return {
     initializeGame,
     resetGame,
@@ -293,5 +308,6 @@ export const Game = (p1 = null, p2 = null) => {
     getScore,
     attack,
     switchTurn,
+    handleComputerTurn,
   };
 };
