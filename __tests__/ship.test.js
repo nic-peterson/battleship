@@ -1,6 +1,6 @@
 // * ship.test.js
 const { Ship } = require("../src/components/ship");
-const { BATTLESHIPS } = require("../src/helpers/constants");
+const { BATTLESHIPS } = require("../src/helpers/constants/shipConstants");
 
 describe("Ship", () => {
   describe("Error handling", () => {
