@@ -8,7 +8,11 @@ module.exports = {
   },
   devtool: "inline-source-map",
   devServer: {
-    static: "./dist",
+    static: {
+      directory: path.join(__dirname, "dist"),
+    },
+    compress: true,
+    port: 8080,
   },
   plugins: [
     new HtmlWebpackPlugin({
