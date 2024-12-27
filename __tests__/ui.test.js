@@ -376,4 +376,62 @@ describe("UI", () => {
     });
   });
   describe("UI - Game Over", () => {});
+
+  describe("UI Error Handling", () => {
+    test("should handle missing message div when displaying message", () => {
+      // Setup DOM without message div
+      document.body.innerHTML = '<div id="game"></div>';
+      const ui = UI();
+
+      // Should not throw when message div is missing
+      expect(() => {
+        ui.displayMessage("Test message");
+      }).not.toThrow();
+    });
+
+    test("should handle missing current player div during update", () => {
+      // Setup DOM without current player section
+      document.body.innerHTML = `
+            <div class="player-section">
+                <h2>Player 1</h2>
+            </div>
+        `;
+      const ui = UI();
+      const mockPlayer = { getName: () => "Player 1" };
+
+      // Should create current player div if missing
+      ui.updateCurrentPlayer(mockPlayer);
+
+      const currentPlayerDiv = document.getElementById("current-player");
+      expect(currentPlayerDiv).toBeTruthy();
+      expect(currentPlayerDiv.textContent).toBe("Current Player: Player 1");
+    });
+
+    test("should handle missing player sections when updating current player", () => {
+      // Setup DOM without player sections
+      document.body.innerHTML = '<div id="current-player"></div>';
+      const ui = UI();
+      const mockPlayer = { getName: () => "Player 1" };
+
+      // Should not throw when player sections are missing
+      expect(() => {
+        ui.updateCurrentPlayer(mockPlayer);
+      }).not.toThrow();
+    });
+
+    test("should handle missing score div during update", () => {
+      // Setup DOM without score div
+      document.body.innerHTML = '<div id="game"></div>';
+      const ui = UI();
+      const mockPlayer1 = { getName: () => "Player 1" };
+      const mockPlayer2 = { getName: () => "Player 2" };
+
+      // Should create score div if missing
+      ui.updateScore(mockPlayer1, 0, mockPlayer2, 0);
+
+      const scoreDiv = document.getElementById("score");
+      expect(scoreDiv).toBeTruthy();
+      expect(scoreDiv.textContent).toBe("Player 1: 0 | Player 2: 0");
+    });
+  });
 });
