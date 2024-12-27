@@ -1,104 +1,212 @@
-export const GameController = (game, ui) => {
-  // Initialization
-  const initGame = () => {
-    game.initGame();
+import { Game } from "./game";
+import { Gameboard } from "./gameboard";
+import { Ship } from "./ship";
+import { Player } from "./player";
+import {
+  CELL_STATUS,
+  ORIENTATIONS,
+  PLAYER_BOARDS,
+} from "../helpers/constants/boardConstants";
 
-    const [player1, player2] = game.getPlayers();
-    ui.initUI(player1, player2);
+import {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+} from "../helpers/constants/messageConstants";
 
-    addBoardEventListeners("player2-board");
-  };
+import { PLAYERS } from "../helpers/constants/playerConstants";
+import { BATTLESHIPS } from "../helpers/constants/shipConstants";
 
-  // Board Event Management
+export const GameController = (game, ui, players = [], gameboards = []) => {
+  // Add validation at the start
+  if (!game) throw new Error(ERROR_MESSAGES.GAME_REQUIRED);
+  if (!ui) throw new Error(ERROR_MESSAGES.UI_REQUIRED);
 
-  const addBoardEventListeners = (boardContainerId) => {
-    const container = document.getElementById(boardContainerId);
+  // Validate players if provided
+  if (players.length > 0 && players.length !== 2) {
+    throw new Error(ERROR_MESSAGES.INVALID_PLAYERS_COUNT);
+  }
 
-    if (!container) {
-      throw new Error("Container not found");
-    }
+  // Validate gameboards if provided
+  if (gameboards.length > 0 && gameboards.length !== 2) {
+    throw new Error(ERROR_MESSAGES.INVALID_GAMEBOARDS_COUNT);
+  }
 
-    // Check if listeners are already added
-    if (!container.dataset.listenerAdded) {
-      container.addEventListener("click", (event) => {
-        const cell = event.target;
+  // **Elevate player and gameboard variables to the factory function scope**
+  try {
+    const [player1, player2] =
+      players.length === 2
+        ? players
+        : [
+            Player(
+              PLAYERS.PLAYER1.TYPE,
+              PLAYERS.PLAYER1.NAME,
+              PLAYERS.PLAYER1.ID
+            ),
+            Player(
+              PLAYERS.PLAYER2.TYPE,
+              PLAYERS.PLAYER2.NAME,
+              PLAYERS.PLAYER2.ID
+            ),
+          ];
+    const [gameboard1, gameboard2] = gameboards.length === 2 ? gameboards : [];
 
-        if (
-          cell.classList.contains("board-cell") &&
-          !cell.classList.contains("hit") &&
-          !cell.classList.contains("miss")
-        ) {
-          const x = parseInt(cell.getAttribute("data-x"), 10);
-          const y = parseInt(cell.getAttribute("data-y"), 10);
-          handleAttack(x, y);
-          console.log("Attacking", x, y);
-          console.log("current player", game.getCurrentPlayer().getName());
+    // Mapping of player IDs to their corresponding board container IDs
+    const playerBoardMap = {
+      player1: PLAYER_BOARDS.PLAYER1,
+      player2: PLAYER_BOARDS.PLAYER2,
+    };
+
+    /**
+     * Retrieves the current players.
+     *
+     * @returns {Array<Player>} An array containing player1 and player2.
+     */
+    const getPlayers = () => [player1, player2];
+
+    /**
+     * placeShipsForPlayer
+     *
+     * Places ships for a given player either randomly or manually.
+     *
+     * @param {Player} player - The player for whom to place ships
+     * @param {boolean} random - If true, place ships randomly; otherwise, place manually
+     * @returns {void}
+     */
+    const placeShipsForPlayer = (player, random = true) => {
+      try {
+        const gameboard = player.getGameboard();
+        if (random) {
+          gameboard.placeShipsRandomly();
+        } else {
+          const shipsToPlace = BATTLESHIPS.map((battleship) =>
+            Ship(battleship.length)
+          );
+          gameboard.placeShip(shipsToPlace[0], 0, 0, ORIENTATIONS.HORIZONTAL);
         }
-      });
-      container.dataset.listenerAdded = true;
-    }
-  };
+      } catch (error) {
+        ui.displayMessage(error.message);
+        throw error;
+      }
+    };
 
-  const enableBoardInteraction = (boardContainerId) => {
-    const container = document.getElementById(boardContainerId);
+    // Initialization
+    /**
+     * startGame
+     *
+     * Starts or restarts the game by initializing players and placing ships.
+     *
+     * @returns {Object} The initial game state
+     */
+    const startGame = () => {
+      try {
+        if (game.isGameStarted()) return;
 
-    if (!container) {
-      throw new Error("Container not found");
-    }
+        player1.setGameboard(gameboard1);
+        player2.setGameboard(gameboard2);
 
-    container.classList.remove("disabled");
-  };
+        // Initialize the game
+        // initialState = {player1, player2, currentPlayer: player1};
+        const initialState = game.initializeGame(player1, player2);
 
-  const disableBoardInteraction = (boardContainerId) => {
-    const container = document.getElementById(boardContainerId);
+        // Place ships for both players
 
-    if (!container) {
-      throw new Error("Container not found");
-    }
+        placeShipsForPlayer(player1, true); // Random placement
+        placeShipsForPlayer(player2, true); // Random placement
 
-    container.classList.add("disabled");
-  };
+        ui.initUI(player1, player2);
+        ui.addBoardEventListeners(PLAYER_BOARDS.PLAYER2, handleAttack);
+        ui.displayMessage(SUCCESS_MESSAGES.GAME_STARTED);
 
-  // Game Flow Management
-  const handleAttack = (x, y) => {
-    try {
-      console.log(`Handling attack at (${x}, ${y})`);
-      const attackResult = game.attack(x, y);
-      console.log("Attack Result:", attackResult);
+        return initialState;
+      } catch (error) {
+        ui.displayMessage(error.message);
+        throw error;
+      }
+    };
 
+    /**
+     * restartGame
+     *
+     * Restarts the game by resetting game state and re-placing ships.
+     *
+     * @returns {void}
+     */
+    const restartGame = () => {
+      // Reset the game state
+      game.resetGame();
+      ui.resetUI();
+
+      startGame();
+    };
+
+    // Game Flow Management
+    const handleAttack = (x, y) => {
+      try {
+        if (game.isGameOver()) {
+          throw new Error(ERROR_MESSAGES.GAME_OVER);
+        }
+
+        let attackResult = game.attack(x, y);
+        updateGameState(attackResult);
+
+        // Handle computer moves in a more controlled way
+        if (
+          !game.isGameOver() &&
+          game.getCurrentPlayer().getType() === "computer"
+        ) {
+          setTimeout(() => {
+            const computerMove = game
+              .getCurrentPlayer()
+              .makeSmartMove(game.getOpponent().getGameboard());
+            attackResult = game.attack(computerMove.x, computerMove.y);
+            updateGameState(attackResult);
+          }, 500);
+        }
+
+        return attackResult;
+      } catch (error) {
+        ui.displayMessage(error.message);
+        throw error;
+      }
+    };
+
+    // Helper to reduce code duplication
+    const updateGameState = (attackResult) => {
       const currentPlayer = game.getCurrentPlayer();
       const opponent = game.getOpponent();
-      console.log("Current Player:", currentPlayer.getName());
-      console.log("Opponent:", opponent.getName());
 
-      ui.renderBoard(opponent.getGameboard().getBoard(), "player2-board");
-      ui.displayMessage(attackResult.hit ? "Hit!" : "Miss!");
+      ui.renderBoard(
+        opponent.getGameboard().getBoard(),
+        playerBoardMap[opponent.getId()],
+        false
+      );
+
+      ui.displayMessage(
+        attackResult.result === CELL_STATUS.HIT
+          ? SUCCESS_MESSAGES.HIT
+          : SUCCESS_MESSAGES.MISS
+      );
 
       if (attackResult.sunk) {
-        ui.displayMessage("You sunk a ship!");
+        ui.displayMessage(SUCCESS_MESSAGES.SHIP_SUNK);
         ui.updateScore(currentPlayer, opponent);
       }
 
       if (game.isGameOver()) {
         ui.showGameOverScreen(currentPlayer.getName());
-        ui.disableBoardInteraction("player2-board");
-      } else {
-        console.log("Switching turn");
-        //game.switchTurn();
-        ui.updateCurrentPlayer(game.getCurrentPlayer().getName());
+        ui.disableBoardInteraction(PLAYER_BOARDS.PLAYER2);
       }
-    } catch (error) {
-      console.error("Error in handleAttack:", error);
+    };
 
-      ui.displayMessage(error.message);
-    }
-  };
-
-  return {
-    initGame,
-    handleAttack,
-    addBoardEventListeners,
-    enableBoardInteraction,
-    disableBoardInteraction,
-  };
+    return {
+      startGame,
+      restartGame,
+      handleAttack,
+      getPlayers,
+      placeShipsForPlayer,
+    };
+  } catch (error) {
+    ui.displayMessage(error.message);
+    throw error;
+  }
 };
