@@ -225,5 +225,6 @@ export const Player = (type, name, id) => {
     getValidCoordinates,
     getNextMove,
     makeSmartMove,
+    makeRandomMove,
   };
 };

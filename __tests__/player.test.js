@@ -185,21 +185,6 @@ describe("Player Factory", () => {
     let player;
     let opponentBoard;
 
-    /*
-    beforeEach(() => {
-      player = Player(
-        PLAYERS.PLAYER2.TYPE,
-        PLAYERS.PLAYER2.NAME,
-        PLAYERS.PLAYER2.ID
-      );
-      opponentBoard = Gameboard();
-      // Place a test ship
-      const ship = Ship("Destroyer", 3);
-      opponentBoard.placeShip(ship, 3, 3, "horizontal");
-      computerPlayer.setGameboard(mockGameboard);
-    });
-    */
-
     beforeEach(() => {
       computerPlayer.setGameboard(mockGameboard);
       // Mock getAllAttacks to return empty set for valid moves
@@ -307,6 +292,172 @@ describe("Player Factory", () => {
         (Math.abs(nextMove.x - 5) === 1 && nextMove.y === 5) ||
         (Math.abs(nextMove.y - 5) === 1 && nextMove.x === 5);
       expect(isAdjacent).toBe(true);
+    });
+
+    test("should handle sunk ship and reset targeting", () => {
+      mockGameboard.receiveAttack.mockReturnValue({
+        result: CELL_STATUS.HIT,
+        sunk: true,
+      });
+
+      // Make initial hit
+      computerPlayer.attack(3, 3, mockGameboard);
+
+      // Next move should be checkerboard pattern since targeting was reset
+      const nextMove = computerPlayer.makeSmartMove(mockGameboard);
+      expect((nextMove.x + nextMove.y) % 2).toBe(0);
+    });
+
+    test("should try alternate direction when hitting ship boundary", () => {
+      // Mock hasBeenAttacked to track attacked coordinates
+      const attackedCoords = new Set();
+      mockGameboard.hasBeenAttacked.mockImplementation((x, y) =>
+        attackedCoords.has(`${x},${y}`)
+      );
+
+      mockGameboard.receiveAttack.mockImplementation((x, y) => {
+        attackedCoords.add(`${x},${y}`);
+        return {
+          result: x === 3 && y <= 4 ? CELL_STATUS.HIT : CELL_STATUS.MISS,
+          sunk: false,
+        };
+      });
+
+      // Make hits in a line
+      computerPlayer.attack(3, 3, mockGameboard);
+      computerPlayer.attack(3, 4, mockGameboard);
+      computerPlayer.attack(3, 5, mockGameboard); // Miss
+
+      const nextMove = computerPlayer.makeSmartMove(mockGameboard);
+      expect(nextMove.x).toBe(3);
+      expect(nextMove.y).toBe(2);
+    });
+
+    test("should handle invalid moves during targeting", () => {
+      // Set up a hit at board edge
+      mockGameboard.receiveAttack.mockReturnValue({
+        result: CELL_STATUS.HIT,
+        sunk: false,
+      });
+
+      computerPlayer.attack(0, 0, mockGameboard);
+
+      // Mock that some adjacent moves are invalid/already attacked
+      mockGameboard.hasBeenAttacked
+        .mockReturnValue(true) // Block most moves
+        .mockReturnValueOnce(false); // Allow one valid move
+
+      const nextMove = computerPlayer.makeSmartMove(mockGameboard);
+      expect(nextMove).toBeDefined();
+      expect(nextMove.x >= 0 && nextMove.x < 10).toBeTruthy();
+      expect(nextMove.y >= 0 && nextMove.y < 10).toBeTruthy();
+    });
+
+    test("should handle all adjacent cells being invalid", () => {
+      mockGameboard.receiveAttack.mockReturnValue({
+        result: CELL_STATUS.HIT,
+        sunk: false,
+      });
+
+      // Make a hit but surround it with invalid moves
+      computerPlayer.attack(5, 5, mockGameboard);
+
+      // Mock hasBeenAttacked to allow one checkerboard move
+      mockGameboard.hasBeenAttacked.mockImplementation(
+        (x, y) =>
+          // Allow one specific checkerboard position
+          !(x === 0 && y === 0)
+      );
+
+      const nextMove = computerPlayer.makeSmartMove(mockGameboard);
+      expect(nextMove.x).toBe(0);
+      expect(nextMove.y).toBe(0);
+    });
+
+    test("should make valid random moves", () => {
+      const attackedCoords = new Set();
+      mockGameboard.hasBeenAttacked.mockImplementation((x, y) =>
+        attackedCoords.has(`${x},${y}`)
+      );
+
+      // Make several random moves
+      for (let i = 0; i < 5; i++) {
+        const [x, y] = computerPlayer.getValidCoordinates(mockGameboard);
+
+        // Verify move is within bounds
+        expect(x).toBeGreaterThanOrEqual(0);
+        expect(x).toBeLessThan(10);
+        expect(y).toBeGreaterThanOrEqual(0);
+        expect(y).toBeLessThan(10);
+
+        // Verify move wasn't previously made
+        expect(attackedCoords.has(`${x},${y}`)).toBe(false);
+        attackedCoords.add(`${x},${y}`);
+      }
+    });
+
+    test("should make random move and return valid coordinates", () => {
+      const attackedCoords = new Set();
+      mockGameboard.hasBeenAttacked.mockImplementation((x, y) =>
+        attackedCoords.has(`${x},${y}`)
+      );
+
+      // Make random move
+      const move = computerPlayer.makeRandomMove(mockGameboard);
+
+      // Verify coordinates are valid
+      expect(move).toHaveProperty("x");
+      expect(move).toHaveProperty("y");
+      expect(move.x).toBeGreaterThanOrEqual(0);
+      expect(move.x).toBeLessThan(10);
+      expect(move.y).toBeGreaterThanOrEqual(0);
+      expect(move.y).toBeLessThan(10);
+    });
+
+    test("should fallback to checkerboard pattern when no valid targeting moves", () => {
+      // Setup initial hit
+      mockGameboard.receiveAttack.mockReturnValue({
+        result: CELL_STATUS.HIT,
+        sunk: false,
+      });
+      computerPlayer.attack(5, 5, mockGameboard);
+
+      // Mock that all adjacent cells are attacked
+      mockGameboard.hasBeenAttacked.mockImplementation((x, y) => {
+        // Block all adjacent cells to force fallback
+        if (Math.abs(x - 5) <= 1 && Math.abs(y - 5) <= 1) {
+          return true;
+        }
+        // Allow one specific checkerboard position
+        return !(x === 0 && y === 0);
+      });
+
+      const nextMove = computerPlayer.makeSmartMove(mockGameboard);
+
+      // Should fallback to checkerboard pattern
+      expect(nextMove.x).toBe(0);
+      expect(nextMove.y).toBe(0);
+      expect((nextMove.x + nextMove.y) % 2).toBe(0); // Verify checkerboard pattern
+    });
+
+    test("should collect all valid moves from the board", () => {
+      // Mock a partially filled board
+      mockGameboard.hasBeenAttacked.mockImplementation((x, y) => {
+        // Make some cells "attacked" to test valid move collection
+        if (x < 5) return true; // First half of board is attacked
+        return false; // Second half is free
+      });
+
+      mockGameboard.getSize.mockReturnValue(10);
+
+      // Get valid moves through makeSmartMove
+      const move = computerPlayer.makeSmartMove(mockGameboard);
+
+      // Verify move is from valid section
+      expect(move.x).toBeGreaterThanOrEqual(5); // Should be from free half
+      expect(move.x).toBeLessThan(10);
+      expect(move.y).toBeGreaterThanOrEqual(0);
+      expect(move.y).toBeLessThan(10);
     });
   });
 
