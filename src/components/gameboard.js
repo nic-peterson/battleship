@@ -139,6 +139,8 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
    * @throws {Error} If a ship cannot be placed after the maximum number of attempts.
    */
   const placeShipsRandomly = () => {
+    console.log("Placing ships randomly");
+    console.log("ships", ships);
     if (!ships || !Array.isArray(ships) || ships.length === 0) {
       throw new Error("No ships provided for random placement");
     }
@@ -359,6 +361,12 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
     return placedShips.every((ship) => ship.ship.isSunk());
   };
 
+  const getSunkShipsCount = () => {
+    return placedShips.reduce((count, { ship }) => {
+      return count + (ship.isSunk() ? 1 : 0);
+    }, 0);
+  };
+
   // ? Instantiate the gameboard object
   initializeBoard();
   return {
@@ -376,5 +384,6 @@ export const Gameboard = (size = BOARD_SIZE, ships = []) => {
     areAllShipsSunk,
     allShipsPlaced,
     reset,
+    getSunkShipsCount,
   };
 };
