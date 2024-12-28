@@ -53,18 +53,20 @@ export const UI = () => {
 
     updateCurrentPlayer(player1);
 
+    // Create message div here, before the game div
+    createElement("div", {
+      id: CSS_IDS.MESSAGE,
+      parent: document.body,
+    });
+
     const gameDiv = createElement("div", {
       id: CSS_IDS.GAME,
       parent: document.body,
     });
 
+    // Create player sections
     players.forEach((player, index) => {
       createPlayerSection(player, index, gameDiv);
-    });
-
-    createElement("div", {
-      id: CSS_IDS.MESSAGE,
-      parent: gameDiv,
     });
 
     renderBoard(player1.getGameboard().getBoard(), CSS_IDS.PLAYER1_BOARD, true);
@@ -123,6 +125,9 @@ export const UI = () => {
       throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
     }
 
+    // Store the current handleAttack function if it exists
+    const existingHandler = container._handleAttack;
+
     container.innerHTML = ""; // Clear previous content
 
     board.forEach((row, y) => {
@@ -140,6 +145,7 @@ export const UI = () => {
         cellElement.dataset.x = x;
         cellElement.dataset.y = y;
 
+        // Show ships only on player's own board
         if (cell.ship && isOwnBoard) {
           cellElement.classList.add(CSS_CLASSES.SHIP);
 
@@ -147,11 +153,31 @@ export const UI = () => {
             cellElement.classList.add(CSS_CLASSES.SUNK);
           }
         }
-
-        if (cell.status === CELL_STATUS.HIT)
+        // Add hit/miss classes
+        if (cell.status === CELL_STATUS.HIT) {
           cellElement.classList.add(CSS_CLASSES.HIT);
+          // Add sunk class if the ship is sunk (for both boards)
+          if (cell.ship && cell.ship.isSunk()) {
+            cellElement.classList.add(CSS_CLASSES.SUNK);
+          }
+        }
+
         if (cell.status === CELL_STATUS.MISS)
           cellElement.classList.add(CSS_CLASSES.MISS);
+
+        // Re-add click handler if it existed
+        if (existingHandler) {
+          cellElement.addEventListener("click", (event) => {
+            if (
+              !cellElement.classList.contains(CSS_CLASSES.HIT) &&
+              !cellElement.classList.contains(CSS_CLASSES.MISS) &&
+              !cellElement.classList.contains(CSS_CLASSES.SUNK)
+            ) {
+              console.log(`Board clicked: ${x},${y}`);
+              existingHandler(x, y);
+            }
+          });
+        }
       });
     });
   };
@@ -172,6 +198,10 @@ export const UI = () => {
   };
 
   const updateScore = (player1, player1Score, player2, player2Score) => {
+    if (!player1 || !player2) {
+      console.error("Missing player information for score update");
+      return;
+    }
     const scoreDiv =
       document.getElementById(CSS_IDS.SCORE) ||
       createElement("div", { id: CSS_IDS.SCORE, parent: document.body });
@@ -204,6 +234,9 @@ export const UI = () => {
       throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
     }
 
+    // Store the handler for future re-renders
+    container._handleAttack = handleAttack;
+
     // Select all cells inside the container
     const cells = container.querySelectorAll(`.${CSS_CLASSES.BOARD_CELL}`);
 
@@ -219,6 +252,8 @@ export const UI = () => {
           !cell.classList.contains(CSS_CLASSES.MISS) &&
           !cell.classList.contains(CSS_CLASSES.SUNK)
         ) {
+          console.log(`Board clicked: ${x},${y}`);
+
           handleAttack(x, y);
         }
       });
@@ -230,6 +265,8 @@ export const UI = () => {
 
     if (container) {
       container.classList.remove(CSS_CLASSES.DISABLED);
+      container.style.pointerEvents = "auto"; // Explicitly enable clicking
+      console.log(`Enabled board: ${boardContainerId}`); // Debug log
     } else {
       throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
     }
@@ -240,26 +277,41 @@ export const UI = () => {
 
     if (container) {
       container.classList.add(CSS_CLASSES.DISABLED);
+      container.style.pointerEvents = "none"; // Explicitly disable clicking
+      console.log(`Disabled board: ${boardContainerId}`); // Debug log
     } else {
       throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
     }
   };
 
   const showGameOverScreen = (winnerName) => {
+    // First, clear any existing game over messages
+    const existingGameOver = document.getElementById(CSS_IDS.GAME_OVER);
+    if (existingGameOver) {
+      existingGameOver.remove();
+    }
+
     const gameOverDiv = createElement("div", {
       id: CSS_IDS.GAME_OVER,
       classes: [CSS_CLASSES.OVERLAY],
       parent: document.body,
     });
 
+    // Create a container for the content
+    const contentDiv = createElement("div", {
+      classes: ["game-over-content"],
+      parent: gameOverDiv,
+    });
+
     createElement("h2", {
       textContent: `${winnerName} wins!`,
-      parent: gameOverDiv,
+      parent: contentDiv,
     });
 
     const restartButton = createElement("button", {
       textContent: "Play Again",
-      parent: gameOverDiv,
+      classes: ["play-again-button"],
+      parent: contentDiv,
     });
 
     restartButton.addEventListener("click", () => {
