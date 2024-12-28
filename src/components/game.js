@@ -279,18 +279,8 @@ export const Game = (p1 = null, p2 = null) => {
    * @returns {void}
    */
   const switchTurn = () => {
-    if (isGameOver()) return; // Don't switch turns if game is over
-    console.log("Before switch - current player:", {
-      name: currentPlayer.getName(),
-      id: currentPlayer.getId(),
-      type: currentPlayer.getType(),
-    });
+    if (isGameOver()) return;
     currentPlayer = currentPlayer === player1 ? player2 : player1;
-    console.log("After switch - current player:", {
-      name: currentPlayer.getName(),
-      id: currentPlayer.getId(),
-      type: currentPlayer.getType(),
-    });
   };
 
   return {

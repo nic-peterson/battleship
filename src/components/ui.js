@@ -227,61 +227,40 @@ export const UI = () => {
     });
   };
 
-  const addBoardEventListeners = (boardContainerId, handleAttack) => {
-    const container = document.getElementById(boardContainerId);
-
-    if (!container) {
+  const addBoardEventListeners = (boardContainerId, clickHandler) => {
+    const boardContainer = document.getElementById(boardContainerId);
+    if (!boardContainer) {
       throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
     }
 
-    // Store the handler for future re-renders
-    container._handleAttack = handleAttack;
-
-    // Select all cells inside the container
-    const cells = container.querySelectorAll(`.${CSS_CLASSES.BOARD_CELL}`);
-
-    cells.forEach((cell) => {
-      cell.addEventListener("click", (event) => {
-        // Extract x, y from cell's data attributes
-        const x = parseInt(cell.dataset.x, 10);
-        const y = parseInt(cell.dataset.y, 10);
-
-        // Prevent attacking a cell that's already marked
-        if (
-          !cell.classList.contains(CSS_CLASSES.HIT) &&
-          !cell.classList.contains(CSS_CLASSES.MISS) &&
-          !cell.classList.contains(CSS_CLASSES.SUNK)
-        ) {
-          console.log(`Board clicked: ${x},${y}`);
-
-          handleAttack(x, y);
-        }
-      });
+    const cells = boardContainer.getElementsByClassName(CSS_CLASSES.CELL);
+    Array.from(cells).forEach((cell) => {
+      if (!cell.classList.contains(CSS_CLASSES.SHIP)) {
+        cell.addEventListener("click", () => {
+          const x = parseInt(cell.dataset.x);
+          const y = parseInt(cell.dataset.y);
+          clickHandler(x, y);
+        });
+      }
     });
   };
 
   const enableBoardInteraction = (boardContainerId) => {
-    const container = document.getElementById(boardContainerId);
-
-    if (container) {
-      container.classList.remove(CSS_CLASSES.DISABLED);
-      container.style.pointerEvents = "auto"; // Explicitly enable clicking
-      console.log(`Enabled board: ${boardContainerId}`); // Debug log
-    } else {
+    const boardContainer = document.getElementById(boardContainerId);
+    if (!boardContainer) {
       throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
     }
+    boardContainer.classList.remove(CSS_CLASSES.DISABLED);
+    boardContainer.style.pointerEvents = "auto";
   };
 
   const disableBoardInteraction = (boardContainerId) => {
-    const container = document.getElementById(boardContainerId);
-
-    if (container) {
-      container.classList.add(CSS_CLASSES.DISABLED);
-      container.style.pointerEvents = "none"; // Explicitly disable clicking
-      console.log(`Disabled board: ${boardContainerId}`); // Debug log
-    } else {
+    const boardContainer = document.getElementById(boardContainerId);
+    if (!boardContainer) {
       throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
     }
+    boardContainer.classList.add(CSS_CLASSES.DISABLED);
+    boardContainer.style.pointerEvents = "none";
   };
 
   const showGameOverScreen = (winnerName) => {
