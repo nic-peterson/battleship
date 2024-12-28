@@ -129,11 +129,9 @@ export const Game = (p1 = null, p2 = null) => {
    * @returns {void}
    */
   const switchTurn = () => {
-    if (gameOver) {
-      console.warn("Cannot switch turn. The game is already over.");
-      return;
-    }
-    setCurrentPlayer(currentPlayer === player1 ? player2 : player1);
+    console.log("Switching turns from:", currentPlayer.getName());
+    currentPlayer = currentPlayer === player1 ? player2 : player1;
+    console.log("to:", currentPlayer.getName());
   };
 
   /**
@@ -179,20 +177,12 @@ export const Game = (p1 = null, p2 = null) => {
     // Check if all ships are sunk
     if (opponentBoard.areAllShipsSunk()) {
       setGameOver(true);
-    }
-
-    // Switch turns if the game is not over
-    if (!isGameOver()) {
-      switchTurn();
     } else {
-      // console.log(`${winner.getName()} has won the game!`);
+      // Only switch turns if the game isn't over
+      switchTurn();
     }
 
-    // After switching turns, check if it's computer's turn
-    if (!isGameOver() && getCurrentPlayer().getType() === "computer") {
-      return handleComputerTurn();
-    }
-
+    return attackResult;
     return attackResult;
   };
 
@@ -289,9 +279,10 @@ export const Game = (p1 = null, p2 = null) => {
 
   const handleComputerTurn = () => {
     const currentPlayer = getCurrentPlayer();
+    const opponent = getOpponent();
 
     if (currentPlayer.getType() === "computer") {
-      const move = currentPlayer.getNextMove();
+      const move = currentPlayer.getNextMove(opponent.getGameboard());
       return attack(move.x, move.y);
     }
     return null;
