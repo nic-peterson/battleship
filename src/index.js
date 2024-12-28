@@ -25,8 +25,9 @@ const player2 = Player(
 const player1Board = Gameboard(BOARD_SIZE, [...BATTLESHIPS]);
 const player2Board = Gameboard(BOARD_SIZE, [...BATTLESHIPS]);
 
-console.log("player1Board.getShips()", player1Board.getShips());
-console.log("player2Board.getShips()", player2Board.getShips());
+// Set gameboards for players
+player1.setGameboard(player1Board);
+player2.setGameboard(player2Board);
 
 // Initialize core components with players
 const ui = UI();
