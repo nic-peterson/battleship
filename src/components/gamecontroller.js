@@ -115,6 +115,12 @@ export const GameController = (game, ui, players = [], gameboards = []) => {
 
         ui.initUI(player1, player2);
         ui.addBoardEventListeners(PLAYER_BOARDS.PLAYER2, handleAttack);
+
+        // Enable the computer's board for the first turn (if human starts)
+        if (game.getCurrentPlayer().getType() === "human") {
+          ui.enableBoardInteraction(PLAYER_BOARDS.PLAYER2);
+        }
+
         ui.displayMessage(SUCCESS_MESSAGES.GAME_STARTED);
 
         return initialState;
@@ -140,27 +146,58 @@ export const GameController = (game, ui, players = [], gameboards = []) => {
     };
 
     // Game Flow Management
+    // TODO investigate this method
     const handleAttack = (x, y) => {
       try {
         if (game.isGameOver()) {
           throw new Error(ERROR_MESSAGES.GAME_OVER);
         }
 
+        console.log("Before player move:", {
+          currentPlayer: game.getCurrentPlayer().getName(),
+          type: game.getCurrentPlayer().getType(),
+        });
+
+        if (game.getCurrentPlayer().getType() === "computer") {
+          console.log("Blocked - Computer's turn");
+          return;
+        }
+
         let attackResult = game.attack(x, y);
         updateGameState(attackResult);
 
-        // Handle computer moves in a more controlled way
+        console.log("After player move:", {
+          currentPlayer: game.getCurrentPlayer().getName(),
+          type: game.getCurrentPlayer().getType(),
+        });
+
+        // Handle computer moves
         if (
           !game.isGameOver() &&
           game.getCurrentPlayer().getType() === "computer"
         ) {
+          console.log("Starting computer move...");
           setTimeout(() => {
-            const computerMove = game
-              .getCurrentPlayer()
-              .makeSmartMove(game.getOpponent().getGameboard());
-            attackResult = game.attack(computerMove.x, computerMove.y);
-            updateGameState(attackResult);
-          }, 500);
+            try {
+              // Add try-catch inside setTimeout
+              const computerPlayer = game.getCurrentPlayer();
+              const opponentBoard = game.getOpponent().getGameboard();
+              const computerMove = computerPlayer.makeSmartMove(opponentBoard);
+
+              console.log("Computer attacking:", computerMove);
+
+              attackResult = game.attack(computerMove.x, computerMove.y);
+              updateGameState(attackResult);
+
+              console.log("After computer move:", {
+                currentPlayer: game.getCurrentPlayer().getName(),
+                type: game.getCurrentPlayer().getType(),
+              });
+            } catch (error) {
+              console.error("Error during computer move:", error);
+              ui.displayMessage("Error during computer move: " + error.message);
+            }
+          }, 1000);
         }
 
         return attackResult;
@@ -175,27 +212,71 @@ export const GameController = (game, ui, players = [], gameboards = []) => {
       const currentPlayer = game.getCurrentPlayer();
       const opponent = game.getOpponent();
 
+      // Render the opponent's board to show the attack result
       ui.renderBoard(
         opponent.getGameboard().getBoard(),
         playerBoardMap[opponent.getId()],
-        false
+        opponent.getId() === "player1" // Show ships if it's player1's board
       );
 
-      ui.displayMessage(
-        attackResult.result === CELL_STATUS.HIT
-          ? SUCCESS_MESSAGES.HIT
-          : SUCCESS_MESSAGES.MISS
+      // Also render current player's board to keep ships visible
+      ui.renderBoard(
+        currentPlayer.getGameboard().getBoard(),
+        playerBoardMap[currentPlayer.getId()],
+        currentPlayer.getId() === "player1" // Show ships if it's player1's board
       );
 
+      // Create more detailed messages
+      let message;
+      if (attackResult.result === CELL_STATUS.HIT) {
+        message = `${opponent.getName()} hit ${currentPlayer.getName()}'s ${
+          attackResult.shipType
+        }!`;
+      } else {
+        message = `${opponent.getName()} missed ${currentPlayer.getName()}'s ships`;
+      }
+      ui.displayMessage(message);
+
+      // Handle ship sinking with more detail
       if (attackResult.sunk) {
-        ui.displayMessage(SUCCESS_MESSAGES.SHIP_SUNK);
-        ui.updateScore(currentPlayer, opponent);
+        message = `${currentPlayer.getName()} sunk ${opponent.getName()}'s ${
+          attackResult.shipType
+        }!`;
+        ui.displayMessage(message);
+
+        // Get current scores - flipped to count opponent's sunk ships
+        const player1Score = player2.getGameboard().getSunkShipsCount(); // Player 1's score is how many of Player 2's ships were sunk
+        const player2Score = player1.getGameboard().getSunkShipsCount(); // Player 2's score is how many of Player 1's ships were sunk
+
+        // Update score with both players and their current scores
+        ui.updateScore(player1, player1Score, player2, player2Score);
       }
 
+      // UPdate current player display
+      ui.updateCurrentPlayer(currentPlayer);
+
+      // More explicit board management
+      console.log("Current player type:", currentPlayer.getType());
+      if (currentPlayer.getType() === "human") {
+        console.log("Enabling board for human player");
+        ui.disableBoardInteraction(PLAYER_BOARDS.PLAYER1); // Disable own board
+        ui.enableBoardInteraction(PLAYER_BOARDS.PLAYER2); // Enable opponent's board
+      } else {
+        console.log("Disabling boards for computer turn");
+        ui.disableBoardInteraction(PLAYER_BOARDS.PLAYER1);
+        ui.disableBoardInteraction(PLAYER_BOARDS.PLAYER2);
+      }
+
+      // Handle game over
       if (game.isGameOver()) {
         ui.showGameOverScreen(currentPlayer.getName());
         ui.disableBoardInteraction(PLAYER_BOARDS.PLAYER2);
       }
+
+      console.log(`After ${currentPlayer.getName()}'s move:`, {
+        result: attackResult.result,
+        coordinates: attackResult.coordinates,
+      });
     };
 
     return {
