@@ -233,15 +233,19 @@ export const UI = () => {
       throw new Error(ERROR_MESSAGES.CONTAINER_NOT_FOUND);
     }
 
-    const cells = boardContainer.getElementsByClassName(CSS_CLASSES.CELL);
+    const cells = boardContainer.getElementsByClassName(CSS_CLASSES.BOARD_CELL);
     Array.from(cells).forEach((cell) => {
-      if (!cell.classList.contains(CSS_CLASSES.SHIP)) {
-        cell.addEventListener("click", () => {
+      cell.addEventListener("click", () => {
+        if (
+          !cell.classList.contains(CSS_CLASSES.HIT) &&
+          !cell.classList.contains(CSS_CLASSES.MISS) &&
+          !cell.classList.contains(CSS_CLASSES.SUNK)
+        ) {
           const x = parseInt(cell.dataset.x);
           const y = parseInt(cell.dataset.y);
           clickHandler(x, y);
-        });
-      }
+        }
+      });
     });
   };
 
