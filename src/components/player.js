@@ -209,9 +209,29 @@ export const Player = (type, name, id) => {
 
   // Modify getNextMove to use smart targeting
   const getNextMove = (opponentBoard) => {
-    if (!opponentBoard.getBoard().flat().includes(null)) {
+    if (!opponentBoard) {
+      throw new Error(ERROR_MESSAGES.INVALID_GAMEBOARD);
+    }
+
+    // Check if there are any valid moves available
+    const size = opponentBoard.getSize();
+    let hasValidMove = false;
+
+    // Check for at least one valid move
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        if (!opponentBoard.hasBeenAttacked(x, y)) {
+          hasValidMove = true;
+          break;
+        }
+      }
+      if (hasValidMove) break;
+    }
+
+    if (!hasValidMove) {
       throw new Error(ERROR_MESSAGES.NO_VALID_MOVES);
     }
+
     return type === "computer" ? makeSmartMove(opponentBoard) : null;
   };
 
