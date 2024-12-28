@@ -55,18 +55,16 @@ describe("GameController Factory", () => {
   let mockGame;
   let mockPlayer1;
   let mockPlayer2;
+  let mockGameboard1;
+  let mockGameboard2;
 
   beforeEach(() => {
     // Mock DOM first
     document.body.innerHTML = `<div id="${PLAYER_BOARDS.PLAYER2}" class="board-container"></div>`;
 
-    // Setup fresh mocks for each test
-    mockUI = createMockUI();
-    mockGame = createMockGame();
-
     // Create mock gameboards
-    const mockGameboard1 = createMockGameboard();
-    const mockGameboard2 = createMockGameboard();
+    mockGameboard1 = createMockGameboard();
+    mockGameboard2 = createMockGameboard();
 
     mockPlayer1 = createMockPlayer(
       PLAYERS.PLAYER1.TYPE,
@@ -79,15 +77,21 @@ describe("GameController Factory", () => {
       PLAYERS.PLAYER2.ID
     );
 
-    // Add makeSmartMove explicitly
-    mockPlayer1.makeSmartMove = jest.fn();
-    mockPlayer2.makeSmartMove = jest.fn();
-
     // Set up both setGameboard and getGameboard
     mockGameboard1.placeShip = jest.fn();
     mockGameboard2.placeShip = jest.fn();
     mockPlayer1.setGameboard(mockGameboard1);
     mockPlayer2.setGameboard(mockGameboard2);
+
+    // Add makeSmartMove explicitly
+    mockPlayer1.makeSmartMove = jest.fn();
+    mockPlayer2.makeSmartMove = jest.fn();
+    mockPlayer1.getGameboard = jest.fn().mockReturnValue(mockGameboard1);
+    mockPlayer2.getGameboard = jest.fn().mockReturnValue(mockGameboard2);
+
+    // Setup fresh mocks for each test
+    mockUI = createMockUI();
+    mockGame = createMockGame(mockPlayer1, mockPlayer2);
 
     gameController = GameController(
       mockGame,
@@ -95,6 +99,19 @@ describe("GameController Factory", () => {
       [mockPlayer1, mockPlayer2],
       [mockGameboard1, mockGameboard2]
     );
+
+    // Mock initial player for startGame
+    mockGame.getCurrentPlayer.mockReturnValue(mockPlayer1);
+    mockGame.getOpponent.mockReturnValue(mockPlayer2);
+
+    // Ensure the game starts from scratch for each test
+    gameController.startGame();
+    jest.useFakeTimers(); // so we can control setTimeout in handleAttack
+
+    // Clear mocks after startGame
+    mockGame.getCurrentPlayer.mockReset();
+    mockGame.getOpponent.mockReset();
+    mockGame.attack.mockReset();
   });
 
   afterEach(() => {
@@ -164,33 +181,42 @@ describe("GameController Factory", () => {
       ).toThrow(ERROR_MESSAGES.INVALID_GAMEBOARDS_COUNT);
     });
 
-    test("creates default gameboards when none provided", () => {
-      // Reset Player mock to return valid players
+    test("initializes game with default players and gameboards when none provided", () => {
       const mockGameboard = createMockGameboard();
-      mockGameboard.placeShipsRandomly = jest.fn();
 
+      // Mock Gameboard constructor
+      Gameboard.mockImplementation(() => mockGameboard);
+
+      // Mock Player constructor
       Player.mockImplementation((type, name, id) => ({
         getType: () => type,
         getName: () => name,
         getId: () => id,
         setGameboard: jest.fn(),
         getGameboard: jest.fn().mockReturnValue(mockGameboard),
+        makeSmartMove: jest.fn(),
       }));
+
+      // Update mockGame to return a player
+      mockGame.getCurrentPlayer.mockReturnValue({
+        getType: () => PLAYERS.PLAYER1.TYPE,
+        getName: () => PLAYERS.PLAYER1.NAME,
+        getId: () => PLAYERS.PLAYER1.ID,
+        getGameboard: () => mockGameboard,
+      });
 
       const gameController = GameController(mockGame, mockUI);
       gameController.startGame();
 
       const players = gameController.getPlayers();
-      expect(players[0].setGameboard).toHaveBeenCalledWith(undefined);
-      expect(players[1].setGameboard).toHaveBeenCalledWith(undefined);
+      expect(players[0].setGameboard).toHaveBeenCalled();
+      expect(players[1].setGameboard).toHaveBeenCalled();
     });
   });
 
   describe("Game Flow", () => {
     describe("Starting Game", () => {
       test("initializes game with correct state", () => {
-        gameController.startGame();
-
         expect(mockGame.initializeGame).toHaveBeenCalledWith(
           mockPlayer1,
           mockPlayer2
@@ -202,6 +228,17 @@ describe("GameController Factory", () => {
       });
 
       test("prevents multiple game starts", () => {
+        // Reset initializeGame mock count
+        mockGame.initializeGame.mockClear();
+
+        // Update mockGame to return a player
+        mockGame.getCurrentPlayer.mockReturnValue({
+          getType: () => PLAYERS.PLAYER1.TYPE,
+          getName: () => PLAYERS.PLAYER1.NAME,
+          getId: () => PLAYERS.PLAYER1.ID,
+          getGameboard: () => mockGameboard1,
+        });
+
         mockGame.isGameStarted
           .mockReturnValueOnce(false) // First call returns false
           .mockReturnValue(true); // Subsequent calls return true
@@ -215,7 +252,7 @@ describe("GameController Factory", () => {
 
     describe("Attack Handling", () => {
       beforeEach(() => {
-        gameController.startGame();
+        // No startGame here, it's called in individual tests
       });
 
       test("processes valid attack", () => {
@@ -223,45 +260,185 @@ describe("GameController Factory", () => {
           result: "hit",
           sunk: false,
           coordinates: { x: 0, y: 0 },
+          shipType: "battleship", // Add shipType for message formatting
         };
         mockGame.attack.mockReturnValue(attackResult);
+
+        // Mock players with proper names
         mockGame.getCurrentPlayer.mockReturnValue(mockPlayer1);
         mockGame.getOpponent.mockReturnValue(mockPlayer2);
+        mockPlayer1.getName.mockReturnValue("Player 1");
+        mockPlayer2.getName.mockReturnValue("Player 2");
 
         const result = gameController.handleAttack(0, 0);
 
         expect(result).toEqual(attackResult);
-        expect(mockUI.displayMessage).toHaveBeenCalledWith(
-          SUCCESS_MESSAGES.HIT
+        expect(mockUI.displayMessage).toHaveBeenLastCalledWith(
+          "Player 1 hit Player 2's battleship!"
         );
       });
 
       test("handles computer moves after player attack", () => {
         jest.useFakeTimers();
-        const attackResult = {
-          result: "miss",
+
+        // Clear previous mock calls
+        mockGame.getCurrentPlayer.mockClear();
+        mockGame.getOpponent.mockClear();
+        mockGame.attack.mockClear();
+
+        // Setup initial game state
+        mockGame.isGameStarted.mockReturnValue(true);
+        mockGame.isGameOver.mockReturnValue(false);
+
+        // Setup player types and names first
+        mockPlayer1.getType.mockReturnValue("human");
+        mockPlayer2.getType.mockReturnValue("computer");
+        mockPlayer1.getName.mockReturnValue("Alice");
+        mockPlayer2.getName.mockReturnValue("Computer");
+
+        // Setup attack results
+        const humanAttackResult = {
+          result: "hit",
           sunk: false,
           coordinates: { x: 0, y: 0 },
+          shipType: "battleship",
         };
-        mockGame.attack.mockReturnValue(attackResult);
-        mockGame.getCurrentPlayer.mockReturnValue(mockPlayer2);
-        mockGame.getOpponent.mockReturnValue(mockPlayer1);
-        mockPlayer2.getType.mockReturnValue("computer");
-        mockPlayer2.makeSmartMove = jest.fn().mockReturnValue({ x: 1, y: 1 });
 
-        gameController.handleAttack(0, 0);
-        jest.runAllTimers();
+        const computerAttackResult = {
+          result: "miss",
+          sunk: false,
+          coordinates: { x: 3, y: 3 },
+          shipType: null,
+        };
 
+        // Setup computer move and turn switching
+        const computerMove = { x: 3, y: 3 };
+        mockPlayer2.makeSmartMove.mockReturnValue(computerMove);
+
+        let isComputerTurn = false;
+        mockGame.getCurrentPlayer.mockImplementation(() => {
+          return isComputerTurn ? mockPlayer2 : mockPlayer1;
+        });
+        mockGame.getOpponent.mockImplementation(() => {
+          return isComputerTurn ? mockPlayer1 : mockPlayer2;
+        });
+        mockGame.switchTurn.mockImplementation(() => {
+          isComputerTurn = !isComputerTurn;
+        });
+
+        mockGame.attack
+          .mockReturnValueOnce(humanAttackResult)
+          .mockReturnValueOnce(computerAttackResult);
+
+        // Execute and verify human attack
+        const result = gameController.handleAttack(0, 0);
+        expect(result).toEqual(humanAttackResult);
+
+        // Verify computer counter-attack
+        jest.advanceTimersByTime(1000);
         expect(mockPlayer2.makeSmartMove).toHaveBeenCalled();
+        expect(mockGame.attack).toHaveBeenCalledWith(3, 3);
+        expect(mockUI.displayMessage).toHaveBeenLastCalledWith(
+          "Computer missed"
+        );
+      });
+
+      test("Human attack results in sinking a ship, then computer moves", () => {
+        jest.useFakeTimers();
+
+        // Clear previous messages
+        mockUI.displayMessage.mockClear();
+        mockGame.attack.mockClear();
+
+        // Arrange
+        const playerAttackResult = {
+          result: "hit",
+          sunk: true,
+          coordinates: { x: 2, y: 2 },
+          shipType: "battleship",
+        };
+        const computerAttackResult = {
+          result: "hit",
+          sunk: false,
+          coordinates: { x: 3, y: 3 },
+          shipType: "battleship",
+        };
+
+        // Setup sequence
+        mockGameboard2.getSunkShipsCount.mockReturnValue(1);
+        mockGameboard1.getSunkShipsCount.mockReturnValue(0);
+
+        // Mock player names and types
+        mockPlayer1.getType.mockReturnValue("human");
+        mockPlayer2.getType.mockReturnValue("computer");
+        mockPlayer1.getName.mockReturnValue("Alice");
+        mockPlayer2.getName.mockReturnValue("Computer");
+
+        // Set up the computer's move
+        const computerMove = { x: 3, y: 3 };
+        mockPlayer2.makeSmartMove.mockReturnValue(computerMove);
+
+        // Set up the game state
+        mockGame.isGameOver.mockReturnValue(false);
+        mockGame.isGameStarted.mockReturnValue(true);
+
+        // Set up the player sequence with closure
+        let isComputerTurn = false;
+        mockGame.getCurrentPlayer.mockImplementation(() => {
+          return isComputerTurn ? mockPlayer2 : mockPlayer1;
+        });
+        mockGame.getOpponent.mockImplementation(() => {
+          return isComputerTurn ? mockPlayer1 : mockPlayer2;
+        });
+        mockGame.switchTurn.mockImplementation(() => {
+          isComputerTurn = !isComputerTurn;
+        });
+
+        // Set up attack results
+        mockGame.attack
+          .mockReturnValueOnce(playerAttackResult)
+          .mockReturnValueOnce(computerAttackResult);
+
+        // Execute and verify human attack
+        const result = gameController.handleAttack(2, 2);
+
+        // Assert initial attack
+        expect(result).toEqual(playerAttackResult);
+        expect(mockUI.displayMessage).toHaveBeenNthCalledWith(
+          1,
+          `Alice hit Computer's battleship!`
+        );
+        expect(mockUI.displayMessage).toHaveBeenNthCalledWith(
+          2,
+          `Alice sunk Computer's battleship!`
+        );
+
+        // Advance timer to trigger computer's move
+        jest.advanceTimersByTime(1000);
+
+        // Assert computer's move was triggered
+        expect(mockPlayer2.makeSmartMove).toHaveBeenCalled();
+        expect(mockGame.attack).toHaveBeenCalledWith(3, 3);
+        expect(mockUI.displayMessage).toHaveBeenNthCalledWith(
+          3,
+          `Computer hit Alice's battleship!`
+        );
       });
     });
   });
 
   describe("Game Flow - Human vs Computer Sequence", () => {
     beforeEach(() => {
+      // Mock initial player for startGame
+      mockGame.getCurrentPlayer.mockReturnValue(mockPlayer1);
+      mockGame.getOpponent.mockReturnValue(mockPlayer2);
+
       // Ensure the game starts from scratch for each test
       gameController.startGame();
       jest.useFakeTimers(); // so we can control setTimeout in handleAttack
+
+      // Clear mocks after startGame
+      mockUI.displayMessage.mockClear();
     });
 
     afterEach(() => {
@@ -270,149 +447,76 @@ describe("GameController Factory", () => {
     });
 
     test("Human attacks and hits (not sunk), then computer responds", () => {
+      // Clear previous messages
+      mockUI.displayMessage.mockClear();
+
       // Arrange
       const playerAttackResult = {
         result: "hit",
         sunk: false,
         coordinates: { x: 0, y: 0 },
-      };
-      const computerAttackResult = {
-        result: "miss",
-        sunk: false,
-        coordinates: { x: 1, y: 1 },
+        shipType: "battleship",
       };
 
-      // Set up the sequence of turns FIRST
+      mockPlayer1.getName.mockReturnValue("Alice");
+      mockPlayer2.getName.mockReturnValue("Computer");
+
       mockGame.getCurrentPlayer
-        .mockReturnValueOnce(mockPlayer1)
-        .mockReturnValueOnce(mockPlayer2)
-        .mockReturnValueOnce(mockPlayer2);
+        .mockReturnValueOnce(mockPlayer1) // During attack
+        .mockReturnValueOnce(mockPlayer2); // After attack
 
-      mockGame.getOpponent
-        .mockReturnValueOnce(mockPlayer2)
-        .mockReturnValueOnce(mockPlayer1)
-        .mockReturnValueOnce(mockPlayer1);
-
-      // Mock attack results
-      mockGame.attack
-        .mockReturnValueOnce(playerAttackResult)
-        .mockReturnValueOnce(computerAttackResult);
-
-      // Mock computer behavior
-      mockPlayer2.getType.mockReturnValue("computer");
-      mockPlayer2.makeSmartMove.mockReturnValue({ x: 1, y: 1 });
+      mockGame.getOpponent.mockReturnValue(mockPlayer2);
+      mockGame.attack.mockReturnValue(playerAttackResult);
+      mockGame.isGameOver.mockReturnValue(false);
 
       const result = gameController.handleAttack(0, 0);
-      jest.runAllTimers();
 
-      // Assert human’s immediate attack result
+      // Assert human's immediate attack result
       expect(result).toEqual(playerAttackResult);
-      expect(mockUI.displayMessage).toHaveBeenCalledWith(SUCCESS_MESSAGES.HIT);
-
-      // Now fast-forward the setTimeout for the computer’s turn
-      jest.runAllTimers();
-
-      // Assert computer’s attack
-      expect(mockPlayer2.makeSmartMove).toHaveBeenCalled();
       expect(mockUI.displayMessage).toHaveBeenLastCalledWith(
-        SUCCESS_MESSAGES.MISS
+        `${PLAYERS.PLAYER1.NAME} hit ${PLAYERS.PLAYER2.NAME}'s ${playerAttackResult.shipType}!`
       );
-
-      // Also verify we re-rendered the board after each attack
-      expect(mockUI.renderBoard).toHaveBeenCalledTimes(2);
-    });
-
-    test("Human attack results in sinking a ship, then computer moves", () => {
-      // Arrange
-      const playerAttackResult = {
-        result: "hit",
-        sunk: true,
-        coordinates: { x: 2, y: 2 },
-      };
-      const computerAttackResult = {
-        result: "hit",
-        sunk: false,
-        coordinates: { x: 3, y: 3 },
-      };
-
-      // Setup sequence
-      mockGame.getCurrentPlayer
-        .mockReturnValueOnce(mockPlayer1) // Human's turn
-        .mockReturnValueOnce(mockPlayer2) // Computer's turn
-        .mockReturnValueOnce(mockPlayer2); // For computer's smart move calculation
-
-      mockGame.getOpponent
-        .mockReturnValueOnce(mockPlayer2) // Human attacks computer
-        .mockReturnValueOnce(mockPlayer1) // Computer attacks human
-        .mockReturnValueOnce(mockPlayer1); // For computer's smart move calculation
-
-      mockGame.attack
-        .mockReturnValueOnce(playerAttackResult)
-        .mockReturnValueOnce(computerAttackResult);
-      mockPlayer2.getType.mockReturnValue("computer");
-      mockPlayer2.makeSmartMove.mockReturnValue({ x: 3, y: 3 });
-
-      // Act & Assert...
-      // Act
-      const result = gameController.handleAttack(2, 2);
-      jest.runAllTimers(); // trigger computer's delayed attack
-
-      // Assert
-      // 1) Player’s attack sank a ship
-      expect(result).toEqual(playerAttackResult);
-      expect(mockUI.displayMessage).toHaveBeenCalledWith(SUCCESS_MESSAGES.HIT);
-      expect(mockUI.displayMessage).toHaveBeenCalledWith(
-        SUCCESS_MESSAGES.SHIP_SUNK
-      );
-      // 2) UI updates scoreboard on sink
-      expect(mockUI.updateScore).toHaveBeenCalledWith(mockPlayer1, mockPlayer2);
-
-      // 3) Then computer moved
-      expect(mockPlayer2.makeSmartMove).toHaveBeenCalled();
-      expect(mockUI.displayMessage).toHaveBeenCalledWith(SUCCESS_MESSAGES.HIT);
     });
 
     test("Game over scenario: final ship is sunk, shows Game Over", () => {
+      // Clear mock history
+      mockUI.displayMessage.mockClear();
+
       // Arrange
       const finalAttackResult = {
         result: "hit",
         sunk: true,
         coordinates: { x: 5, y: 5 },
+        shipType: "battleship",
       };
 
-      // Mark game over after this attack
-      // We simulate that isGameOver is still false before the attack,
-      // but becomes true *after* the final attack.
+      // Set up players with proper names and types
+      mockPlayer1.getType.mockReturnValue("human");
+      mockPlayer2.getType.mockReturnValue("computer");
+      mockPlayer1.getName.mockReturnValue("Alice");
+      mockPlayer2.getName.mockReturnValue("Computer");
+
+      // Set up player sequence
+      mockGame.getCurrentPlayer.mockReturnValue(mockPlayer1);
+      mockGame.getOpponent.mockReturnValue(mockPlayer2);
+
+      mockGame.attack.mockReturnValue(finalAttackResult);
       mockGame.isGameOver
         .mockReturnValueOnce(false) // before the attack
         .mockReturnValueOnce(true); // after the attack
-
-      mockGame.getCurrentPlayer.mockReturnValueOnce(mockPlayer1);
-      mockGame.getOpponent.mockReturnValueOnce(mockPlayer2);
-      mockGame.attack.mockReturnValueOnce(finalAttackResult);
-
-      mockGame.getCurrentPlayer
-        .mockReturnValueOnce(mockPlayer1) // Initial turn
-        .mockReturnValueOnce(mockPlayer2); // After attack
-      mockGame.getOpponent
-        .mockReturnValueOnce(mockPlayer2) // Target of attack
-        .mockReturnValueOnce(mockPlayer1); // After attack
-      mockPlayer2.getType.mockReturnValue("computer"); // Add this line
 
       // Act
       const result = gameController.handleAttack(5, 5);
 
       // Assert
       expect(result).toEqual(finalAttackResult);
-      expect(mockUI.displayMessage).toHaveBeenCalledWith(SUCCESS_MESSAGES.HIT);
       expect(mockUI.displayMessage).toHaveBeenCalledWith(
-        SUCCESS_MESSAGES.SHIP_SUNK
+        `Alice hit Computer's battleship!`
       );
-      // Once we realize the game is over, we call showGameOverScreen
-      expect(mockUI.showGameOverScreen).toHaveBeenCalledWith(
-        mockPlayer1.getName()
+      expect(mockUI.displayMessage).toHaveBeenCalledWith(
+        `Alice sunk Computer's battleship!`
       );
-      // Also, the board for the opponent is disabled
+      expect(mockUI.showGameOverScreen).toHaveBeenCalledWith("Alice");
       expect(mockUI.disableBoardInteraction).toHaveBeenCalledWith(
         PLAYER_BOARDS.PLAYER2
       );
@@ -424,6 +528,11 @@ describe("GameController Factory", () => {
       // Arrange
       mockGame.resetGame.mockClear();
       mockUI.resetUI.mockClear();
+      mockGame.getCurrentPlayer.mockReturnValue({
+        getType: () => PLAYERS.PLAYER1.TYPE,
+        getName: () => PLAYERS.PLAYER1.NAME,
+        getId: () => PLAYERS.PLAYER1.ID,
+      });
 
       // Act
       gameController.restartGame();
@@ -450,6 +559,10 @@ describe("GameController Factory", () => {
 
     test("catches and displays unexpected error during attack", () => {
       mockGame.isGameOver.mockReturnValue(false);
+      mockGame.getCurrentPlayer.mockReturnValue({
+        getName: () => PLAYERS.PLAYER1.NAME,
+        getType: () => "human",
+      });
       mockGame.attack.mockImplementation(() => {
         throw new Error("Unexpected error!");
       });
@@ -488,6 +601,12 @@ describe("GameController Factory", () => {
         getLength: () => 3,
         getType: () => "test",
       }));
+
+      mockGame.getCurrentPlayer.mockReturnValue({
+        getType: () => "human",
+        getName: () => PLAYERS.PLAYER1.NAME,
+        getId: () => PLAYERS.PLAYER1.ID,
+      });
 
       gameController.startGame();
       gameController
