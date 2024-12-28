@@ -121,20 +121,6 @@ export const Game = (p1 = null, p2 = null) => {
   };
 
   /**
-   * switchTurn
-   *
-   * Public method to switch the current player to the next player.
-   * Should be called internally after an attack to toggle the turn.
-   *
-   * @returns {void}
-   */
-  const switchTurn = () => {
-    console.log("Switching turns from:", currentPlayer.getName());
-    currentPlayer = currentPlayer === player1 ? player2 : player1;
-    console.log("to:", currentPlayer.getName());
-  };
-
-  /**
    * attack
    *
    * Handles the attack action by the current player on the opponent's gameboard.
@@ -177,12 +163,8 @@ export const Game = (p1 = null, p2 = null) => {
     // Check if all ships are sunk
     if (opponentBoard.areAllShipsSunk()) {
       setGameOver(true);
-    } else {
-      // Only switch turns if the game isn't over
-      switchTurn();
     }
 
-    return attackResult;
     return attackResult;
   };
 
@@ -286,6 +268,29 @@ export const Game = (p1 = null, p2 = null) => {
       return attack(move.x, move.y);
     }
     return null;
+  };
+
+  /**
+   * switchTurn
+   *
+   * Switches the current player to the next player.
+   * This is now public to allow for better UI state management.
+   *
+   * @returns {void}
+   */
+  const switchTurn = () => {
+    if (isGameOver()) return; // Don't switch turns if game is over
+    console.log("Before switch - current player:", {
+      name: currentPlayer.getName(),
+      id: currentPlayer.getId(),
+      type: currentPlayer.getType(),
+    });
+    currentPlayer = currentPlayer === player1 ? player2 : player1;
+    console.log("After switch - current player:", {
+      name: currentPlayer.getName(),
+      id: currentPlayer.getId(),
+      type: currentPlayer.getType(),
+    });
   };
 
   return {
