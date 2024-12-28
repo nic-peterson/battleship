@@ -254,18 +254,8 @@ describe("Player Factory", () => {
     });
 
     test("should handle no valid moves available", () => {
-      // Mock getAllAttacks to return a full board
-      const fullBoard = new Set();
-      for (let x = 0; x < 10; x++) {
-        for (let y = 0; y < 10; y++) {
-          fullBoard.add(`${x},${y}`);
-        }
-      }
-      //mockGameboard.getAllAttacks.mockReturnValue(fullBoard);
-      const mockBoard = Array(10)
-        .fill(null)
-        .map(() => Array(10).fill("X")); // Full board with no valid moves
-      mockGameboard.getBoard = jest.fn(() => mockBoard);
+      // Mock hasBeenAttacked to always return true (all cells attacked)
+      mockGameboard.hasBeenAttacked.mockReturnValue(true);
 
       expect(() => {
         computerPlayer.getNextMove(mockGameboard);
