@@ -98,34 +98,23 @@ export const GameController = (game, ui, players = [], gameboards = []) => {
      * @returns {Object} The initial game state
      */
     const startGame = () => {
+      if (game.isGameStarted()) {
+        throw new Error(ERROR_MESSAGES.GAME_ALREADY_STARTED);
+      }
+
       try {
-        if (game.isGameStarted()) return;
+        // Place ships for both players before initializing game
+        placeShipsForPlayer(player1, true);
+        placeShipsForPlayer(player2, true);
 
-        player1.setGameboard(gameboard1);
-        player2.setGameboard(gameboard2);
-
-        // Initialize the game
-        // initialState = {player1, player2, currentPlayer: player1};
-        const initialState = game.initializeGame(player1, player2);
-
-        // Place ships for both players
-
-        placeShipsForPlayer(player1, true); // Random placement
-        placeShipsForPlayer(player2, true); // Random placement
-
+        game.initializeGame(player1, player2);
         ui.initUI(player1, player2);
         ui.addBoardEventListeners(PLAYER_BOARDS.PLAYER2, handleAttack);
-
-        console.log("Current player:", game.getCurrentPlayer().getName());
-
-        // Enable the computer's board for the first turn (if human starts)
         if (game.getCurrentPlayer().getType() === "human") {
           ui.enableBoardInteraction(PLAYER_BOARDS.PLAYER2);
         }
-
         ui.displayMessage(SUCCESS_MESSAGES.GAME_STARTED);
-
-        return initialState;
+        return true;
       } catch (error) {
         ui.displayMessage(error.message);
         throw error;
@@ -144,6 +133,10 @@ export const GameController = (game, ui, players = [], gameboards = []) => {
       game.resetGame();
       ui.resetUI();
 
+      // Place ships for both players
+      placeShipsForPlayer(player1, true);
+      placeShipsForPlayer(player2, true);
+
       startGame();
     };
 
@@ -155,48 +148,25 @@ export const GameController = (game, ui, players = [], gameboards = []) => {
           throw new Error(ERROR_MESSAGES.GAME_OVER);
         }
 
-        console.log("Before player move:", {
-          currentPlayer: game.getCurrentPlayer().getName(),
-          type: game.getCurrentPlayer().getType(),
-        });
-
         if (game.getCurrentPlayer().getType() === "computer") {
-          console.log("Blocked - Computer's turn");
           return;
         }
 
         let attackResult = game.attack(x, y);
-        updateGameState(attackResult);
+        handleAttackResult(attackResult);
 
-        console.log("After player move:", {
-          currentPlayer: game.getCurrentPlayer().getName(),
-          type: game.getCurrentPlayer().getType(),
-        });
-
-        // Handle computer moves
         if (
           !game.isGameOver() &&
           game.getCurrentPlayer().getType() === "computer"
         ) {
-          console.log("Starting computer move...");
           setTimeout(() => {
             try {
-              // Add try-catch inside setTimeout
-              const computerPlayer = game.getCurrentPlayer();
+              const currentPlayer = game.getCurrentPlayer();
               const opponentBoard = game.getOpponent().getGameboard();
-              const computerMove = computerPlayer.makeSmartMove(opponentBoard);
-
-              console.log("Computer attacking:", computerMove);
-
+              const computerMove = currentPlayer.makeSmartMove(opponentBoard);
               attackResult = game.attack(computerMove.x, computerMove.y);
-              updateGameState(attackResult);
-
-              console.log("After computer move:", {
-                currentPlayer: game.getCurrentPlayer().getName(),
-                type: game.getCurrentPlayer().getType(),
-              });
+              handleAttackResult(attackResult);
             } catch (error) {
-              console.error("Error during computer move:", error);
               ui.displayMessage("Error during computer move: " + error.message);
             }
           }, 1000);
@@ -209,74 +179,64 @@ export const GameController = (game, ui, players = [], gameboards = []) => {
       }
     };
 
-    // Helper to reduce code duplication
-    const updateGameState = (attackResult) => {
+    const handleAttackResult = (attackResult) => {
       const currentPlayer = game.getCurrentPlayer();
       const opponent = game.getOpponent();
 
-      // Create more detailed messages
-      let message;
-      if (attackResult.result === CELL_STATUS.HIT) {
-        message = `${currentPlayer.getName()} hit ${opponent.getName()}'s ${
-          attackResult.shipType
-        }!`;
-      } else {
-        message = `${currentPlayer.getName()} missed`;
-      }
+      // Display hit/miss message
+      const message =
+        attackResult.result === "hit"
+          ? `${currentPlayer.getName()} hit ${opponent.getName()}'s ${
+              attackResult.shipType
+            }!`
+          : `${currentPlayer.getName()} missed`;
       ui.displayMessage(message);
 
-      // Handle ship sinking with more detail
+      // If a ship was sunk, display sinking message
       if (attackResult.sunk) {
-        message = `${currentPlayer.getName()} sunk ${opponent.getName()}'s ${
+        const sinkMessage = `${currentPlayer.getName()} sunk ${opponent.getName()}'s ${
           attackResult.shipType
         }!`;
-        console.log("Sinking message:", message);
-        ui.displayMessage(message);
+        ui.displayMessage(sinkMessage);
 
-        // Get current scores
-        const player1Score = player2.getGameboard().getSunkShipsCount(); // Player 1's score is how many of Player 2's ships were sunk
-        const player2Score = player1.getGameboard().getSunkShipsCount(); // Player 2's score is how many of Player 1's ships were sunk
-
-        // Update score with both players and their current scores
+        // Update scores - count ships sunk on opponent's board
+        const player1Score = player2.getGameboard().getSunkShipsCount(); // Ships player1 has sunk
+        const player2Score = player1.getGameboard().getSunkShipsCount(); // Ships player2 has sunk
         ui.updateScore(player1, player1Score, player2, player2Score);
       }
 
-      // Render both boards to show the attack result
+      // Always render both boards with their correct states
+      const isPlayer1Current = currentPlayer === player1;
       ui.renderBoard(
-        opponent.getGameboard().getBoard(),
-        playerBoardMap[opponent.getId()],
-        opponent.getId() === "player1" // Show ships if it's player1's board
+        player1.getGameboard().getBoard(),
+        PLAYER_BOARDS.PLAYER1,
+        true // Always show ships on player 1's board
+      );
+      ui.renderBoard(
+        player2.getGameboard().getBoard(),
+        PLAYER_BOARDS.PLAYER2,
+        false // Never show ships on player 2's board
       );
 
-      ui.renderBoard(
-        currentPlayer.getGameboard().getBoard(),
-        playerBoardMap[currentPlayer.getId()],
-        currentPlayer.getId() === "player1" // Show ships if it's player1's board
-      );
+      // Re-add event listeners after rendering
+      ui.addBoardEventListeners(PLAYER_BOARDS.PLAYER2, handleAttack);
 
-      // Handle game over
+      // Check for game over
       if (game.isGameOver()) {
         ui.showGameOverScreen(currentPlayer.getName());
         ui.disableBoardInteraction(PLAYER_BOARDS.PLAYER2);
-        return; // Don't switch turns if game is over
+        return;
       }
 
-      // Switch turns after all UI updates are complete
+      // Switch turns and update UI accordingly
       game.switchTurn();
-
-      // Update current player display with the new current player
-      ui.updateCurrentPlayer(game.getCurrentPlayer());
-
-      // Update board interactions for the new current player
       const newCurrentPlayer = game.getCurrentPlayer();
-      console.log("Current player type:", newCurrentPlayer.getType());
+      ui.updateCurrentPlayer(newCurrentPlayer);
+
+      // Enable/disable boards based on whose turn it is
       if (newCurrentPlayer.getType() === "human") {
-        console.log("Enabling board for human player");
-        ui.disableBoardInteraction(PLAYER_BOARDS.PLAYER1); // Disable own board
-        ui.enableBoardInteraction(PLAYER_BOARDS.PLAYER2); // Enable opponent's board
+        ui.enableBoardInteraction(PLAYER_BOARDS.PLAYER2);
       } else {
-        console.log("Disabling boards for computer turn");
-        ui.disableBoardInteraction(PLAYER_BOARDS.PLAYER1);
         ui.disableBoardInteraction(PLAYER_BOARDS.PLAYER2);
       }
     };

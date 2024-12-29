@@ -1,1 +1,4 @@
-{}
+// .vscode/settings.json
+{
+  "jest.jestCommandLine": "npx jest --config=jest.config.js"
+}

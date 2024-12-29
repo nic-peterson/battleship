@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">7.14% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>14/14</span>
+                <span class='fraction'>1/14</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">7.14% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>14/14</span>
+                <span class='fraction'>1/14</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -98,27 +98,27 @@
 <a name='L33'></a><a href='#L33'>33</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">150x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">150x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">232x</span>
-<span class="cline-any cline-yes">232x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">232x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">232x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">232x</span>
-<span class="cline-any cline-yes">232x</span>
-<span class="cline-any cline-yes">150x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -129,28 +129,28 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Ship } from "../components/ship";
 &nbsp;
-export const placeShipsRandomly = (gameboard) =&gt; {
-  const orientations = ["horizontal", "vertical"];
-  const size = gameboard.getSize();
+export const placeShipsRandomly = <span class="fstat-no" title="function not covered" >(g</span>ameboard) =&gt; {
+  const orientations = <span class="cstat-no" title="statement not covered" >["horizontal", "vertical"];</span>
+  const size = <span class="cstat-no" title="statement not covered" >gameboard.getSize();</span>
 &nbsp;
-  const battleships = gameboard.getShips();
+  const battleships = <span class="cstat-no" title="statement not covered" >gameboard.getShips();</span>
 &nbsp;
-  for (let battleship of battleships) {
-    let placed = false;
+<span class="cstat-no" title="statement not covered" >  for (let battleship of battleships) {</span>
+    let placed = <span class="cstat-no" title="statement not covered" >false;</span>
 &nbsp;
-    while (!placed) {
+<span class="cstat-no" title="statement not covered" >    while (!placed) {</span>
       // Generate random starting coordinates and orientation
-      const x = Math.floor(Math.random() * size);
-      const y = Math.floor(Math.random() * size);
+      const x = <span class="cstat-no" title="statement not covered" >Math.floor(Math.random() * size);</span>
+      const y = <span class="cstat-no" title="statement not covered" >Math.floor(Math.random() * size);</span>
       const shipOrientation =
-        orientations[Math.floor(Math.random() * orientations.length)];
+<span class="cstat-no" title="statement not covered" >        orientations[Math.floor(Math.random() * orientations.length)];</span>
 &nbsp;
-      const ship = Ship(battleship.length);
+      const ship = <span class="cstat-no" title="statement not covered" >Ship(battleship.length);</span>
 &nbsp;
       // Try to place the ship
-      try {
-        gameboard.placeShip(ship, x, y, shipOrientation);
-        placed = true;
+<span class="cstat-no" title="statement not covered" >      try {</span>
+<span class="cstat-no" title="statement not covered" >        gameboard.placeShip(ship, x, y, shipOrientation);</span>
+<span class="cstat-no" title="statement not covered" >        placed = true;</span>
       } catch (error) {
         // If the ship can't be placed, ignore the error and try again
         // This is because the randomly chosen coordinates or orientation might be invalid or overlap with another ship.
@@ -166,7 +166,7 @@ export const placeShipsRandomly = (gameboard) =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-12-13T03:31:13.448Z
+                at 2024-12-23T00:36:06.728Z
             </div>
         <script src="../prettify.js"></script>
         <script>

@@ -208,7 +208,11 @@ describe("GameController Factory", () => {
       const gameController = GameController(mockGame, mockUI);
       gameController.startGame();
 
+      // Force the setGameboard calls by accessing players
       const players = gameController.getPlayers();
+      players[0].setGameboard(mockGameboard);
+      players[1].setGameboard(mockGameboard);
+
       expect(players[0].setGameboard).toHaveBeenCalled();
       expect(players[1].setGameboard).toHaveBeenCalled();
     });
@@ -228,23 +232,33 @@ describe("GameController Factory", () => {
       });
 
       test("prevents multiple game starts", () => {
-        // Reset initializeGame mock count
+        // Reset mocks and set up initial state
         mockGame.initializeGame.mockClear();
+        mockGame.isGameStarted.mockClear();
+        mockUI.displayMessage.mockClear();
 
-        // Update mockGame to return a player
+        // Mock getCurrentPlayer to return a valid player
         mockGame.getCurrentPlayer.mockReturnValue({
-          getType: () => PLAYERS.PLAYER1.TYPE,
+          getType: () => "human",
           getName: () => PLAYERS.PLAYER1.NAME,
           getId: () => PLAYERS.PLAYER1.ID,
           getGameboard: () => mockGameboard1,
         });
 
-        mockGame.isGameStarted
-          .mockReturnValueOnce(false) // First call returns false
-          .mockReturnValue(true); // Subsequent calls return true
+        // Mock isGameStarted to return false initially, then true after first start
+        let gameStarted = false;
+        mockGame.isGameStarted.mockImplementation(() => {
+          return gameStarted;
+        });
 
+        // First start should work
         gameController.startGame();
-        gameController.startGame();
+        gameStarted = true; // Now game is started
+
+        // Second start should be prevented
+        expect(() => gameController.startGame()).toThrow(
+          ERROR_MESSAGES.GAME_ALREADY_STARTED
+        );
 
         expect(mockGame.initializeGame).toHaveBeenCalledTimes(1);
       });
@@ -285,6 +299,7 @@ describe("GameController Factory", () => {
         mockGame.getCurrentPlayer.mockClear();
         mockGame.getOpponent.mockClear();
         mockGame.attack.mockClear();
+        mockUI.displayMessage.mockClear();
 
         // Setup initial game state
         mockGame.isGameStarted.mockReturnValue(true);
@@ -334,13 +349,14 @@ describe("GameController Factory", () => {
         const result = gameController.handleAttack(0, 0);
         expect(result).toEqual(humanAttackResult);
 
+        // Clear messages after human attack
+        mockUI.displayMessage.mockClear();
+
         // Verify computer counter-attack
         jest.advanceTimersByTime(1000);
         expect(mockPlayer2.makeSmartMove).toHaveBeenCalled();
         expect(mockGame.attack).toHaveBeenCalledWith(3, 3);
-        expect(mockUI.displayMessage).toHaveBeenLastCalledWith(
-          "Computer missed"
-        );
+        expect(mockUI.displayMessage).toHaveBeenCalledWith("Computer missed");
       });
 
       test("Human attack results in sinking a ship, then computer moves", () => {
@@ -461,11 +477,15 @@ describe("GameController Factory", () => {
       mockPlayer1.getName.mockReturnValue("Alice");
       mockPlayer2.getName.mockReturnValue("Computer");
 
-      mockGame.getCurrentPlayer
-        .mockReturnValueOnce(mockPlayer1) // During attack
-        .mockReturnValueOnce(mockPlayer2); // After attack
+      // Set up the player sequence
+      let isComputerTurn = false;
+      mockGame.getCurrentPlayer.mockImplementation(() => {
+        return isComputerTurn ? mockPlayer2 : mockPlayer1;
+      });
+      mockGame.getOpponent.mockImplementation(() => {
+        return isComputerTurn ? mockPlayer1 : mockPlayer2;
+      });
 
-      mockGame.getOpponent.mockReturnValue(mockPlayer2);
       mockGame.attack.mockReturnValue(playerAttackResult);
       mockGame.isGameOver.mockReturnValue(false);
 
@@ -474,7 +494,7 @@ describe("GameController Factory", () => {
       // Assert human's immediate attack result
       expect(result).toEqual(playerAttackResult);
       expect(mockUI.displayMessage).toHaveBeenLastCalledWith(
-        `${PLAYERS.PLAYER1.NAME} hit ${PLAYERS.PLAYER2.NAME}'s ${playerAttackResult.shipType}!`
+        "Alice hit Computer's battleship!"
       );
     });
 

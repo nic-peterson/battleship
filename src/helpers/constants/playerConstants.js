@@ -5,7 +5,7 @@ export const PLAYERS = {
     ID: "player1",
   },
   PLAYER2: {
-    TYPE: "cpu",
+    TYPE: "computer",
     NAME: "Computer",
     ID: "player2",
   },

@@ -29,4 +29,10 @@ export const ERROR_MESSAGES = {
   ALREADY_STARTED: "Game has already started.",
   GAME_OVER: "Game is already over.",
   GAME_NOT_INITIALIZED: "Game not initialized",
+  NO_VALID_MOVES: "No valid moves available.",
+  GAME_REQUIRED: "Game instance is required",
+  UI_REQUIRED: "UI instance is required",
+  INVALID_PLAYERS_COUNT: "Exactly 2 players must be provided",
+  INVALID_PLAYER: "Invalid player object provided",
+  INVALID_GAMEBOARDS_COUNT: "Exactly 2 gameboards must be provided",
 };

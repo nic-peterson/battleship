@@ -26,6 +26,7 @@ export const createMockGameboard = () => {
     receiveAttack: jest.fn(),
     areAllShipsSunk: jest.fn(),
     getAllAttacks: jest.fn(() => allAttacks),
+    getSunkShipsCount: jest.fn().mockReturnValue(0),
   };
 };
 
